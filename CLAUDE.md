@@ -537,3 +537,7 @@ The Operations stage will eventually include:
 - Application code: Workspace root (NEVER in aidlc-docs/)
 - Documentation: aidlc-docs/ only
 - Project structure: See code-generation.md for patterns by project type
+
+
+## Project Requirements
+See PROJECT_BRIEF.md for the full application requirements, data models, workout programs, coaching engine logic, and Firebase schema.
