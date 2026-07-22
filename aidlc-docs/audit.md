@@ -1,10 +1,240 @@
 # AI-DLC Audit Log
 
+## Build and Test Stage
+**Timestamp**: 2026-07-22T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: Generated all Build and Test instruction files. 5 files created in aidlc-docs/construction/build-and-test/. aidlc-state.md updated to mark Build and Test COMPLETED.
+**Context**: Build and Test stage — all instruction files generated, stage complete.
+
+---
+
+## Unit 4 — Apple Watch App: Code Generation Complete
+**Timestamp**: 2026-07-22T00:00:00Z
+**User Input**: "continue" (after tool rejection during Step 1 in prior session)
+**AI Response**: Completed all 15 steps of Unit 4 Code Generation (Steps 1–3 in prior session, Steps 4–15 in this session). All Watch app files created, WatchBridge and WorkoutSessionManager updated, tests created, documentation written.
+**Context**: Unit 4 Code Generation — Phase 2 (Watch App Core), Phase 3 (Watch Views), Phase 4 (iPhone WatchBridge Update), Phase 5 (Tests), Phase 6 (Documentation) — all COMPLETED.
+
+---
+
 ## Workspace Detection
 **Timestamp**: 2026-05-28T00:00:00Z
 **User Input**: "Using AI-DLC, I would like to build an iphone and apple watch app for coaching based on heart rate. I put what I would like to have in the PROJECT_BRIEF.md."
 **AI Response**: Loaded PROJECT_BRIEF.md, identified greenfield workspace, loaded common rules and extension opt-in files. Proceeding to Requirements Analysis.
 **Context**: INCEPTION - Workspace Detection; greenfield project confirmed (no source files, build files, or project structure detected in workspace root).
+
+---
+
+## NFR Design Unit 4 — Approved; Infrastructure Design Skipped; Code Generation Begins
+**Timestamp**: 2026-07-22T00:09:00Z
+**User Input**: "Approve"
+**AI Response**: NFR Design Unit 4 approved. Infrastructure Design skipped — no new cloud infrastructure; all frameworks are system-provided (HealthKit, WatchKit, WatchConnectivity). Advancing to Code Generation Part 1 (Planning).
+**Context**: CONSTRUCTION - Unit 4 Code Generation begins.
+
+---
+
+## NFR Design Unit 4 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-22T00:08:00Z
+**User Input**: "answered" (Q1 — A: recover HKWorkoutSession on app launch)
+**AI Response**: Generated nfr-design-patterns.md (7 patterns) and logical-components.md (8 components) for Unit 4. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 4 NFR Design complete, awaiting approval.
+
+---
+
+## NFR Requirements Unit 4 — Approved; NFR Design Begins
+**Timestamp**: 2026-07-22T00:07:00Z
+**User Input**: "Approve"
+**AI Response**: NFR Requirements Unit 4 approved. Advancing to NFR Design.
+**Context**: CONSTRUCTION - Unit 4 NFR Design begins.
+
+---
+
+## NFR Requirements Unit 4 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-22T00:06:00Z
+**User Input**: "answered" (Q1 — A: Save to Apple Health)
+**AI Response**: Generated nfr-requirements.md and tech-stack-decisions.md for Unit 4. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 4 NFR Requirements complete, awaiting approval.
+
+---
+
+## Functional Design Unit 4 — Approved; NFR Requirements Begins
+**Timestamp**: 2026-07-22T00:05:00Z
+**User Input**: "approve"
+**AI Response**: Functional Design Unit 4 approved. Advancing to NFR Requirements.
+**Context**: CONSTRUCTION - Unit 4 NFR Requirements begins.
+
+---
+
+## Functional Design Unit 4 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-22T00:04:00Z
+**User Input**: "I chose option A" (Q4 — haptic mapping)
+**AI Response**: All 4 questions answered A. Generated domain-entities.md, business-logic-model.md, frontend-components.md for Unit 4. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 4 Functional Design complete, awaiting approval.
+
+---
+
+## Code Generation Unit 3 — Approved; Unit 4 Begins
+**Timestamp**: 2026-07-22T00:03:00Z
+**User Input**: "Approve"
+**AI Response**: Unit 3 Code Generation approved. Unit 3 COMPLETE. Deleted HistoryPlaceholderView.swift. Starting Unit 4 (Apple Watch App) — Functional Design.
+**Context**: CONSTRUCTION - Unit 4 Functional Design begins.
+
+---
+
+## Code Generation Unit 3 — Complete, Awaiting Approval
+**Timestamp**: 2026-07-22T00:02:00Z
+**AI Response**: All 25 steps generated. 13 new files in HeartCoach, 3 new files in HeartRateCoachCore, 4 updated files, 3 new test files. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 3 Code Generation complete, awaiting approval.
+
+---
+
+## NFR Design Unit 3 — Approved; Infrastructure Design Skipped; Code Generation Begins
+**Timestamp**: 2026-07-22T00:01:00Z
+**User Input**: "approve"
+**AI Response**: NFR Design Unit 3 approved. Infrastructure Design skipped (no new infrastructure — all frameworks are Apple system-provided: AVFoundation, WatchConnectivity). Advancing to Code Generation Part 1 (Planning).
+**Context**: CONSTRUCTION - Unit 3 Code Generation begins.
+
+---
+
+## NFR Design Unit 3 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-22T00:00:00Z
+**User Input**: "just answered"
+**AI Response**: Answer A (isolated state struct). Generated nfr-design-patterns.md (10 patterns: stateless engine, tick loop, 3-layer mutual exclusion, HR smoothing, staleness, anti-spam, in-zone streak, voice interruption, audio session, WCSession fire-and-forget) and logical-components.md (8 components: CoachingEngineState, CoachingEngine, WorkoutSessionManager, VoiceFeedbackService, WatchBridge, WorkoutViewModel, WorkoutSummaryViewModel, HistoryViewModel). Presenting for approval.
+**Context**: CONSTRUCTION - Unit 3 NFR Design complete, awaiting approval.
+
+---
+
+## NFR Requirements Unit 3 — Approved
+**Timestamp**: 2026-07-15T00:05:00Z
+**User Input**: "Approve"
+**AI Response**: NFR Requirements Unit 3 approved. Advancing to NFR Design.
+**Context**: CONSTRUCTION - Unit 3 NFR Design begins.
+
+---
+
+## NFR Requirements Unit 3 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-15T00:04:00Z
+**User Input**: "I just answered the questions"
+**AI Response**: Generated nfr-requirements.md and tech-stack-decisions.md for Unit 3. Includes HR staleness rule from discussion.
+**Context**: CONSTRUCTION - Unit 3 NFR Requirements complete, awaiting approval.
+
+---
+
+## Functional Design Unit 3 — Approved
+**Timestamp**: 2026-07-15T00:03:00Z
+**User Input**: "Approve"
+**AI Response**: Functional Design Unit 3 approved. Advancing to NFR Requirements.
+**Context**: CONSTRUCTION - Unit 3 NFR Requirements begins.
+
+---
+
+## Functional Design Unit 3 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-15T00:02:00Z
+**User Input**: "I just answered the questions"
+**AI Response**: Generated all 4 functional design artifacts for Unit 3.
+**Context**: CONSTRUCTION - Unit 3 Functional Design complete, awaiting approval.
+
+---
+
+## Code Generation Unit 2 — Approved; Unit 3 Begins
+**Timestamp**: 2026-07-15T00:01:00Z
+**User Input**: "approve"
+**AI Response**: Unit 2 Code Generation approved. Unit 2 COMPLETE. Starting Unit 3 (iPhone Workout Engine) — Functional Design.
+**Context**: CONSTRUCTION - Unit 3 Functional Design begins.
+
+---
+
+## Code Generation Unit 2 — Complete, Awaiting Approval
+**Timestamp**: 2026-07-15T00:00:00Z
+**AI Response**: All 37 steps generated. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 2 Code Generation complete, awaiting approval.
+
+---
+
+## Code Generation Unit 2 — Generation Started
+**Timestamp**: 2026-07-14T00:08:00Z
+**User Input**: "Approve"
+**AI Response**: Code generation plan approved. Executing all 37 steps.
+**Context**: CONSTRUCTION - Unit 2 Code Generation Part 2 (Generation).
+
+---
+
+## Code Generation Unit 2 — Plan Creation Started
+**Timestamp**: 2026-07-14T00:07:00Z
+**User Input**: "Approve"
+**AI Response**: Infrastructure Design Unit 2 approved. Creating Code Generation plan (Part 1).
+**Context**: CONSTRUCTION - Unit 2 Code Generation Part 1 (Planning).
+
+---
+
+## Infrastructure Design Unit 2 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-14T00:06:00Z
+**User Input**: "I just answered the questions"
+**AI Response**: Generated infrastructure-design.md and deployment-architecture.md for Unit 2. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 2 Infrastructure Design complete, awaiting approval.
+
+---
+
+## Infrastructure Design Unit 2 — Begins
+**Timestamp**: 2026-07-14T00:05:00Z
+**User Input**: "Approve and proceed to Infrastructure Design"
+**AI Response**: NFR Design Unit 2 approved. Starting Infrastructure Design.
+**Context**: CONSTRUCTION - Unit 2 Infrastructure Design begins.
+
+---
+
+## NFR Design Unit 2 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-14T00:04:00Z
+**User Input**: "just answered"
+**AI Response**: Generated nfr-design-patterns.md and logical-components.md for Unit 2. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 2 NFR Design complete, awaiting approval.
+
+---
+
+## NFR Requirements Unit 2 — Approved
+**Timestamp**: 2026-07-14T00:03:00Z
+**User Input**: "approve"
+**AI Response**: NFR Requirements Unit 2 approved. Advancing to NFR Design.
+**Context**: CONSTRUCTION - Unit 2 NFR Design begins.
+
+---
+
+## NFR Requirements Unit 2 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-14T00:02:00Z
+**User Input**: "I just answered the questions"
+**AI Response**: Generated nfr-requirements.md and tech-stack-decisions.md for Unit 2. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 2 NFR Requirements complete, awaiting approval.
+
+---
+
+## Functional Design Unit 2 — Approved
+**Timestamp**: 2026-07-14T00:01:00Z
+**User Input**: "approve"
+**AI Response**: Functional Design Unit 2 approved. Advancing to NFR Requirements.
+**Context**: CONSTRUCTION - Unit 2 NFR Requirements begins.
+
+---
+
+## Functional Design Unit 2 — Artifacts Generated, Awaiting Approval
+**Timestamp**: 2026-07-14T00:00:00Z
+**User Input**: "I answered the questions"
+**AI Response**: Generated domain-entities.md, business-logic-model.md, business-rules.md, frontend-components.md for Unit 2. Presenting for approval.
+**Context**: CONSTRUCTION - Unit 2 Functional Design complete, awaiting approval.
+
+---
+
+## Code Generation Unit 1 — Approved; Unit 2 Begins
+**Timestamp**: 2026-06-05T00:01:00Z
+**User Input**: "Approve and proceed to Unit 2"
+**AI Response**: Unit 1 Code Generation approved. Unit 1 COMPLETE. Starting Unit 2 (iPhone Foundation) — Functional Design.
+**Context**: CONSTRUCTION - Unit 2 Functional Design begins.
+
+---
+
+## Code Generation Unit 1 — Generation Started
+**Timestamp**: 2026-06-05T00:00:00Z
+**User Input**: "approve and generate"
+**AI Response**: Code generation plan approved. Executing all 16 steps.
+**Context**: CONSTRUCTION - Unit 1 Code Generation Part 2 (Generation).
 
 ---
 

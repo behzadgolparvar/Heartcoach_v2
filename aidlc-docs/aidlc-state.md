@@ -40,30 +40,30 @@
 - [x] NFR Requirements — COMPLETED (2026-06-02)
 - [x] NFR Design — COMPLETED (2026-06-02)
 - [x] Infrastructure Design — SKIPPED (no infrastructure dependencies)
-- [ ] Code Generation — IN PROGRESS
+- [x] Code Generation — COMPLETED (2026-06-05)
 
 #### Unit 2 — iPhone Foundation
-- [ ] Functional Design — PENDING
-- [ ] NFR Requirements — PENDING
-- [ ] NFR Design — PENDING
-- [ ] Infrastructure Design — PENDING
-- [ ] Code Generation — PENDING
+- [x] Functional Design — COMPLETED (2026-07-14)
+- [x] NFR Requirements — COMPLETED (2026-07-14)
+- [x] NFR Design — COMPLETED (2026-07-14)
+- [x] Infrastructure Design — COMPLETED (2026-07-14)
+- [x] Code Generation — COMPLETED (2026-07-15)
 
 #### Unit 3 — iPhone Workout Engine
-- [ ] Functional Design — PENDING
-- [ ] NFR Requirements — PENDING
-- [ ] NFR Design — PENDING
-- [ ] Infrastructure Design — PENDING
-- [ ] Code Generation — PENDING
+- [x] Functional Design — COMPLETED (2026-07-15)
+- [x] NFR Requirements — COMPLETED (2026-07-15)
+- [x] NFR Design — COMPLETED (2026-07-22)
+- [x] Infrastructure Design — SKIPPED (no new infrastructure; all frameworks are system-provided)
+- [x] Code Generation — COMPLETED (2026-07-22)
 
 #### Unit 4 — Apple Watch App
-- [ ] Functional Design — PENDING
-- [ ] NFR Requirements — PENDING
-- [ ] NFR Design — PENDING
-- [ ] Infrastructure Design — PENDING
-- [ ] Code Generation — PENDING
+- [x] Functional Design — COMPLETED (2026-07-22)
+- [x] NFR Requirements — COMPLETED (2026-07-22)
+- [x] NFR Design — COMPLETED (2026-07-22)
+- [x] Infrastructure Design — SKIPPED (no new infrastructure; all frameworks system-provided)
+- [x] Code Generation — COMPLETED (2026-07-22)
 
-- [ ] Build and Test — PENDING
+- [x] Build and Test — COMPLETED (2026-07-22)
 
 ### OPERATIONS PHASE
 - [ ] Operations — PLACEHOLDER

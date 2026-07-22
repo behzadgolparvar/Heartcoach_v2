@@ -1,0 +1,51 @@
+# Firebase — NEVER commit
+GoogleService-Info.plist
+
+# Xcode generated — regenerate with `xcodegen generate`
+*.xcodeproj/
+*.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+
+# Xcode build artifacts
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+HeartRateCoachCore/.build/
+HeartRateCoachCore/.swiftpm/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Xcode user state
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# CocoaPods (not used, but just in case)
+Pods/
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Environment files
+.env
+.env.local

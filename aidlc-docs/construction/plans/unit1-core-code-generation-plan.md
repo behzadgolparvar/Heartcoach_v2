@@ -23,13 +23,13 @@
 
 ### Phase 1: Project Structure Setup
 
-- [ ] **Step 1** — Create `HeartRateCoachCore/Package.swift`
+- [x] **Step 1** — Create `HeartRateCoachCore/Package.swift`
   - SPM manifest with iOS 17+, watchOS 10+ platforms
   - Production target: `HeartRateCoachCore` (no dependencies)
   - Test target: `HeartRateCoachCoreTests` (depends on HeartRateCoachCore + SwiftCheck 0.12.0)
   - SwiftCheck URL + exact version pinned
 
-- [ ] **Step 2** — Create directory structure
+- [x] **Step 2** — Create directory structure
   ```
   HeartRateCoachCore/
     Sources/HeartRateCoachCore/
@@ -43,7 +43,7 @@
 
 ### Phase 2: Supporting Enums
 
-- [ ] **Step 3** — Create `Sources/HeartRateCoachCore/Models/Supporting.swift`
+- [x] **Step 3** — Create `Sources/HeartRateCoachCore/Models/Supporting.swift`
   - `Goal`: `.fatBurn`, `.endurance`
   - `WorkoutType`: `.continuous`, `.hiit`, `.fartlek`
   - `Sex`: `.male`, `.female`, `.other`
@@ -55,14 +55,14 @@
 
 ### Phase 3: Domain Models
 
-- [ ] **Step 4** — Create `Sources/HeartRateCoachCore/Models/UserProfile.swift`
+- [x] **Step 4** — Create `Sources/HeartRateCoachCore/Models/UserProfile.swift`
   - `struct UserProfile` with all properties per domain-entities.md
 
-- [ ] **Step 5** — Create `Sources/HeartRateCoachCore/Models/HRZones.swift`
+- [x] **Step 5** — Create `Sources/HeartRateCoachCore/Models/HRZones.swift`
   - `struct Zone` (number, name, min, max)
   - `struct HRZones` (zone1–zone5)
 
-- [ ] **Step 6** — Create `Sources/HeartRateCoachCore/Models/WorkoutProgram.swift`
+- [x] **Step 6** — Create `Sources/HeartRateCoachCore/Models/WorkoutProgram.swift`
   - `struct WorkoutPhase` with all properties
   - `enum WorkoutProgram` with `.continuous`, `.hiit`, `.fartlek`
   - Each case provides `var phases: [WorkoutPhase]` with the complete hardcoded phase sequences from business-logic-model.md
@@ -70,14 +70,14 @@
     - HIIT: 32 phases (warm-up × 2 + 15 × exercise/recovery)
     - Fartlek: 17 phases (warm-up × 2 + 15 × segments)
 
-- [ ] **Step 7** — Create `Sources/HeartRateCoachCore/Models/Session.swift`
+- [x] **Step 7** — Create `Sources/HeartRateCoachCore/Models/Session.swift`
   - `struct HRRecord` with all properties
   - `struct Session` with all properties
 
-- [ ] **Step 8** — Create `Sources/HeartRateCoachCore/Models/CoachingState.swift`
+- [x] **Step 8** — Create `Sources/HeartRateCoachCore/Models/CoachingState.swift`
   - `struct CoachingState` with all published UI properties
 
-- [ ] **Step 9** — Create `Sources/HeartRateCoachCore/Models/Messaging.swift`
+- [x] **Step 9** — Create `Sources/HeartRateCoachCore/Models/Messaging.swift`
   - `enum CoachingCommand` with all cases
   - `struct HRReading`
 
@@ -85,7 +85,7 @@
 
 ### Phase 4: Engine — Error Types
 
-- [ ] **Step 10** — Create `Sources/HeartRateCoachCore/Engine/ZoneCalculationError.swift`
+- [x] **Step 10** — Create `Sources/HeartRateCoachCore/Engine/ZoneCalculationError.swift`
   - `enum ZoneCalculationError: Error` with `.invalidAge(value: Int)`, `.invalidRestingHR(value: Int)`
   - `enum RHRWarning` with `.belowTypicalRange`, `.aboveTypicalRange`
 
@@ -93,7 +93,7 @@
 
 ### Phase 5: Engine — ZoneCalculator
 
-- [ ] **Step 11** — Create `Sources/HeartRateCoachCore/Engine/ZoneCalculator.swift`
+- [x] **Step 11** — Create `Sources/HeartRateCoachCore/Engine/ZoneCalculator.swift`
   - `struct ZoneCalculator` (static methods only)
   - `static func maxHR(for age: Int) -> Int`
   - `static func calculate(age: Int, restingHR: Int) throws -> (zones: HRZones, warning: RHRWarning?)`
@@ -111,7 +111,7 @@
 
 ### Phase 6: Engine — WorkoutPhaseSequencer
 
-- [ ] **Step 12** — Create `Sources/HeartRateCoachCore/Engine/WorkoutPhaseSequencer.swift`
+- [x] **Step 12** — Create `Sources/HeartRateCoachCore/Engine/WorkoutPhaseSequencer.swift`
   - `struct WorkoutPhaseSequencer`
   - `init(program: WorkoutProgram)`
   - `var currentPhase: WorkoutPhase`
@@ -126,7 +126,7 @@
 
 ### Phase 7: Tests — Helpers
 
-- [ ] **Step 13** — Create `Tests/HeartRateCoachCoreTests/Helpers/Generators.swift`
+- [x] **Step 13** — Create `Tests/HeartRateCoachCoreTests/Helpers/Generators.swift`
   - Import SwiftCheck
   - `AgeGenerator`: `Gen<Int>` constrained to 15–100
   - `InvalidAgeGenerator`: negative/zero + above 100
@@ -139,7 +139,7 @@
 
 ### Phase 8: Tests — ZoneCalculator
 
-- [ ] **Step 14** — Create `Tests/HeartRateCoachCoreTests/ZoneCalculatorTests.swift`
+- [x] **Step 14** — Create `Tests/HeartRateCoachCoreTests/ZoneCalculatorTests.swift`
 
   **Example-based tests:**
   - `testKarvonenFormulaKnownValues()` — manual calculation for age 30, RHR 60; verify all 5 zone boundaries
@@ -167,7 +167,7 @@
 
 ### Phase 9: Tests — WorkoutPhaseSequencer
 
-- [ ] **Step 15** — Create `Tests/HeartRateCoachCoreTests/WorkoutPhaseSequencerTests.swift`
+- [x] **Step 15** — Create `Tests/HeartRateCoachCoreTests/WorkoutPhaseSequencerTests.swift`
 
   **Example-based tests:**
   - `testContinuousTotalDuration()` — sum of all phase durations = 2100s
@@ -187,7 +187,7 @@
 
 ### Phase 10: Documentation
 
-- [ ] **Step 16** — Create `aidlc-docs/construction/unit1-core/code/code-summary.md`
+- [x] **Step 16** — Create `aidlc-docs/construction/unit1-core/code/code-summary.md`
   - List of all generated files with paths
   - Key implementation notes (ceiling rounding, lower-zone-wins, throws pattern)
   - PBT coverage summary

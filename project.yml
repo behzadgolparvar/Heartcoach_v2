@@ -1,0 +1,106 @@
+name: HeartCoach
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  defaultConfig: Debug
+  xcodeVersion: "15.4"
+
+packages:
+  firebase-ios-sdk:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: "11.0.0"
+  HeartRateCoachCore:
+    path: HeartRateCoachCore
+
+targets:
+  HeartCoach:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: HeartCoach
+    resources:
+      - path: HeartCoach/Offline/OfflineQueue.xcdatamodeld
+    info:
+      path: HeartCoach/Info.plist
+      properties:
+        CFBundleName: HeartCoach
+        CFBundleDisplayName: HeartCoach
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Dark
+        NSHealthShareUsageDescription: "HeartCoach reads your heart rate to provide personalised coaching during workouts."
+        NSHealthUpdateUsageDescription: "HeartCoach needs access to your health data to read your heart rate."
+        NSSupportsLiveActivities: false
+    entitlements:
+      path: HeartCoach/HeartCoach.entitlements
+    dependencies:
+      - package: firebase-ios-sdk
+        product: FirebaseAuth
+      - package: firebase-ios-sdk
+        product: FirebaseFirestore
+      - package: HeartRateCoachCore
+        product: HeartRateCoachCore
+      - sdk: WatchConnectivity.framework
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach
+        DEVELOPMENT_TEAM: ""   # Set your Apple Developer Team ID here
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: HeartCoach/Info.plist
+
+  HeartCoachWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: HeartCoachWatch
+    info:
+      path: HeartCoachWatch/Info.plist
+      properties:
+        CFBundleName: HeartCoachWatch
+        CFBundleDisplayName: HeartCoach
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.behzad.heartcoach
+        NSHealthShareUsageDescription: "HeartCoach reads your heart rate during workouts."
+        NSHealthUpdateUsageDescription: "HeartCoach writes workout data to your health records."
+    entitlements:
+      path: HeartCoachWatch/HeartCoachWatch.entitlements
+    dependencies:
+      - package: HeartRateCoachCore
+        product: HeartRateCoachCore
+      - sdk: WatchConnectivity.framework
+      - sdk: HealthKit.framework
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach.watchkitapp
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: HeartCoachWatch/Info.plist
+
+  HeartCoachWatchTests:
+    type: bundle.unit-test
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: HeartCoachWatchTests
+    dependencies:
+      - target: HeartCoachWatch
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach.watchkitapptests
+
+  HeartCoachTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: HeartCoachTests
+    dependencies:
+      - target: HeartCoach
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoachtests
