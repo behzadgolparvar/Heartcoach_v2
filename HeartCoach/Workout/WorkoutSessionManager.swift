@@ -141,7 +141,7 @@ final class WorkoutSessionManager {
 
         // Record HR data point (skip if no signal)
         if hr != Int.max {
-            let zone = (try? ZoneCalculator.classify(hr: hr, zones: zones)) ?? 0
+            let zone = ZoneCalculator.zone(for: hr, in: zones)
             let record = HRRecord(
                 timestamp: now,
                 second: Int(sequencer.totalElapsedTime),
@@ -164,7 +164,7 @@ final class WorkoutSessionManager {
         let coachingState = CoachingState(
             currentHR: hr == Int.max ? 0 : hr,
             hrSmooth: engineState.hrSmooth,
-            currentZone: hr == Int.max ? 0 : ((try? ZoneCalculator.classify(hr: hr, zones: zones)) ?? 0),
+            currentZone: hr == Int.max ? 0 : (ZoneCalculator.zone(for: hr, in: zones)),
             targetZone: phase.targetZone,
             phase: phase.type,
             phaseTimeRemaining: sequencer.timeRemainingInPhase,

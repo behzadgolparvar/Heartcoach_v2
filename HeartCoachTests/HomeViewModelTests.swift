@@ -6,7 +6,7 @@ final class HomeViewModelTests: XCTestCase {
 
     func testLoadData_noSessions_lastSessionIsNil() async {
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = .fixture
+        firebase.profileToReturn = UserProfile.fixture
         firebase.sessionsToReturn = []
         let hk = MockHealthKitService()
         let vm = HomeViewModel(firebaseService: firebase, healthKitService: hk)
@@ -20,8 +20,8 @@ final class HomeViewModelTests: XCTestCase {
 
     func testLoadData_withSessions_lastSessionPopulated() async {
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = .fixture
-        firebase.sessionsToReturn = [.fixture]
+        firebase.profileToReturn = UserProfile.fixture
+        firebase.sessionsToReturn = [Session.fixture]
         let hk = MockHealthKitService()
         let vm = HomeViewModel(firebaseService: firebase, healthKitService: hk)
 
@@ -54,16 +54,3 @@ final class HomeViewModelTests: XCTestCase {
     }
 }
 
-// MARK: - Test Fixtures
-private extension UserProfile {
-    static var fixture: UserProfile {
-        UserProfile(age: 30, restingHR: 60, goal: .fatBurn, preferredWorkout: .continuous)
-    }
-}
-
-private extension Session {
-    static var fixture: Session {
-        Session(date: Date(), programType: .continuous, durationSec: 2100,
-                avgHR: 145, timeInZones: [3: 1200, 4: 600, 2: 300], hrStream: [])
-    }
-}

@@ -21,7 +21,7 @@ struct HistoryView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .onAppear {
-            if let uid = authVM.authService.currentUserID {
+            if let uid = authVM.currentUserID {
                 historyVM.loadInitial(userID: uid)
             }
         }
@@ -53,7 +53,7 @@ struct HistoryView: View {
 
             if historyVM.hasMore {
                 Button("Load More") {
-                    if let uid = authVM.authService.currentUserID {
+                    if let uid = authVM.currentUserID {
                         historyVM.loadMore(userID: uid)
                     }
                 }

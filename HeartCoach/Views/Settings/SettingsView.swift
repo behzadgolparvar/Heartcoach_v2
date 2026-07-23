@@ -86,7 +86,7 @@ struct SettingsView: View {
 
                     // Save
                     Button(vm.isSaving ? "Saving…" : "Save") {
-                        if let userID = authViewModel.authService.currentUserID {
+                        if let userID = authViewModel.currentUserID {
                             vm.save(userID: userID)
                         }
                     }

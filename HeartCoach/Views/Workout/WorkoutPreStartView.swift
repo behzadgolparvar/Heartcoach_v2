@@ -97,12 +97,3 @@ private struct ProgramCard: View {
         .accessibilityIdentifier("program-card-\(title.lowercased())")
     }
 }
-
-extension WorkoutProgram: Equatable {
-    public static func == (lhs: WorkoutProgram, rhs: WorkoutProgram) -> Bool {
-        switch (lhs, rhs) {
-        case (.continuous, .continuous), (.hiit, .hiit), (.fartlek, .fartlek): return true
-        default: return false
-        }
-    }
-}

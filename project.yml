@@ -28,6 +28,9 @@ targets:
         CFBundleDisplayName: HeartCoach
         UILaunchScreen: {}
         UIUserInterfaceStyle: Dark
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIRequiresFullScreen: true
         NSHealthShareUsageDescription: "HeartCoach reads your heart rate to provide personalised coaching during workouts."
         NSHealthUpdateUsageDescription: "HeartCoach needs access to your health data to read your heart rate."
         NSSupportsLiveActivities: false
@@ -91,6 +94,7 @@ targets:
       base:
         SWIFT_VERSION: "5.9"
         PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach.watchkitapptests
+        GENERATE_INFOPLIST_FILE: YES
 
   HeartCoachTests:
     type: bundle.unit-test
@@ -104,3 +108,4 @@ targets:
       base:
         SWIFT_VERSION: "5.9"
         PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoachtests
+        GENERATE_INFOPLIST_FILE: YES

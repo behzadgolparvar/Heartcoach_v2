@@ -2,6 +2,7 @@ import Foundation
 import HeartRateCoachCore
 
 @Observable
+@MainActor
 final class WorkoutViewModel {
 
     // MARK: - State (published to WorkoutView)

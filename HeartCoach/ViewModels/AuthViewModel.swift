@@ -10,6 +10,8 @@ final class AuthViewModel {
     var errorMessage: String?
     var isLoading = false
 
+    var currentUserID: String? { authService.currentUserID }
+
     private let authService: AuthServiceProtocol
     private let firebaseService: FirebaseServiceProtocol
 

@@ -4,6 +4,7 @@ import HeartRateCoachCore
 /// Composition root — creates and owns all services and ViewModels.
 /// Injected into the SwiftUI environment at app startup.
 @Observable
+@MainActor
 final class AppContainer {
     // MARK: - Services
     let authService: AuthServiceProtocol

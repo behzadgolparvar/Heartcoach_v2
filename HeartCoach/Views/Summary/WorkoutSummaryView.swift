@@ -54,7 +54,7 @@ struct WorkoutSummaryView: View {
                     switch summaryVM.saveState {
                     case .idle:
                         Button("Save Workout") {
-                            if let uid = authVM.authService.currentUserID {
+                            if let uid = authVM.currentUserID {
                                 summaryVM.saveSession(userID: uid)
                             }
                         }
@@ -72,7 +72,7 @@ struct WorkoutSummaryView: View {
                     case .failed(let error):
                         ErrorBanner(message: error.localizedDescription)
                         Button("Retry") {
-                            if let uid = authVM.authService.currentUserID {
+                            if let uid = authVM.currentUserID {
                                 summaryVM.saveSession(userID: uid)
                             }
                         }

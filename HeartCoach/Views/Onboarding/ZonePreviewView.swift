@@ -30,7 +30,7 @@ struct ZonePreviewView: View {
                     }
                 } else {
                     Button("Start Training") {
-                        if let userID = authViewModel.authService.currentUserID {
+                        if let userID = authViewModel.currentUserID {
                             vm.saveProfile(userID: userID)
                         }
                     }

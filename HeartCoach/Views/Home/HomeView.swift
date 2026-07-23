@@ -68,7 +68,7 @@ struct HomeView: View {
             }
         }
         .onAppear {
-            if let userID = authViewModel.authService.currentUserID {
+            if let userID = authViewModel.currentUserID {
                 vm.loadData(userID: userID)
             }
         }

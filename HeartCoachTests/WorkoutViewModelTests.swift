@@ -13,7 +13,7 @@ final class WorkoutViewModelTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        zones = try ZoneCalculator.calculate(age: 30, restingHR: 60)
+        zones = try ZoneCalculator.calculate(age: 30, restingHR: 60).zones
         mockVoice = MockVoiceFeedbackService()
         mockWatch = MockWatchBridge()
         mockFirebase = MockFirebaseService()

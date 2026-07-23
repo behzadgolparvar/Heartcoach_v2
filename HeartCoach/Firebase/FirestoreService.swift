@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseAuth
 import FirebaseFirestore
 import HeartRateCoachCore
 
@@ -122,7 +123,7 @@ final class FirestoreService: FirebaseServiceProtocol {
     private func mapError(_ error: Error) -> AppError {
         let nsError = error as NSError
         if nsError.domain == FirestoreErrorDomain {
-            switch FirestoreErrorCode(rawValue: nsError.code) {
+            switch FirestoreErrorCode.Code(rawValue: nsError.code) {
             case .unavailable: return .networkUnavailable
             case .permissionDenied: return .permissionDenied
             default: return .unknown

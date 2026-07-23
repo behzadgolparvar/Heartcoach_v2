@@ -19,7 +19,7 @@ final class VoiceFeedbackService: VoiceFeedbackServiceProtocol {
         try? AVAudioSession.sharedInstance().setCategory(
             .playback,
             mode: .default,
-            options: [.duckOthers, .allowBluetooth]
+            options: [.duckOthers, .allowBluetoothHFP]
         )
         try? AVAudioSession.sharedInstance().setActive(true)
     }

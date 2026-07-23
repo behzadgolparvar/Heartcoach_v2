@@ -1,4 +1,5 @@
 import XCTest
+import HeartRateCoachCore
 @testable import HeartCoach
 
 final class AuthViewModelTests: XCTestCase {
@@ -6,7 +7,7 @@ final class AuthViewModelTests: XCTestCase {
     func testSignInSuccessWithExistingProfile_goesToMain() async {
         let auth = MockAuthService()
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = .fixture
+        firebase.profileToReturn = UserProfile.fixture
         let vm = AuthViewModel(authService: auth, firebaseService: firebase)
 
         await vm.signInWithApple(result: .failure(NSError()), rawNonce: "")
@@ -57,9 +58,3 @@ final class AuthViewModelTests: XCTestCase {
     }
 }
 
-// MARK: - Test Fixtures
-private extension UserProfile {
-    static var fixture: UserProfile {
-        UserProfile(age: 30, restingHR: 60, goal: .fatBurn, preferredWorkout: .continuous)
-    }
-}

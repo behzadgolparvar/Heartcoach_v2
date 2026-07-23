@@ -6,7 +6,7 @@ struct MainTabView: View {
             HomeView()
                 .tabItem { Label("Home", systemImage: "house.fill") }
 
-            HistoryPlaceholderView()
+            HistoryView()
                 .tabItem { Label("History", systemImage: "list.bullet") }
 
             SettingsView()
