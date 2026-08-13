@@ -56,6 +56,16 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
                  error: Error?) {
         guard activationState == .activated else { return }
         recoverIfNeeded()
+        // Check if iPhone already sent a command before we activated.
+        if let command = session.receivedApplicationContext["command"] as? String {
+            handleCommand(command)
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        if let command = applicationContext["command"] as? String {
+            handleCommand(command)
+        }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {

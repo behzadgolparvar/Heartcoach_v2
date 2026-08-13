@@ -44,10 +44,8 @@ struct HomeView: View {
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
-                                Button("Open Settings →") {
-                                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                                        UIApplication.shared.open(url)
-                                    }
+                                Button("Grant Heart Rate Access →") {
+                                    vm.requestHealthKitAccess()
                                 }
                                 .font(.footnote.bold())
                                 .foregroundStyle(.red)
@@ -62,8 +60,12 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(isPresented: $showPreStart) {
                 if let wvm = workoutVM {
-                    WorkoutPreStartView()
-                        .environment(wvm)
+                    WorkoutPreStartView(onFinish: {
+                        // Collapse the entire workout stack back to Home.
+                        showPreStart = false
+                        workoutVM = nil
+                    })
+                    .environment(wvm)
                 }
             }
         }

@@ -8,6 +8,7 @@ final class WorkoutSummaryViewModel {
         case idle
         case saving
         case saved
+        case savedPendingSync
         case failed(AppError)
     }
 
@@ -42,8 +43,10 @@ final class WorkoutSummaryViewModel {
         saveState = .saving
         Task {
             do {
-                try await firebaseService.saveSession(session, userID: userID)
-                await MainActor.run { self.saveState = .saved }
+                let outcome = try await firebaseService.saveSession(session, userID: userID)
+                await MainActor.run {
+                    self.saveState = outcome == .synced ? .saved : .savedPendingSync
+                }
             } catch let error as AppError {
                 await MainActor.run { self.saveState = .failed(error) }
             } catch {

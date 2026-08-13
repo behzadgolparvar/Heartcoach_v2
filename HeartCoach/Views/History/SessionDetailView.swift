@@ -26,7 +26,7 @@ struct SessionDetailView: View {
             VStack(alignment: .leading, spacing: 24) {
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(session.programType.rawValue.capitalized)
+                    Text(session.programType.displayName)
                         .font(.title2.bold())
                         .foregroundStyle(.white)
                     Text(session.date.formatted(date: .abbreviated, time: .shortened))

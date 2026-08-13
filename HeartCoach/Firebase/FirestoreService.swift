@@ -66,18 +66,34 @@ final class FirestoreService: FirebaseServiceProtocol {
 
     // MARK: - Sessions
 
-    func saveSession(_ session: Session, userID: String) async throws {
-        guard networkMonitor.isCurrentlyConnected else {
-            try offlineQueue.enqueue(session)
-            return
-        }
+    func saveSession(_ session: Session, userID: String) async throws -> SessionSaveOutcome {
+        let data = try encodeSession(session)
         do {
-            let data = try encodeSession(session)
-            try await sessionsCollection(userID).document(session.id).setData(data)
-        } catch let appError as AppError {
-            throw appError
+            // Always attempt the cloud write, bounded by a timeout so an offline /
+            // stalled connection can't hang the UI on "Saving…". A satisfied network
+            // path is no guarantee the write reaches the server (captive portals,
+            // token refresh, transient Firestore errors), so we rely on the actual
+            // write result rather than a cached connectivity flag.
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    try await self.sessionsCollection(userID).document(session.id).setData(data)
+                }
+                group.addTask {
+                    try await Task.sleep(nanoseconds: 8_000_000_000)
+                    throw AppError.networkUnavailable
+                }
+                try await group.next()
+                group.cancelAll()
+            }
+            return .synced
         } catch {
+            // Write failed or timed out — hold it locally and sync later.
+            // Log only the error (never any health data — SECURITY-03).
+            #if DEBUG
+            print("[Sessions] Cloud write failed, queued offline: \(error.localizedDescription)")
+            #endif
             try offlineQueue.enqueue(session)
+            return .queued
         }
     }
 
@@ -211,8 +227,18 @@ final class FirestoreService: FirebaseServiceProtocol {
                 return (key, v)
             })
         } ?? [:]
+        // Reverse of encodeSession's hrStream serialization. Empty if absent/undecodable
+        // (e.g. legacy records saved before the stream was persisted).
+        let hrStream: [HRRecord]
+        if let raw = d["hrStream"],
+           let data = try? JSONSerialization.data(withJSONObject: raw),
+           let decoded = try? JSONDecoder().decode([HRRecord].self, from: data) {
+            hrStream = decoded
+        } else {
+            hrStream = []
+        }
         return Session(id: id, date: ts.dateValue(), programType: type,
-                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: [])
+                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: hrStream)
     }
 }
 

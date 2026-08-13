@@ -74,7 +74,7 @@ private struct SessionRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(session.programType.rawValue.capitalized)
+                Text(session.programType.displayName)
                     .font(.headline)
                     .foregroundStyle(.white)
                 Text(session.date.formatted(date: .abbreviated, time: .shortened))

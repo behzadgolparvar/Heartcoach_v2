@@ -2,6 +2,7 @@ import SwiftUI
 import HeartRateCoachCore
 
 struct WorkoutView: View {
+    let onFinish: () -> Void
     @Environment(WorkoutViewModel.self) private var workoutVM
     @State private var showEmergencyStop = false
     @State private var navigateToSummary = false
@@ -72,7 +73,7 @@ struct WorkoutView: View {
         }
         .navigationDestination(isPresented: $navigateToSummary) {
             if let session = workoutVM.completedSession {
-                WorkoutSummaryView(session: session)
+                WorkoutSummaryView(session: session, onFinish: onFinish)
             }
         }
     }

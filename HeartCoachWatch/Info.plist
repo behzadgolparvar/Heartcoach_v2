@@ -27,6 +27,6 @@
 	<key>WKApplication</key>
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>com.behzad.heartcoach</string>
+	<string>com.golkoosh.heartcoach</string>
 </dict>
 </plist>

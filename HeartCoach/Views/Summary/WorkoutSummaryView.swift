@@ -3,9 +3,9 @@ import HeartRateCoachCore
 
 struct WorkoutSummaryView: View {
     let session: Session
+    let onFinish: () -> Void
     @Environment(WorkoutSummaryViewModel.self) private var summaryVM
     @Environment(AuthViewModel.self) private var authVM
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ScrollView {
@@ -69,6 +69,12 @@ struct WorkoutSummaryView: View {
                             .font(.subheadline.bold())
                             .foregroundStyle(.green)
 
+                    case .savedPendingSync:
+                        Label("Saved — will sync when online", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+
                     case .failed(let error):
                         ErrorBanner(message: error.localizedDescription)
                         Button("Retry") {
@@ -79,7 +85,7 @@ struct WorkoutSummaryView: View {
                         .buttonStyle(SecondaryButtonStyle())
                     }
 
-                    Button("Done") { dismiss() }
+                    Button("Done") { onFinish() }
                         .buttonStyle(SecondaryButtonStyle())
                         .accessibilityIdentifier("summary-done-button")
                 }
@@ -159,15 +165,5 @@ private extension Int {
         let m = self / 60
         let s = self % 60
         return m > 0 ? "\(m)m \(s)s" : "\(s)s"
-    }
-}
-
-private extension WorkoutType {
-    var displayName: String {
-        switch self {
-        case .continuous: return "Continuous"
-        case .hiit: return "HIIT"
-        case .fartlek: return "Fartlek"
-        }
     }
 }

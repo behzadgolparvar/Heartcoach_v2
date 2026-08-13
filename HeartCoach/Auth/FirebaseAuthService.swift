@@ -1,5 +1,4 @@
 import Foundation
-import AuthenticationServices
 import FirebaseAuth
 
 final class FirebaseAuthService: AuthServiceProtocol {
@@ -8,32 +7,21 @@ final class FirebaseAuthService: AuthServiceProtocol {
         Auth.auth().currentUser?.uid
     }
 
-    func signInWithApple(result: Result<ASAuthorization, Error>, rawNonce: String) async throws -> String {
-        switch result {
-        case .failure:
+    func signIn(email: String, password: String) async throws -> String {
+        do {
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            return result.user.uid
+        } catch {
             throw AppError.authenticationFailed
+        }
+    }
 
-        case .success(let authorization):
-            guard
-                let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-                let tokenData = credential.identityToken,
-                let tokenString = String(data: tokenData, encoding: .utf8)
-            else {
-                throw AppError.authenticationFailed
-            }
-
-            let firebaseCredential = OAuthProvider.appleCredential(
-                withIDToken: tokenString,
-                rawNonce: rawNonce,
-                fullName: credential.fullName
-            )
-
-            do {
-                let result = try await Auth.auth().signIn(with: firebaseCredential)
-                return result.user.uid
-            } catch {
-                throw AppError.authenticationFailed
-            }
+    func signUp(email: String, password: String) async throws -> String {
+        do {
+            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            return result.user.uid
+        } catch {
+            throw AppError.authenticationFailed
         }
     }
 

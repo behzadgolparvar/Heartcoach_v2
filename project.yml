@@ -26,6 +26,8 @@ targets:
       properties:
         CFBundleName: HeartCoach
         CFBundleDisplayName: HeartCoach
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
         UILaunchScreen: {}
         UIUserInterfaceStyle: Dark
         UISupportedInterfaceOrientations:
@@ -36,6 +38,9 @@ targets:
         NSSupportsLiveActivities: false
     entitlements:
       path: HeartCoach/HeartCoach.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     dependencies:
       - package: firebase-ios-sdk
         product: FirebaseAuth
@@ -44,11 +49,13 @@ targets:
       - package: HeartRateCoachCore
         product: HeartRateCoachCore
       - sdk: WatchConnectivity.framework
+      - target: HeartCoachWatch
+        embed: true
     settings:
       base:
         SWIFT_VERSION: "5.9"
-        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach
-        DEVELOPMENT_TEAM: ""   # Set your Apple Developer Team ID here
+        PRODUCT_BUNDLE_IDENTIFIER: com.golkoosh.heartcoach
+        DEVELOPMENT_TEAM: "Z5F9A35728"
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: HeartCoach/Info.plist
 
@@ -63,12 +70,17 @@ targets:
       properties:
         CFBundleName: HeartCoachWatch
         CFBundleDisplayName: HeartCoach
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
         WKApplication: true
-        WKCompanionAppBundleIdentifier: com.behzad.heartcoach
+        WKCompanionAppBundleIdentifier: com.golkoosh.heartcoach
         NSHealthShareUsageDescription: "HeartCoach reads your heart rate during workouts."
         NSHealthUpdateUsageDescription: "HeartCoach writes workout data to your health records."
     entitlements:
       path: HeartCoachWatch/HeartCoachWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     dependencies:
       - package: HeartRateCoachCore
         product: HeartRateCoachCore
@@ -77,8 +89,8 @@ targets:
     settings:
       base:
         SWIFT_VERSION: "5.9"
-        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach.watchkitapp
-        DEVELOPMENT_TEAM: ""
+        PRODUCT_BUNDLE_IDENTIFIER: com.golkoosh.heartcoach.watchkitapp
+        DEVELOPMENT_TEAM: "Z5F9A35728"
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: HeartCoachWatch/Info.plist
 
@@ -93,7 +105,8 @@ targets:
     settings:
       base:
         SWIFT_VERSION: "5.9"
-        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoach.watchkitapptests
+        PRODUCT_BUNDLE_IDENTIFIER: com.golkoosh.heartcoach.watchkitapptests
+        DEVELOPMENT_TEAM: "Z5F9A35728"
         GENERATE_INFOPLIST_FILE: YES
 
   HeartCoachTests:
@@ -107,5 +120,6 @@ targets:
     settings:
       base:
         SWIFT_VERSION: "5.9"
-        PRODUCT_BUNDLE_IDENTIFIER: com.behzad.heartcoachtests
+        PRODUCT_BUNDLE_IDENTIFIER: com.golkoosh.heartcoachtests
+        DEVELOPMENT_TEAM: "Z5F9A35728"
         GENERATE_INFOPLIST_FILE: YES

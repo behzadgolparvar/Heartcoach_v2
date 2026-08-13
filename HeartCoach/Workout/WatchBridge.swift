@@ -21,7 +21,6 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
     }
 
     func deactivate() {
-        // WCSession has no explicit deactivate; clear the callback to stop processing
         onHRReceived = nil
     }
 
@@ -47,12 +46,17 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
     }
 
     func sendCommand(_ command: String) {
-        guard WCSession.default.isReachable else { return }
-        WCSession.default.sendMessage(
-            ["command": command],
-            replyHandler: nil,
-            errorHandler: { _ in }
-        )
+        let payload: [String: Any] = ["command": command, "ts": Date().timeIntervalSince1970]
+        // updateApplicationContext is guaranteed delivery — Watch receives it on next open.
+        try? WCSession.default.updateApplicationContext(payload)
+        // sendMessage is the fast path if the Watch is already reachable.
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(
+                ["command": command],
+                replyHandler: nil,
+                errorHandler: { _ in }
+            )
+        }
     }
 
     // MARK: - WCSessionDelegate
@@ -60,6 +64,8 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
     func session(_ session: WCSession,
                  activationDidCompleteWith activationState: WCSessionActivationState,
                  error: Error?) {}
+
+    func sessionReachabilityDidChange(_ session: WCSession) {}
 
     func sessionDidBecomeInactive(_ session: WCSession) {}
     func sessionDidDeactivate(_ session: WCSession) {}

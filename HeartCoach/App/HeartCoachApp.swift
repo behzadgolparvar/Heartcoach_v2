@@ -4,13 +4,14 @@ import FirebaseFirestore
 
 @main
 struct HeartCoachApp: App {
-    @State private var container = AppContainer()
+    @State private var container: AppContainer
 
     init() {
         FirebaseApp.configure()
         let settings = FirestoreSettings()
         settings.cacheSettings = PersistentCacheSettings()
         Firestore.firestore().settings = settings
+        _container = State(initialValue: AppContainer())
     }
 
     var body: some Scene {

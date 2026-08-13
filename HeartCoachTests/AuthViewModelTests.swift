@@ -4,46 +4,57 @@ import HeartRateCoachCore
 
 final class AuthViewModelTests: XCTestCase {
 
-    func testSignInSuccessWithExistingProfile_goesToMain() async {
+    func testSignIn_withExistingProfile_goesToMain() async {
         let auth = MockAuthService()
         let firebase = MockFirebaseService()
         firebase.profileToReturn = UserProfile.fixture
         let vm = AuthViewModel(authService: auth, firebaseService: firebase)
 
-        await vm.signInWithApple(result: .failure(NSError()), rawNonce: "")
-        // signInResult is .success by default in MockAuthService
-        auth.signInResult = .success("test-user-id")
-        // Trigger check
-        vm.checkAuthState()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        vm.email = "test@example.com"
+        vm.password = "password123"
+        await vm.submitAuth()
 
         XCTAssertEqual(vm.appState, .main)
     }
 
-    func testSignInSuccessWithNoProfile_goesToOnboarding() async {
+    func testSignIn_withNoProfile_goesToOnboarding() async {
         let auth = MockAuthService()
         let firebase = MockFirebaseService()
         firebase.profileToReturn = nil
         let vm = AuthViewModel(authService: auth, firebaseService: firebase)
 
-        vm.checkAuthState()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        vm.email = "test@example.com"
+        vm.password = "password123"
+        await vm.submitAuth()
 
         XCTAssertEqual(vm.appState, .onboarding)
     }
 
-    func testSignInFailure_setsErrorMessage() async {
+    func testSignIn_failure_setsErrorMessage() async {
         let auth = MockAuthService()
         auth.signInResult = .failure(AppError.authenticationFailed)
         let firebase = MockFirebaseService()
         let vm = AuthViewModel(authService: auth, firebaseService: firebase)
 
-        // signInWithApple is called by the view — simulate a failure result
-        auth.authStateSequence = [nil]
-        vm.checkAuthState()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        vm.email = "test@example.com"
+        vm.password = "wrongpass"
+        await vm.submitAuth()
 
-        XCTAssertEqual(vm.appState, .signedOut)
+        XCTAssertNotNil(vm.errorMessage)
+    }
+
+    func testSignUp_withNoProfile_goesToOnboarding() async {
+        let auth = MockAuthService()
+        let firebase = MockFirebaseService()
+        firebase.profileToReturn = nil
+        let vm = AuthViewModel(authService: auth, firebaseService: firebase)
+        vm.isSignUpMode = true
+
+        vm.email = "new@example.com"
+        vm.password = "newpass123"
+        await vm.submitAuth()
+
+        XCTAssertEqual(vm.appState, .onboarding)
     }
 
     func testSignOut_goesToSignedOut() {
@@ -57,4 +68,3 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertEqual(vm.appState, .signedOut)
     }
 }
-

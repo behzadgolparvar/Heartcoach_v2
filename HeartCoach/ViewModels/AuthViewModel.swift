@@ -1,5 +1,4 @@
 import Foundation
-import AuthenticationServices
 
 @Observable
 final class AuthViewModel {
@@ -9,6 +8,9 @@ final class AuthViewModel {
     var appState: AppState = .loading
     var errorMessage: String?
     var isLoading = false
+    var isSignUpMode = false
+    var email = ""
+    var password = ""
 
     var currentUserID: String? { authService.currentUserID }
 
@@ -28,11 +30,13 @@ final class AuthViewModel {
         }
     }
 
-    func signInWithApple(result: Result<ASAuthorization, Error>, rawNonce: String) async {
+    func submitAuth() async {
         isLoading = true
         errorMessage = nil
         do {
-            let userID = try await authService.signInWithApple(result: result, rawNonce: rawNonce)
+            let userID = isSignUpMode
+                ? try await authService.signUp(email: email, password: password)
+                : try await authService.signIn(email: email, password: password)
             await handleAuthState(userID: userID)
         } catch {
             errorMessage = (error as? AppError)?.errorDescription ?? AppError.authenticationFailed.errorDescription

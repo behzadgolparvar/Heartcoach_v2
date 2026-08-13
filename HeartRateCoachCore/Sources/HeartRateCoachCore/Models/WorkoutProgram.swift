@@ -41,6 +41,18 @@ public enum WorkoutProgram: Sendable {
         }
     }
 
+    /// The persisted workout type this program corresponds to.
+    public var workoutType: WorkoutType {
+        switch self {
+        case .continuous: return .continuous
+        case .hiit:       return .hiit
+        case .fartlek:    return .fartlek
+        }
+    }
+
+    /// Human-readable name for display (preserves "HIIT" casing).
+    public var displayName: String { workoutType.displayName }
+
     // MARK: - Continuous (5-cycle steady progressive effort)
 
     private static let continuousPhases: [WorkoutPhase] = {

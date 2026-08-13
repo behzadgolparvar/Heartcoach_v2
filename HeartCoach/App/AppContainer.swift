@@ -52,7 +52,7 @@ final class AppContainer {
         let homeVM = HomeViewModel(firebaseService: firebase, healthKitService: hk)
         let settingsVM = SettingsViewModel(firebaseService: firebase, authService: auth)
         let summaryVM = WorkoutSummaryViewModel(firebaseService: firebase)
-        let historyVM = HistoryViewModel(firebaseService: firebase)
+        let historyVM = HistoryViewModel(firebaseService: firebase, offlineQueue: queue)
 
         // Wire onboarding completion → auth state transition
         onboardingVM.onComplete = { [weak authVM] in
@@ -65,6 +65,9 @@ final class AppContainer {
         self.settingsViewModel = settingsVM
         self.summaryViewModel = summaryVM
         self.historyViewModel = historyVM
+
+        // Warm up WCSession at launch so it's reachable by the time a workout starts.
+        watch.activate()
     }
 
     /// Creates a fresh WorkoutViewModel for a new workout session.

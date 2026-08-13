@@ -25,6 +25,7 @@ final class OnboardingViewModel {
     var fieldError: String?
     var isSaving = false
     var isRequestingHealthKit = false
+    var isHealthKitAuthorized = false
 
     /// Called when profile is saved successfully — wired in AppContainer to set appState = .main
     var onComplete: (() -> Void)?
@@ -69,11 +70,16 @@ final class OnboardingViewModel {
         isRequestingHealthKit = true
         Task {
             try? await healthKitService.requestAuthorization()
-            await MainActor.run { isRequestingHealthKit = false }
+            let rhr = await healthKitService.fetchRestingHeartRate()
+            await MainActor.run {
+                isRequestingHealthKit = false
+                isHealthKitAuthorized = healthKitService.isAuthorized
+                if let rhr, rhrText.isEmpty {
+                    rhrText = "\(rhr)"
+                }
+            }
         }
     }
-
-    var isHealthKitAuthorized: Bool { healthKitService.isAuthorized }
 
     // MARK: - Validation (Step 1)
 

@@ -57,9 +57,8 @@ final class WorkoutSessionManager {
                 self?.lastHRReceived = reading
             }
         }
-        watchBridge.activate()
 
-        // Notify Watch that workout started
+        // Notify Watch that workout started (WCSession already activated at app launch)
         watchBridge.sendCommand("workoutStarted")
 
         startTickLoop()
@@ -199,18 +198,6 @@ final class WorkoutSessionManager {
             timeInZones: timeInZones,
             hrStream: hrRecords
         )
-    }
-}
-
-// MARK: - WorkoutProgram helper
-
-private extension WorkoutProgram {
-    var workoutType: WorkoutType {
-        switch self {
-        case .continuous: return .continuous
-        case .hiit: return .hiit
-        case .fartlek: return .fartlek
-        }
     }
 }
 

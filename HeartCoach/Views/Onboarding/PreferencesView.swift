@@ -51,13 +51,6 @@ struct PreferencesView: View {
 }
 
 private extension WorkoutType {
-    var displayName: String {
-        switch self {
-        case .continuous: return "Continuous"
-        case .hiit: return "HIIT"
-        case .fartlek: return "Fartlek"
-        }
-    }
     var description: String {
         switch self {
         case .continuous: return "Steady progressive effort, 35 min"

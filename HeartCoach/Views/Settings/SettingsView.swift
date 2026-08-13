@@ -49,9 +49,9 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Workout").font(.subheadline).foregroundStyle(.secondary)
                             Picker("Workout", selection: $vm.preferredWorkout) {
-                                Text("Continuous").tag(WorkoutType.continuous)
-                                Text("HIIT").tag(WorkoutType.hiit)
-                                Text("Fartlek").tag(WorkoutType.fartlek)
+                                Text(WorkoutType.continuous.displayName).tag(WorkoutType.continuous)
+                                Text(WorkoutType.hiit.displayName).tag(WorkoutType.hiit)
+                                Text(WorkoutType.fartlek.displayName).tag(WorkoutType.fartlek)
                             }.pickerStyle(.segmented)
                         }
                     }

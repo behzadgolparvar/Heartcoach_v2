@@ -44,4 +44,13 @@ final class HomeViewModel {
     func recheckHealthKitStatus() {
         isHealthKitAuthorized = healthKitService.isAuthorized
     }
+
+    func requestHealthKitAccess() {
+        Task {
+            try? await healthKitService.requestAuthorization()
+            await MainActor.run {
+                isHealthKitAuthorized = healthKitService.isAuthorized
+            }
+        }
+    }
 }

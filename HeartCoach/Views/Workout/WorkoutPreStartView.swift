@@ -2,6 +2,7 @@ import SwiftUI
 import HeartRateCoachCore
 
 struct WorkoutPreStartView: View {
+    let onFinish: () -> Void
     @Environment(WorkoutViewModel.self) private var workoutVM
     @State private var navigateToWorkout = false
     @State private var selectedProgram: WorkoutProgram?
@@ -15,7 +16,6 @@ struct WorkoutPreStartView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 ProgramCard(
-                    title: "Continuous",
                     subtitle: "Steady progressive effort",
                     phases: "12 phases · 35 min",
                     program: .continuous,
@@ -23,7 +23,6 @@ struct WorkoutPreStartView: View {
                 )
 
                 ProgramCard(
-                    title: "HIIT",
                     subtitle: "High-intensity intervals",
                     phases: "32 phases · 35 min",
                     program: .hiit,
@@ -31,7 +30,6 @@ struct WorkoutPreStartView: View {
                 )
 
                 ProgramCard(
-                    title: "Fartlek",
                     subtitle: "Varied pace, your call",
                     phases: "17 phases · 35 min",
                     program: .fartlek,
@@ -54,13 +52,13 @@ struct WorkoutPreStartView: View {
         .navigationTitle("HeartCoach")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $navigateToWorkout) {
-            WorkoutView()
+            WorkoutView(onFinish: onFinish)
+                .environment(workoutVM)
         }
     }
 }
 
 private struct ProgramCard: View {
-    let title: String
     let subtitle: String
     let phases: String
     let program: WorkoutProgram
@@ -73,7 +71,7 @@ private struct ProgramCard: View {
             selectedProgram = program
         } label: {
             VStack(alignment: .leading, spacing: 6) {
-                Text(title)
+                Text(program.displayName)
                     .font(.headline)
                     .foregroundStyle(.white)
                 Text(subtitle)
@@ -94,6 +92,6 @@ private struct ProgramCard: View {
                     )
             )
         }
-        .accessibilityIdentifier("program-card-\(title.lowercased())")
+        .accessibilityIdentifier("program-card-\(program.displayName.lowercased())")
     }
 }

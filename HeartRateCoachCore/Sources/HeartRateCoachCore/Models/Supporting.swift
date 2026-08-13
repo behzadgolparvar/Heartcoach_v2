@@ -9,6 +9,15 @@ public enum WorkoutType: String, Codable, Sendable {
     case continuous
     case hiit
     case fartlek
+
+    /// Human-readable name for display (preserves "HIIT" casing).
+    public var displayName: String {
+        switch self {
+        case .continuous: return "Continuous"
+        case .hiit:       return "HIIT"
+        case .fartlek:    return "Fartlek"
+        }
+    }
 }
 
 public enum Sex: String, Codable, Sendable {

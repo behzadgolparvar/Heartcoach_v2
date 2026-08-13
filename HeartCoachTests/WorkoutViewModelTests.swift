@@ -32,9 +32,9 @@ final class WorkoutViewModelTests: XCTestCase {
         XCTAssertGreaterThan(mockVoice.configureAudioSessionCallCount, 0)
     }
 
-    func test_start_activatesWatchBridge() {
+    func test_start_notifiesWatchWorkoutStarted() {
         vm.start(program: .continuous)
-        XCTAssertEqual(mockWatch.activateCallCount, 1)
+        XCTAssertTrue(mockWatch.sentCommands.contains("workoutStarted"))
     }
 
     func test_start_setsSelectedProgram() {

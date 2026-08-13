@@ -1,5 +1,4 @@
 import Foundation
-import AuthenticationServices
 @testable import HeartCoach
 
 final class MockAuthService: AuthServiceProtocol {
@@ -8,7 +7,14 @@ final class MockAuthService: AuthServiceProtocol {
     var signOutError: Error? = nil
     var authStateSequence: [String?] = ["test-user-id"]
 
-    func signInWithApple(result: Result<ASAuthorization, Error>, rawNonce: String) async throws -> String {
+    func signIn(email: String, password: String) async throws -> String {
+        switch signInResult {
+        case .success(let uid): return uid
+        case .failure(let error): throw error
+        }
+    }
+
+    func signUp(email: String, password: String) async throws -> String {
         switch signInResult {
         case .success(let uid): return uid
         case .failure(let error): throw error
