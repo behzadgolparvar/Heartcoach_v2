@@ -58,6 +58,7 @@ targets:
         DEVELOPMENT_TEAM: "Z5F9A35728"
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: HeartCoach/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
   HeartCoachWatch:
     type: application
@@ -93,6 +94,7 @@ targets:
         DEVELOPMENT_TEAM: "Z5F9A35728"
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: HeartCoachWatch/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
   HeartCoachWatchTests:
     type: bundle.unit-test
