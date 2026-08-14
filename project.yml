@@ -75,6 +75,8 @@ targets:
         CFBundleVersion: "1"
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.golkoosh.heartcoach
+        WKBackgroundModes:
+          - workout-processing
         NSHealthShareUsageDescription: "HeartCoach reads your heart rate during workouts."
         NSHealthUpdateUsageDescription: "HeartCoach writes workout data to your health records."
     entitlements:

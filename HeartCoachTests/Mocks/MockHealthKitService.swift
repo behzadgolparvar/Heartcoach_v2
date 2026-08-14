@@ -14,4 +14,9 @@ final class MockHealthKitService: HealthKitServiceProtocol {
     func fetchRestingHeartRate() async -> Int? {
         restingHeartRateToReturn
     }
+
+    private(set) var startWatchWorkoutCallCount = 0
+    func startWatchWorkout() {
+        startWatchWorkoutCallCount += 1
+    }
 }

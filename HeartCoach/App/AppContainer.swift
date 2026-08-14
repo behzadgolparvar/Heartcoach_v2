@@ -76,7 +76,8 @@ final class AppContainer {
         WorkoutViewModel(
             zones: zones,
             voiceFeedback: voiceFeedbackService,
-            watchBridge: watchBridge
+            watchBridge: watchBridge,
+            healthKitService: healthKitService
         )
     }
 }

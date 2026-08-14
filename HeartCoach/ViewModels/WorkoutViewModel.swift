@@ -18,6 +18,7 @@ final class WorkoutViewModel {
 
     private let voiceFeedback: VoiceFeedbackServiceProtocol
     private let watchBridge: WatchBridgeProtocol
+    private let healthKitService: HealthKitServiceProtocol
     private let zones: HRZones
 
     private var sessionManager: WorkoutSessionManager?
@@ -26,10 +27,12 @@ final class WorkoutViewModel {
 
     init(zones: HRZones,
          voiceFeedback: VoiceFeedbackServiceProtocol,
-         watchBridge: WatchBridgeProtocol) {
+         watchBridge: WatchBridgeProtocol,
+         healthKitService: HealthKitServiceProtocol) {
         self.zones = zones
         self.voiceFeedback = voiceFeedback
         self.watchBridge = watchBridge
+        self.healthKitService = healthKitService
     }
 
     // MARK: - Actions
@@ -54,6 +57,8 @@ final class WorkoutViewModel {
         self.isWorkoutActive = true
         self.lastMessage = nil
         self.completedSession = nil
+        // Wake the Watch app into a workout so HR streams without opening it manually.
+        healthKitService.startWatchWorkout()
         manager.start()
     }
 

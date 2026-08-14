@@ -26,6 +26,10 @@
 	<string>HeartCoach writes workout data to your health records.</string>
 	<key>WKApplication</key>
 	<true/>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+	</array>
 	<key>WKCompanionAppBundleIdentifier</key>
 	<string>com.golkoosh.heartcoach</string>
 </dict>

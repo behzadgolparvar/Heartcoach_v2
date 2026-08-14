@@ -6,7 +6,9 @@ final class HealthKitService: HealthKitServiceProtocol {
     private let store = HKHealthStore()
     private let hrType = HKQuantityType(.heartRate)
     private let rhrType = HKQuantityType(.restingHeartRate)
-    private static let authKey = "healthkit_auth_requested"
+    // Bumped to _v2 so existing users re-prompt once and grant workout sharing,
+    // which iOS requires to launch a workout on the paired Watch.
+    private static let authKey = "healthkit_auth_requested_v2"
 
     // Apple doesn't expose read-only auth status — persist a flag after the dialog is shown.
     var isAuthorized: Bool {
@@ -19,10 +21,27 @@ final class HealthKitService: HealthKitServiceProtocol {
             throw AppError.healthKitUnauthorized
         }
         do {
-            try await store.requestAuthorization(toShare: [], read: [hrType, rhrType])
+            try await store.requestAuthorization(
+                toShare: [HKObjectType.workoutType()],
+                read: [hrType, rhrType]
+            )
             UserDefaults.standard.set(true, forKey: Self.authKey)
         } catch {
             throw AppError.healthKitUnauthorized
+        }
+    }
+
+    func startWatchWorkout() {
+        guard HKHealthStore.isHealthDataAvailable() else { return }
+        let config = HKWorkoutConfiguration()
+        config.activityType = .other
+        config.locationType = .unknown
+        store.startWatchApp(with: config) { _, error in
+            #if DEBUG
+            if let error {
+                print("[Watch] startWatchApp failed: \(error.localizedDescription)")
+            }
+            #endif
         }
     }
 

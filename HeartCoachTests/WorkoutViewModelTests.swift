@@ -9,6 +9,7 @@ final class WorkoutViewModelTests: XCTestCase {
     private var mockVoice: MockVoiceFeedbackService!
     private var mockWatch: MockWatchBridge!
     private var mockFirebase: MockFirebaseService!
+    private var mockHealthKit: MockHealthKitService!
     private var vm: WorkoutViewModel!
 
     override func setUp() async throws {
@@ -17,7 +18,9 @@ final class WorkoutViewModelTests: XCTestCase {
         mockVoice = MockVoiceFeedbackService()
         mockWatch = MockWatchBridge()
         mockFirebase = MockFirebaseService()
-        vm = WorkoutViewModel(zones: zones, voiceFeedback: mockVoice, watchBridge: mockWatch)
+        mockHealthKit = MockHealthKitService()
+        vm = WorkoutViewModel(zones: zones, voiceFeedback: mockVoice, watchBridge: mockWatch,
+                              healthKitService: mockHealthKit)
     }
 
     // MARK: - Start
