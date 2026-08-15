@@ -68,4 +68,11 @@ public extension CoachingMessage {
         text: "Great work — keep it up!",
         hapticPattern: .doubleTap
     )
+
+    /// Spoken once at the end of the start countdown, as the workout begins.
+    static let letsGo = CoachingMessage(
+        layer: 3,
+        text: "Let's go!",
+        hapticPattern: nil
+    )
 }

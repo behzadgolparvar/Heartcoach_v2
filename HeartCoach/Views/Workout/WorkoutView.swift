@@ -11,37 +11,14 @@ struct WorkoutView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Phase header
-                phaseHeader
-
-                Spacer()
-
-                // Main content: zone ring or paused banner
-                if workoutVM.isPaused {
-                    pausedContent
-                } else {
-                    activeContent
-                }
-
-                Spacer()
-
-                // Coaching message
-                if let msg = workoutVM.coachingState?.coachingMessage {
-                    Text(msg)
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                        .transition(.opacity)
-                        .animation(.easeInOut, value: msg)
-                }
-
-                // Control buttons
-                controlButtons
-                    .padding(.bottom, 40)
+            switch workoutVM.startupState {
+            case .warmingUp:
+                startupView(big: nil, caption: "Getting your heart rate…", showSpinner: true)
+            case .countdown(let n):
+                startupView(big: "\(n)", caption: "Get ready", showSpinner: false)
+            case .running:
+                runningContent
             }
-            .padding(.top, 16)
 
             // Emergency stop overlay
             if showEmergencyStop {
@@ -79,6 +56,58 @@ struct WorkoutView: View {
     }
 
     // MARK: - Sub-Views
+
+    private var runningContent: some View {
+        VStack(spacing: 0) {
+            phaseHeader
+
+            Spacer()
+
+            if workoutVM.isPaused {
+                pausedContent
+            } else {
+                activeContent
+            }
+
+            Spacer()
+
+            if let msg = workoutVM.coachingState?.coachingMessage {
+                Text(msg)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .transition(.opacity)
+                    .animation(.easeInOut, value: msg)
+            }
+
+            controlButtons
+                .padding(.bottom, 40)
+        }
+        .padding(.top, 16)
+    }
+
+    private func startupView(big: String?, caption: String, showSpinner: Bool) -> some View {
+        VStack(spacing: 24) {
+            if let big {
+                Text(big)
+                    .font(.system(size: 120, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .contentTransition(.numericText())
+                    .transition(.scale.combined(with: .opacity))
+                    .id(big)
+            } else if showSpinner {
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(.white)
+            }
+            Text(caption)
+                .font(.headline)
+                .foregroundStyle(.white.opacity(0.7))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .animation(.snappy, value: big)
+    }
 
     private var phaseHeader: some View {
         VStack(spacing: 4) {

@@ -45,6 +45,16 @@ final class WorkoutViewModelTests: XCTestCase {
         XCTAssertEqual(vm.selectedProgram, .hiit)
     }
 
+    func test_start_entersWarmingUpState() {
+        vm.start(program: .continuous)
+        XCTAssertEqual(vm.startupState, .warmingUp)
+    }
+
+    func test_start_launchesWatchWorkout() {
+        vm.start(program: .continuous)
+        XCTAssertEqual(mockHealthKit.startWatchWorkoutCallCount, 1)
+    }
+
     // MARK: - Pause / Resume
 
     func test_pause_setsPausedTrue() {

@@ -45,22 +45,28 @@ final class WorkoutSessionManager {
 
     // MARK: - Lifecycle
 
-    func start() {
-        sessionStartDate = Date()
-        hrRecords = []
-        engineState = CoachingEngineState()
+    /// True once at least one HR reading has arrived — used by the start countdown.
+    var hasReceivedHR: Bool { lastHRReceived != nil }
 
+    /// Step 1 of starting: launch the Watch workout and begin receiving HR, without
+    /// starting coaching or the workout timer yet (that happens in `beginCoaching()`
+    /// after the countdown, so HR is already flowing on the first coaching tick).
+    func beginWatchSession() {
         voiceFeedback.configureAudioSession()
-
         watchBridge.onHRReceived = { [weak self] reading in
             Task { @MainActor in
                 self?.lastHRReceived = reading
             }
         }
-
         // Notify Watch that workout started (WCSession already activated at app launch)
         watchBridge.sendCommand("workoutStarted")
+    }
 
+    /// Step 2 of starting: begin the coaching tick loop and the workout timer.
+    func beginCoaching() {
+        sessionStartDate = Date()
+        hrRecords = []
+        engineState = CoachingEngineState()
         startTickLoop()
     }
 
