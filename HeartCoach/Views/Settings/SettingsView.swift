@@ -105,10 +105,12 @@ struct SettingsView: View {
                     .accessibilityIdentifier("settings-sign-out")
                 }
                 .padding(24)
+                .hideKeyboardOnTap()
             }
             .background(Color.black)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .dismissableKeyboard()
         }
         .onAppear {
             if let profile = homeViewModel.profile {

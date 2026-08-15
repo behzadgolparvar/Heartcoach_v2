@@ -46,9 +46,11 @@ struct PhysiologicalDataView: View {
                     .accessibilityIdentifier("onboarding-step1-next")
             }
             .padding(24)
+            .hideKeyboardOnTap()
         }
         .background(Color.black)
         .foregroundStyle(.white)
+        .dismissableKeyboard()
     }
 }
 

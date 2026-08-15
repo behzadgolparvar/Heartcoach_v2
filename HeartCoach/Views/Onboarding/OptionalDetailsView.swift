@@ -45,8 +45,10 @@ struct OptionalDetailsView: View {
                 }
             }
             .padding(24)
+            .hideKeyboardOnTap()
         }
         .background(Color.black)
         .foregroundStyle(.white)
+        .dismissableKeyboard()
     }
 }
