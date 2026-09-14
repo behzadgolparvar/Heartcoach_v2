@@ -17,7 +17,7 @@ enum AppError: Error, LocalizedError {
         case .networkUnavailable:
             return "No internet connection. Please try again."
         case .permissionDenied:
-            return "Access denied. Please sign in again."
+            return "Couldn't reach your data. Please check your connection and try again."
         case .authenticationFailed:
             return "Sign in failed. Please try again."
         case .profileNotFound:

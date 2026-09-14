@@ -3,7 +3,7 @@ import Foundation
 @Observable
 final class AuthViewModel {
 
-    enum AppState { case loading, signedOut, onboarding, main }
+    enum AppState { case loading, signedOut, onboarding, main, loadError }
 
     var appState: AppState = .loading
     var errorMessage: String?
@@ -60,10 +60,22 @@ final class AuthViewModel {
             return
         }
         do {
+            // A successful load with no profile means a genuinely new user → onboarding.
             let profile = try await firebaseService.loadProfile(userID: userID)
             appState = profile != nil ? .main : .onboarding
         } catch {
-            appState = .onboarding
+            // A failed load (network, permissions) must NOT drop the user into
+            // onboarding — that risks overwriting existing data. Surface a retry instead.
+            errorMessage = (error as? AppError)?.errorDescription ?? AppError.unknown.errorDescription
+            appState = .loadError
         }
+    }
+
+    /// Re-attempts loading the profile after a load failure (used by the error screen).
+    @MainActor
+    func retryLoad() async {
+        errorMessage = nil
+        appState = .loading
+        await handleAuthState(userID: authService.currentUserID)
     }
 }

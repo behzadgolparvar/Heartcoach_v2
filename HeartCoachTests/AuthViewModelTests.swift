@@ -30,6 +30,39 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertEqual(vm.appState, .onboarding)
     }
 
+    func testSignIn_loadFails_goesToLoadErrorNotOnboarding() async {
+        let auth = MockAuthService()
+        let firebase = MockFirebaseService()
+        firebase.shouldThrow = .permissionDenied   // profile load fails
+        let vm = AuthViewModel(authService: auth, firebaseService: firebase)
+
+        vm.email = "test@example.com"
+        vm.password = "password123"
+        await vm.submitAuth()
+
+        XCTAssertEqual(vm.appState, .loadError)
+        XCTAssertNotNil(vm.errorMessage)
+    }
+
+    func testRetryLoad_afterFailure_recoversToMain() async {
+        let auth = MockAuthService()
+        let firebase = MockFirebaseService()
+        firebase.shouldThrow = .permissionDenied
+        let vm = AuthViewModel(authService: auth, firebaseService: firebase)
+
+        vm.email = "test@example.com"
+        vm.password = "password123"
+        await vm.submitAuth()
+        XCTAssertEqual(vm.appState, .loadError)
+
+        // The transient failure clears; retry should load the profile and go to main.
+        firebase.shouldThrow = nil
+        firebase.profileToReturn = UserProfile.fixture
+        await vm.retryLoad()
+
+        XCTAssertEqual(vm.appState, .main)
+    }
+
     func testSignIn_failure_setsErrorMessage() async {
         let auth = MockAuthService()
         auth.signInResult = .failure(AppError.authenticationFailed)
