@@ -443,3 +443,50 @@
 **Context**: INCEPTION - Requirements Analysis; waiting for user answers before generating requirements.md
 
 ---
+
+## NEW DESIGN CYCLE (v2) — Workflow Start
+**Timestamp**: 2026-09-15T00:00:00Z
+**User Input**: "I would like to implement a new version of the app which may be significantly different. I received some recommendations from my collaborator in two files (hr-coaching-app-full-spec.md, onboarding-form-spec.md). use aidlc to make phased implementation for the new design"
+**AI Response**: Started a new AI-DLC cycle for v2 on branch new_design_Sep_2026. Loaded common rules and extension opt-ins. Ran Workspace Detection: brownfield (existing native Swift/SwiftUI app from v1). Proceeding to open Requirements Analysis decision gate via v2-requirements-questions.md.
+**Context**: INCEPTION - Workspace Detection → Requirements Analysis (v2 cycle)
+
+---
+
+## v2 Requirements Analysis — Answers Received
+**Timestamp**: 2026-09-15T00:30:00Z
+**User Input**: "I answered all question" — Q1=A (native Swift/SwiftUI), Q2=A (skip Reverse Engineering), Q3=A (full auto-assignment engine — headline feature), Q4=A (push notifications), Q5=A (collect all health fields), Q6=A (include CSV/Excel export), Q7=A (incremental TestFlight phases), Q8=A (Security Baseline full/blocking), Q9=B (PBT partial — pure functions + serialization). Q3 was blank in file; confirmed A from user's earlier statement.
+**AI Response**: Validated answers — no contradictions. Extension config: Security Baseline = Yes/Full (blocking); Property-Based Testing = Partial. Loaded both extension rule files. Proceeding to generate v2 requirements.md.
+**Context**: INCEPTION - Requirements Analysis (v2)
+
+---
+
+## v2 Workflow Planning + Units Generation — Phased Plan Created
+**Timestamp**: 2026-09-15T01:00:00Z
+**User Input**: "continue" (approved requirements; skip User Stories)
+**AI Response**: Brownfield architectural transformation, risk High, incremental delivery. Produced v2-phased-implementation-plan.md decomposing v2 into 5 units/phases (Onboarding+Data → Protocols+Coaching → Assignment+Progression → Scoring+Safety → Reminders+Export), with dependencies, per-phase Construction stages, PBT/security notes, and TestFlight milestones. Awaiting approval.
+**Context**: INCEPTION - Workflow Planning + Units Generation (v2)
+
+---
+
+## Phase 1 Functional Design — Answers + Artifacts
+**Timestamp**: 2026-09-15T01:30:00Z
+**User Input**: "I answered all questions" — Q1=B (full re-onboarding), Q2=A (mentality lean majority rule), Q3=A (required set as recommended; height/weight/BMI optional), Q4=A (locale-default units), Q5=A (HealthKit RHR prefill).
+**AI Response**: No contradictions. Generated Phase 1 functional design: domain-entities.md, business-rules.md (BR-1..BR-10 incl. consent gating, units, BMI, mentality-lean, migration), business-logic-model.md (onboarding state machine + derived-value pipeline), frontend-components.md (SwiftUI hierarchy). Security: consent-gated collection + no-PII-logs designed in; no blocking findings.
+**Context**: CONSTRUCTION - Phase 1 Functional Design
+
+## Phase 1 NFR Requirements + NFR Design — Approved
+**Timestamp**: 2026-09-15T02:00:00Z
+**User Input**: "Continue" (x2 — approved NFR Requirements, then NFR Design)
+**AI Response**: NFR Requirements captured (stack reused, security Baseline blocking rules satisfied, N/A for web rules). NFR Design mapped patterns (consent gate, offline-tolerant save, pure testable core, accessibility). Infrastructure Design SKIPPED (no new infra). Next: Code Generation (Part 1 plan).
+**Context**: CONSTRUCTION - Phase 1 NFR stages
+
+## Phase 1 Code Generation — Part 1 Plan Created (awaiting approval)
+**Timestamp**: 2026-09-15T02:15:00Z
+**User Input**: "Continue" (approved NFR Design → start Code Generation)
+**AI Response**: Created phase1-onboarding-code-generation-plan.md — 10 steps, ~25-30 files (brownfield, extend existing). Covers core models/logic + PBT, new Firestore schema, v2 OnboardingViewModel, shared UI + section screens, routing/migration (full re-onboarding), consumer updates to keep v1 running, build/test. Awaiting explicit approval before Part 2 generation.
+**Context**: CONSTRUCTION - Phase 1 Code Generation (Part 1 Planning)
+
+## Phase 1 Code Generation — Part 2 progress (Steps 1-3)
+**Timestamp**: 2026-09-15T03:00:00Z
+**AI Response**: Generated core domain models (OnboardingEnums, Mentality+lean, ProfileSections, UserProfileV2) + pure logic (UnitConverter, BMI). Core package builds clean. Phase 1 logic tests (11) added to app test target and passing; full app suite 44/44 green. NOTE: core package SwiftCheck test target does not compile under Xcode 26 (pre-existing) — flagged for Build&Test to migrate/upgrade. Steps 1-3 [x]; Steps 4-10 (persistence, VM, onboarding UI, routing/migration, consumer refactor, build) remaining.
+**Context**: CONSTRUCTION - Phase 1 Code Generation (Part 2)
