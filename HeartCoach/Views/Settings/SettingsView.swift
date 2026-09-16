@@ -12,9 +12,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
 
-                    // Profile section
                     SectionHeader("Profile")
-
                     VStack(alignment: .leading, spacing: 16) {
                         LabelledField("Age", placeholder: "e.g. 32", text: $vm.ageText, keyboardType: .numberPad,
                                       identifier: "settings-age-field") { vm.updatePreview() }
@@ -22,41 +20,29 @@ struct SettingsView: View {
                                       identifier: "settings-rhr-field") { vm.updatePreview() }
 
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Sex").font(.subheadline).foregroundStyle(.secondary)
-                            Picker("Sex", selection: $vm.sex) {
-                                Text("Not specified").tag(Optional<Sex>.none)
-                                Text("Male").tag(Optional<Sex>.some(.male))
-                                Text("Female").tag(Optional<Sex>.some(.female))
-                                Text("Other").tag(Optional<Sex>.some(.other))
+                            Text("Gender").font(.subheadline).foregroundStyle(.secondary)
+                            Picker("Gender", selection: $vm.gender) {
+                                Text("Not set").tag(Optional<Gender>.none)
+                                ForEach(Gender.allCases, id: \.self) { Text($0.displayName).tag(Optional($0)) }
                             }.pickerStyle(.menu)
                         }
 
-                        LabelledField("Weight (kg)", placeholder: "e.g. 75", text: $vm.weightText, keyboardType: .decimalPad,
-                                      identifier: "settings-weight-field") {}
-                    }
-
-                    // Training section
-                    SectionHeader("Training")
-
-                    VStack(alignment: .leading, spacing: 16) {
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Goal").font(.subheadline).foregroundStyle(.secondary)
-                            Picker("Goal", selection: $vm.goal) {
-                                Text("Fat Burn").tag(Goal.fatBurn)
-                                Text("Endurance").tag(Goal.endurance)
-                            }.pickerStyle(.segmented)
-                        }
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Workout").font(.subheadline).foregroundStyle(.secondary)
-                            Picker("Workout", selection: $vm.preferredWorkout) {
-                                Text(WorkoutType.continuous.displayName).tag(WorkoutType.continuous)
-                                Text(WorkoutType.hiit.displayName).tag(WorkoutType.hiit)
-                                Text(WorkoutType.fartlek.displayName).tag(WorkoutType.fartlek)
+                            Text("Fitness experience").font(.subheadline).foregroundStyle(.secondary)
+                            Picker("Experience", selection: $vm.fitnessExperience) {
+                                Text("Not set").tag(Optional<FitnessExperience>.none)
+                                ForEach(FitnessExperience.allCases, id: \.self) { Text($0.displayName).tag(Optional($0)) }
                             }.pickerStyle(.segmented)
                         }
                     }
 
-                    // Zone preview
+                    SectionHeader("Goals")
+                    VStack(spacing: 8) {
+                        ForEach(TrainingGoal.allCases, id: \.self) { g in
+                            MultiSelectRow(title: g.displayName, value: g, selection: $vm.goals)
+                        }
+                    }
+
                     if let zones = vm.previewedZones {
                         SectionHeader("Zone Preview")
                         VStack(spacing: 0) {
@@ -74,21 +60,14 @@ struct SettingsView: View {
                             ? "RHR is below the typical range (40 bpm). Please confirm."
                             : "RHR is above the typical range (100 bpm). Please confirm.")
                     }
-
-                    if let error = vm.fieldError {
-                        ErrorBanner(message: error)
-                    }
-
+                    if let error = vm.fieldError { ErrorBanner(message: error) }
                     if vm.saveSuccess {
                         Label("Saved successfully.", systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green).font(.subheadline)
                     }
 
-                    // Save
                     Button(vm.isSaving ? "Saving…" : "Save") {
-                        if let userID = authViewModel.currentUserID {
-                            vm.save(userID: userID)
-                        }
+                        if let userID = authViewModel.currentUserID { vm.save(userID: userID) }
                     }
                     .buttonStyle(PrimaryButtonStyle())
                     .disabled(vm.isSaving)
@@ -96,7 +75,6 @@ struct SettingsView: View {
 
                     Divider().background(Color.white.opacity(0.1))
 
-                    // Sign Out
                     Button("Sign Out", role: .destructive) {
                         vm.signOut()
                         authViewModel.appState = .signedOut
@@ -113,9 +91,7 @@ struct SettingsView: View {
             .dismissableKeyboard()
         }
         .onAppear {
-            if let profile = homeViewModel.profile {
-                vm.populate(from: profile)
-            }
+            if let profile = homeViewModel.profile { vm.populate(from: profile) }
         }
         .preferredColorScheme(.dark)
     }
@@ -124,9 +100,7 @@ struct SettingsView: View {
 private struct SectionHeader: View {
     let title: String
     init(_ title: String) { self.title = title }
-    var body: some View {
-        Text(title).font(.headline).foregroundStyle(.white)
-    }
+    var body: some View { Text(title).font(.headline).foregroundStyle(.white) }
 }
 
 private struct LabelledField: View {
@@ -139,12 +113,8 @@ private struct LabelledField: View {
 
     init(_ label: String, placeholder: String, text: Binding<String>,
          keyboardType: UIKeyboardType = .default, identifier: String, onChange: @escaping () -> Void) {
-        self.label = label
-        self.placeholder = placeholder
-        self._text = text
-        self.keyboardType = keyboardType
-        self.identifier = identifier
-        self.onChange = onChange
+        self.label = label; self.placeholder = placeholder; self._text = text
+        self.keyboardType = keyboardType; self.identifier = identifier; self.onChange = onChange
     }
 
     var body: some View {

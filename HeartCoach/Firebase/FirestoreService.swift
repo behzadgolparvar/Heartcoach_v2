@@ -52,6 +52,34 @@ final class FirestoreService: FirebaseServiceProtocol {
         }
     }
 
+    // MARK: - Profile (v2 onboarding schema)
+
+    /// Persists the full v2 profile under `users/{uid}.v2profile` (Codable JSON map).
+    /// The Codable round-trip is unit-tested; storage is robust to schema growth.
+    func saveProfileV2(_ profile: UserProfileV2, userID: String) async throws {
+        do {
+            let json = try JSONEncoder().encode(profile)
+            let dict = (try? JSONSerialization.jsonObject(with: json)) as? [String: Any] ?? [:]
+            try await userDoc(userID).setData(
+                ["v2profile": dict, "updatedAt": FieldValue.serverTimestamp()],
+                merge: true
+            )
+        } catch {
+            throw mapError(error)
+        }
+    }
+
+    func loadProfileV2(userID: String) async throws -> UserProfileV2? {
+        do {
+            let snapshot = try await userDoc(userID).getDocument()
+            guard snapshot.exists, let raw = snapshot.data()?["v2profile"] else { return nil }
+            let data = try JSONSerialization.data(withJSONObject: raw)
+            return try JSONDecoder().decode(UserProfileV2.self, from: data)
+        } catch {
+            throw mapError(error)
+        }
+    }
+
     func loadZones(userID: String) async throws -> HRZones? {
         do {
             let snapshot = try await userDoc(userID).getDocument()

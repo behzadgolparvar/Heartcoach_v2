@@ -7,7 +7,7 @@ final class AuthViewModelTests: XCTestCase {
     func testSignIn_withExistingProfile_goesToMain() async {
         let auth = MockAuthService()
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = UserProfile.fixture
+        firebase.profileV2ToReturn = UserProfileV2.fixture
         let vm = AuthViewModel(authService: auth, firebaseService: firebase)
 
         vm.email = "test@example.com"
@@ -57,7 +57,7 @@ final class AuthViewModelTests: XCTestCase {
 
         // The transient failure clears; retry should load the profile and go to main.
         firebase.shouldThrow = nil
-        firebase.profileToReturn = UserProfile.fixture
+        firebase.profileV2ToReturn = UserProfileV2.fixture
         await vm.retryLoad()
 
         XCTAssertEqual(vm.appState, .main)

@@ -31,35 +31,35 @@ Add/extend pure models (source of truth, testable):
 - [ ] `Tests/…/UnitConverterTests.swift`, `BMITests.swift`, `MentalityLeanTests.swift`
 - [ ] **PBT (partial):** conversion round-trips (lbs→kg→lbs), BMI monotonicity, mentality-lean exhaustive over all 8 combos, `UserProfile` Codable round-trip
 
-## Step 4 — Persistence (app `FirestoreService`)  [ ]
+## Step 4 — Persistence (app `FirestoreService`)  [x]
 - [ ] Extend `FirebaseServiceProtocol`: `saveProfile(_ profile:)` / `loadProfile()` to the **new §5.1 document shape** (profile/physiology/hr_zones/settings/health/schedule/device/consent/onboarding)
 - [ ] Encode/decode all new sections; tolerant of missing optional sections
 - [ ] Keep offline-tolerant write pattern (reused)
 - [ ] Update `MockFirebaseService` accordingly
 
-## Step 5 — Onboarding view model (app)  [ ]
+## Step 5 — Onboarding view model (app)  [x]
 - [ ] Replace `ViewModels/OnboardingViewModel.swift` with v2: in-memory draft for all sections, per-section `isValid`, computed `bmi/zones/mentalityLean`, HealthKit RHR prefill, `save()` (derived-value pipeline → Firestore → `v2Completed=true`)
 - [ ] Consent gating (no save path until both consents) (BR-1)
 
-## Step 6 — Shared UI components (app `Views/Components`)  [ ]
+## Step 6 — Shared UI components (app `Views/Components`)  [x]
 - [ ] `MeasurementField.swift` (value + unit toggle, both stored)
 - [ ] `ProgressDots.swift`, `SelectCard.swift`, `MultiSelectCard.swift`
 - [ ] Reuse `hideKeyboardOnTap()`, `dismissableKeyboard()`, `PrimaryButtonStyle`, zone rows
 
-## Step 7 — Onboarding screens (app `Views/Onboarding`)  [ ]
+## Step 7 — Onboarding screens (app `Views/Onboarding`)  [x]
 - [ ] `OnboardingContainerView.swift` (paging + progress + gating)
 - [ ] `ConsentView`, `DemographicsHealthView` (incl. collapsible optional health section), `SchedulingView`, `MentalityView`, `EquipmentView`, `GoalsView`, `DeviceView`, `ZonesPreviewView` (reuse v1 zone rows)
 - [ ] Remove/replace superseded v1 onboarding views (`PhysiologicalDataView`, `OptionalDetailsView`, `PreferencesView`, `ZonePreviewView`) — keep any reused bits
 
-## Step 8 — Routing & migration (BR-9)  [ ]
+## Step 8 — Routing & migration (BR-9)  [x]
 - [ ] `AuthViewModel`: route on `onboarding.v2_completed` (signed-in & completed → main; else → v2 onboarding); preserve `.loadError` retry
 - [ ] Confirm v1 workout **sessions/History** untouched (only profile reshaped)
 
-## Step 9 — Consumer updates (keep app running)  [ ]
+## Step 9 — Consumer updates (keep app running)  [x]
 - [ ] Update `HomeViewModel`, `SettingsViewModel`, `WorkoutSummary`, `AppContainer` wiring, and anything referencing the old `UserProfile`/`Goal` shape so the app compiles and the v1 workout flow still works with the new profile
 - [ ] `SettingsView`: edit the v2 profile fields (extend existing)
 
-## Step 10 — Build, test, verify  [ ]
+## Step 10 — Build, test, verify  [x]
 - [ ] `xcodegen generate` (new files), build iOS + core, run full test suite (existing + new)
 - [ ] Fix regressions; confirm v1 workout still runs on device path
 - [ ] Code summary in `construction/phase1-onboarding/code/` (markdown)

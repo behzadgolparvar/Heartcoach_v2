@@ -60,9 +60,10 @@ final class AuthViewModel {
             return
         }
         do {
-            // A successful load with no profile means a genuinely new user → onboarding.
-            let profile = try await firebaseService.loadProfile(userID: userID)
-            appState = profile != nil ? .main : .onboarding
+            // A successful load with a completed v2 profile → main; otherwise onboarding
+            // (v2 does full re-onboarding — BR-9).
+            let profile = try await firebaseService.loadProfileV2(userID: userID)
+            appState = (profile?.v2Completed == true) ? .main : .onboarding
         } catch {
             // A failed load (network, permissions) must NOT drop the user into
             // onboarding — that risks overwriting existing data. Surface a retry instead.

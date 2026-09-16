@@ -127,3 +127,4 @@
 - [x] NFR Requirements — COMPLETED (2026-09-15)
 - [x] NFR Design — COMPLETED (2026-09-15)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/targets reused)
+- [x] Code Generation — COMPLETED (2026-09-15) — Phase 1 built; app builds, 46/46 tests green

@@ -6,7 +6,7 @@ final class HomeViewModelTests: XCTestCase {
 
     func testLoadData_noSessions_lastSessionIsNil() async {
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = UserProfile.fixture
+        firebase.profileV2ToReturn = UserProfileV2.fixture
         firebase.sessionsToReturn = []
         let hk = MockHealthKitService()
         let vm = HomeViewModel(firebaseService: firebase, healthKitService: hk)
@@ -20,7 +20,7 @@ final class HomeViewModelTests: XCTestCase {
 
     func testLoadData_withSessions_lastSessionPopulated() async {
         let firebase = MockFirebaseService()
-        firebase.profileToReturn = UserProfile.fixture
+        firebase.profileV2ToReturn = UserProfileV2.fixture
         firebase.sessionsToReturn = [Session.fixture]
         let hk = MockHealthKitService()
         let vm = HomeViewModel(firebaseService: firebase, healthKitService: hk)

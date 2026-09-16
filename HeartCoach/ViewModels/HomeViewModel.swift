@@ -4,7 +4,7 @@ import HeartRateCoachCore
 @Observable
 final class HomeViewModel {
 
-    var profile: UserProfile?
+    var profile: UserProfileV2?
     var zones: HRZones?
     var lastSession: Session?
     var isLoading = false
@@ -22,15 +22,12 @@ final class HomeViewModel {
         isLoading = true
         recheckHealthKitStatus()
         Task {
-            async let profileTask = firebaseService.loadProfile(userID: userID)
-            async let zonesTask = firebaseService.loadZones(userID: userID)
+            async let profileTask = firebaseService.loadProfileV2(userID: userID)
             async let sessionsTask = firebaseService.loadSessions(userID: userID, limit: 1)
 
-            let (p, z, sessions) = (
-                try? await profileTask,
-                try? await zonesTask,
-                (try? await sessionsTask) ?? []
-            )
+            let p = try? await profileTask
+            let sessions = (try? await sessionsTask) ?? []
+            let z = p.flatMap { try? $0.computeZones() }
 
             await MainActor.run {
                 self.profile = p
