@@ -70,3 +70,40 @@ Sensor dropout (20 s → prompt, resume-in-place, data gap flagged, safety-unava
 
 ## 6. Out of Scope (this cycle)
 Twilio calls/SMS; Android; clinical/diagnosed-condition enrollment; equipment-recommendation logic (fields captured only); combined half/half workout type; auto zone-adjust from medications.
+
+---
+
+# v5 REVISION (supersedes conflicting items above)
+
+**Source:** `hr-coaching-app-full-spec.md` (v5). Decisions from `v2-requirements-questions.md` still hold (native Swift, push reminders, collect-all health, export, incremental, security full, PBT partial). Q3 (auto-assignment is the headline) now means the **session-gated ratio progression** engine.
+
+## Program shape (NEW)
+A guided **4 training-stage program** for sedentary/overweight/first-time adults:
+**Foundation → Level Up → Shape → Maintain** (Maintain undesigned = out of scope). Each stage has its **own 60-session counter**, **3 sub-phases of 20** (session-gated ratio progression), and **own unlock question set**. Classification carries forward unchanged across stages.
+
+## Revised / new functional requirements
+- **FR-1 Onboarding (revised):** experience is now **two questions** — Q1 training-history (authoritative) + Q2 self-select — resolved via a matrix; **Ozempic/GLP-1 = Yes → auto-Beginner override** (editable, with informational popup). Health/joint history becomes **active** (drives Level Up exercise exclusion). Keep the rest (consent, demographics, units/BMI, RHR, mentality, goals, scheduling, device).
+- **FR-3 Progression (revised = headline):** per-stage **60 sessions / 3 sub-phases of 20**, **session-count gated** (not month-based). Ratio tables per Beginner/Intermediate/Advanced × mentality (× goal for Beginner). Determines the HIIT:Continuous mix and today's session.
+- **FR-3b Relapse / re-entry (NEW):** gap → push-back sessions (2w→3, 3w→5, 1mo→8, >1mo→reset to sub-phase start); non-negotiable minimum prevents clock advancement without counting.
+- **FR-4 Protocols (revised, per stage):**
+  - **Foundation:** Continuous (7×5-min blocks) + HIIT (15×1/1) — pure HR, no exercises. +30s buffer (Continuous) + mandatory cooldown.
+  - **Level Up:** same + **bodyweight leg exercise phases** woven into blocks/rounds (synced rep counts; leg bank §G); own timelines.
+  - **Shape:** + daily **Option A (plyometric) / Option B (weights)**, **muscle-group selection + priority** (4-2 / 6-5 phase alternation), weight-training banks, shortened-run timelines, **Shape-HIIT special 2-checks-per-50s** feedback timing.
+- **FR-5 Coaching (≈ prior §D):** unchanged in spirit — priority hierarchy, 15s checks, minor/major×low/high phrase pools (no-3x-repeat), escalation (HIIT 30s/Cont 60s), pre-session briefing (first 4 per type **per stage**), reflection prompt (optional).
+- **FR-6 Scoring (unchanged):** % time in target → tier → spoken + visual.
+- **FR-6b Cooldown stretch (NEW):** mandatory 2-min standing stretch sequence (§F) ending every session (Continuous adds 30s buffer first).
+- **FR-7 Reminders (unchanged):** local push.
+- **FR-8 Data (revised):** track **training stage**, per-stage session counter, Option A/B daily selection, muscle-group priority; plus the v2 profile + sessions + hr_stream (phrase_type/time) + CSV/XLSX export.
+- **FR-9 Safety/edge (≈ §J):** dropout 20s, pause 15-min prompt, cancel ≥20/<20, elevated-HR walk_fallback, voice-off text.
+- **FR-10 Milestones (NEW):** biweekly morning **RHR + weight**; weight-entry gating (Day 2 missed → blocked until logged).
+- **FR-11 Client PDF (NEW):** per-stage client-facing session-plan PDF (indexed by session #).
+- **FR-12 Non-negotiable minimum (NEW):** 15-min walk (8 fast/7 slow) fallback; doesn't count toward progression.
+
+## Exercise banks (NEW, §G)
+Legs (plyometric, 8+) + Chest/Back/Shoulders/Arms/Abs (standing free-weight, 6 each). All standing, no floor transitions.
+
+## Out of scope (this cycle)
+Maintain (stage 4), Twilio calls, Android, clinical enrollment, muscle-preservation claims (not evidence-supported for aerobic-only).
+
+## Phase 1 (already built) — delta needed
+Add: dual experience (Q1/Q2 + resolved), Ozempic→Beginner override, training-stage + per-stage session counter, Option A/B + muscle-priority placeholders in the data model; make joint/health history feed future exercise exclusion.

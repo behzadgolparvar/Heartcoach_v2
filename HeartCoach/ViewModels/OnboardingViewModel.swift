@@ -26,11 +26,20 @@ final class OnboardingViewModel {
     var rhrText = ""
     var maxHRText = ""
     var occupation: OccupationActivity?
-    var fitnessExperience: FitnessExperience?
+    // v5 dual experience (spec §A): Q1 authoritative, Q2 independent self-select.
+    var q1TrainingHistory: TrainingHistory?
+    var q2SelfSelect: FitnessExperience?
     // optional health history
     var chronicConditions: Set<ChronicCondition> = []
     var hrMedications: Set<HRMedication> = []
-    var onAntiObesityTherapy = false
+    var onAntiObesityTherapy = false {
+        didSet {
+            // No → Yes re-triggers the informational override popup (BR-1b-4).
+            if onAntiObesityTherapy && !oldValue { showOzempicInfo = true }
+        }
+    }
+    /// Drives the one-time Ozempic/GLP-1 informational popup.
+    var showOzempicInfo = false
     var smokingStatus: SmokingStatus?
     var jointIssues: Set<JointIssue> = []
 
@@ -107,7 +116,8 @@ final class OnboardingViewModel {
         case .consent:      return healthDataConsent && remindersConsent
         case .demographics:
             guard let age = Int(ageText), (15...100).contains(age),
-                  gender != nil, let rhr = Int(rhrText), rhr > 0, fitnessExperience != nil else { return false }
+                  gender != nil, let rhr = Int(rhrText), rhr > 0,
+                  q1TrainingHistory != nil, q2SelfSelect != nil else { return false }
             return true
         case .scheduling:
             guard let len = Int(sessionLengthText), len > 0,
@@ -158,12 +168,15 @@ final class OnboardingViewModel {
 
     func save(userID: String) {
         guard let age = Int(ageText), let rhr = Int(rhrText), let gender,
-              let experience = fitnessExperience,
+              let q1 = q1TrainingHistory, let q2 = q2SelfSelect,
               let md = motivationDriver, let mr = missedResponse, let rp = routinePreference,
               let len = Int(sessionLengthText), let freq = Int(frequencyText) else {
             fieldError = "Please complete the required fields."
             return
         }
+        // BR-1b-2/3/5 — resolve classification (write-through) from Q1/Q2/Ozempic.
+        let classification = ExperienceResolver.resolve(q1: q1, q2: q2, onGLP1: onAntiObesityTherapy)
+
         let healthHistory = HealthHistory(
             chronicConditions: chronicConditions, hrMedications: hrMedications,
             onAntiObesityTherapy: onAntiObesityTherapy, smokingStatus: smokingStatus,
@@ -173,8 +186,11 @@ final class OnboardingViewModel {
             age: age, gender: gender, weightKg: weightKg, heightCm: heightCm,
             unitsPreference: weightImperial ? .imperial : .metric,
             restingHR: rhr, maxHROverride: Int(maxHRText),
-            goals: goals, fitnessExperience: experience,
+            goals: goals, fitnessExperience: classification.resolved,
             mentality: Mentality(motivationDriver: md, missedResponse: mr, routinePreference: rp),
+            q1TrainingHistory: q1, q2SelfSelect: q2,
+            classificationMismatch: classification.mismatch,
+            program: .newUser(),
             healthHistory: healthHistory.isEmpty ? nil : healthHistory,
             facility: FacilityInfo(equipment: equipment, locationPreference: locationPreference),
             device: DeviceInfo(wearable: wearable, trackingApps: trackingApps),

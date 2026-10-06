@@ -112,12 +112,18 @@
 - Q8 Security: **Full/blocking**
 - Q9 PBT: **Partial**
 
-## v2 Stage Progress (updated)
-- [x] Requirements Analysis — COMPLETED (v2-requirements.md)
+## v5 RE-PLAN (2026-10-06)
+Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v5 + re-plan). v4 spec archived at `inception/requirements/hr-coaching-app-full-spec.v4.backup.md`; v5 is now canonical `hr-coaching-app-full-spec.md`. This is a `workflow-changes.md` "requirements changed" loop.
+- v5 replaces the single month-based assignment engine with a **4 training-stage program** (Foundation → Level Up → Shape → Maintain; Maintain out of scope), each with its own 60-session / 3-sub-phase (×20) session-gated ratio progression + unlock questions.
+- Requirements updated: `v2-requirements.md` has a **v5 REVISION** section (FR-1 dual experience + Ozempic override; FR-3 session-gated progression; FR-3b relapse; FR-4 per-stage protocols; FR-6b cooldown; FR-10 milestones; FR-11 client PDF; FR-12 non-negotiable minimum).
+- Plan re-structured to **6 phases**: P1 (done) → P1b (onboarding v5 deltas) → P2 (Foundation protocols+coaching+cooldown+scoring) → P3 (classification+session-gated progression+relapse/minimum) → P4 (Level Up) → P5 (Shape) → P6 (milestones+reminders+export+PDF).
+
+## v2 Stage Progress (updated for v5)
+- [x] Requirements Analysis — COMPLETED (v2-requirements.md + v5 revision)
 - [~] User Stories — SKIPPED (specs + requirements sufficient; user approved skip)
-- [x] Workflow Planning — COMPLETED (execution: 5 phases, incremental)
-- [x] Units Generation — COMPLETED (v2-phased-implementation-plan.md; 5 units)
-- [ ] CONSTRUCTION — pending approval to begin Phase 1
+- [x] Workflow Planning — RE-DONE for v5 (6 phases, incremental)
+- [x] Units Generation — RE-DONE (v2-phased-implementation-plan.md; 6 units + archived 5-phase plan)
+- [x] v5 Re-Plan APPROVED by user (2026-10-06)
 
 ### CONSTRUCTION (v2) — Phase 1 (Onboarding + Data Model)
 - [x] Functional Design — COMPLETED (2026-09-15)
@@ -128,3 +134,13 @@
 - [x] NFR Design — COMPLETED (2026-09-15)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/targets reused)
 - [x] Code Generation — COMPLETED (2026-09-15) — Phase 1 built; app builds, 46/46 tests green
+
+### CONSTRUCTION (v2) — Phase 1b (Onboarding v5 deltas)
+- [x] Functional Design — APPROVED (2026-10-06). Answers: Q1–Q7=A, Q8=B.
+- [x] NFR Requirements — APPROVED (2026-10-06)
+- [x] NFR Design — APPROVED (2026-10-06)
+- [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/targets reused)
+- [~] Code Generation — Part 2 complete; app builds, full test suite green (incl. 24-combo resolver, subphase 0–60, pre-v5 decode), SECURITY-03 grep clean. Code summary written. Awaiting completion-gate approval.
+
+### CONSTRUCTION (v2) — Phase 2 (Foundation Protocols + Coaching + Cooldown + Scoring)
+- [ ] Functional Design — questions issued (`phase2-protocols-coaching-functional-design-plan.md`), UNANSWERED — hold until v5 re-plan approved

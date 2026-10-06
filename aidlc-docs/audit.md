@@ -495,3 +495,79 @@
 **Timestamp**: 2026-09-15T04:00:00Z
 **AI Response**: Completed Steps 4-10. New Firestore v2 persistence; v2 OnboardingViewModel; onboarding components + 8 section screens; routing/migration (full re-onboarding); Home/Settings refactored to v2 profile. App builds; full suite 46/46 green (v1 onboarding tests rewritten for v2; auth/home tests updated). Security: consent-gated collection + no-PII logs upheld. Code summary written. Flagged core SwiftCheck target broken under Xcode 26 for Build&Test.
 **Context**: CONSTRUCTION - Phase 1 Code Generation complete
+
+## Phase 2 Functional Design — Started
+**Timestamp**: 2026-09-15T05:00:00Z
+**User Input**: "start phase 2" (after testing Phase 1 onboarding on device)
+**AI Response**: Opened Phase 2 (Protocols + Coaching) Functional Design with 7 design questions (target representation, off-zone deviation, in-zone cadence, briefing count source, phrase randomness/testability, engine approach, workout selection).
+**Context**: CONSTRUCTION - Phase 2 Functional Design (v2)
+
+## v5 Spec Adoption — Requirements Change (mid-workflow)
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "A" (adopt v5 and re-plan now) — re: collaborator's updated spec /Users/behzad/Downloads/files/hr-coaching-app-full-spec-v5.md
+**AI Response**: Per common/workflow-changes.md (requirements change). Adopted v5 as canonical spec (v4 archived as hr-coaching-app-full-spec.v4.backup.md). v5 restructures into a 4 training-stage program (Foundation/Level Up/Shape/Maintain) with per-stage 60-session counters, 3 sub-phase session-gated ratio progression, dual experience classification (Q1+Q2) + Ozempic→Beginner override, exercise phases/banks (Level Up/Shape), relapse handling, mandatory cooldown stretch, biweekly RHR+weight milestones, client PDF, non-negotiable minimum. Pausing AI-DLC Phase 2 (FD questions unanswered); updating v2-requirements.md + v2-phased-implementation-plan.md to v5 before resuming construction. Phase 1 (built) needs onboarding deltas (dual experience + Ozempic override + stage/counter fields).
+**Context**: INCEPTION (re-visited) - Requirements change → updating requirements + phased plan for v5
+
+## v5 Re-Plan (Inception artifacts updated)
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "A"
+**AI Response**: "Executed the v5 re-plan (workflow-changes 'requirements changed' loop): (1) appended a v5 REVISION section to v2-requirements.md — revised FR-1 (dual experience Q1/Q2 + Ozempic→Beginner override), FR-3 (session-gated ratio progression, 60 sessions/3 sub-phases per stage), added FR-3b relapse/re-entry, revised FR-4 (per-stage protocols: Foundation/Level Up/Shape), added FR-6b cooldown stretch, FR-10 milestones, FR-11 client PDF, FR-12 non-negotiable minimum; (2) rewrote v2-phased-implementation-plan.md into a 6-phase structure (P1 done → P1b → P2 → P3 → P4 → P5 → P6) organized around the 4 training stages, archiving the superseded 5-phase plan; (3) updated aidlc-state.md. Presenting the updated plan at an approval gate; NOT resuming Phase 2 coding or answering the open Phase 2 design questions until approved."
+**Context**: Inception re-plan after adopting hr-coaching-app-full-spec v5. Maintain (stage 4) deferred/out of scope.
+
+---
+
+## v5 Re-Plan Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "I approve the re-plan and do P1b next"
+**AI Response**: "Re-plan approved. Marking Inception re-plan accepted in aidlc-state.md and beginning CONSTRUCTION Phase 1b (Onboarding v5 deltas) Functional Design."
+**Context**: Approval gate passed for v5 6-phase re-plan; proceeding to Phase 1b Functional Design.
+
+---
+
+## Phase 1b Functional Design — Answers
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "answered" (Q1=A, Q2=A, Q3=A, Q4=A, Q5=A, Q6=A, Q7=A, Q8=B in phase1b-onboarding-v5-functional-design-plan.md)
+**AI Response**: "All 8 answers unambiguous. Q8=B (force full re-onboard for profiles missing v5 fields) differs from recommended A but is clear. Generating functional-design artifacts under construction/phase1b-onboarding-v5/functional-design/."
+**Context**: Phase 1b (Onboarding v5 deltas) Functional Design — answers collected.
+
+---
+
+## Phase 1b Functional Design — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Marking complete in aidlc-state.md; proceeding to Phase 1b NFR Requirements."
+**Context**: Phase 1b (Onboarding v5 deltas) Functional Design approved.
+
+---
+
+## Phase 1b NFR Requirements — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 1b NFR Design."
+**Context**: Phase 1b (Onboarding v5 deltas) NFR Requirements approved.
+
+---
+
+## Phase 1b NFR Design — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 1b Code Generation — Part 1 (Planning): creating code generation plan for approval before writing code."
+**Context**: Phase 1b (Onboarding v5 deltas) NFR Design approved; Infrastructure Design skipped.
+
+---
+
+## Phase 1b Code Generation — Plan Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Part 2 (Generation): core types + ExperienceResolver + UserProfileV2 extension + tests + persistence + onboarding/settings/routing, then build+test+SECURITY-03 grep."
+**Context**: Phase 1b (Onboarding v5 deltas) Code Generation Part 1 approved; beginning Part 2.
+
+---
+
+## Phase 1b Code Generation — Part 2 Complete
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: (code generation executed per approved plan)
+**AI Response**: "Generated v5 onboarding deltas: 6 new core types + ExperienceResolver, UserProfileV2 extension with tolerant decode + isV5Complete, onboarding Q1/Q2 + Ozempic popup, isV5Complete routing gate (Q8=B re-onboard), Settings re-resolve. Added ExperienceResolverTests (24-combo exhaustive), StageProgressTests, ProfileV5CodableTests (incl. pre-v5 decode); updated onboarding/auth tests + fixtures. Core + iOS build; full test suite passed on iPhone 17 sim. SECURITY-03 grep clean. Code summary at construction/phase1b-onboarding-v5/code/code-summary.md. Presenting 2-option completion gate."
+**Context**: Phase 1b (Onboarding v5 deltas) Code Generation Part 2 — complete, tests green.
+
+---

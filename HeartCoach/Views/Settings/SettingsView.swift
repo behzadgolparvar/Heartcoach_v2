@@ -28,11 +28,27 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Fitness experience").font(.subheadline).foregroundStyle(.secondary)
-                            Picker("Experience", selection: $vm.fitnessExperience) {
+                            Text("Training history").font(.subheadline).foregroundStyle(.secondary)
+                            Picker("Training history", selection: $vm.q1TrainingHistory) {
+                                Text("Not set").tag(Optional<TrainingHistory>.none)
+                                ForEach(TrainingHistory.allCases, id: \.self) { Text($0.displayName).tag(Optional($0)) }
+                            }.pickerStyle(.menu)
+                        }
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Self-rated experience").font(.subheadline).foregroundStyle(.secondary)
+                            Picker("Self-rated experience", selection: $vm.q2SelfSelect) {
                                 Text("Not set").tag(Optional<FitnessExperience>.none)
                                 ForEach(FitnessExperience.allCases, id: \.self) { Text($0.displayName).tag(Optional($0)) }
                             }.pickerStyle(.segmented)
+                        }
+
+                        Toggle("On Ozempic / anti-obesity therapy", isOn: $vm.onAntiObesityTherapy)
+                            .font(.subheadline).foregroundStyle(.secondary)
+
+                        if let resolved = vm.resolvedExperience {
+                            Text("Training level: \(resolved.displayName)")
+                                .font(.footnote).foregroundStyle(.secondary)
                         }
                     }
 
@@ -92,6 +108,11 @@ struct SettingsView: View {
         }
         .onAppear {
             if let profile = homeViewModel.profile { vm.populate(from: profile) }
+        }
+        .alert("A note on your training start", isPresented: $vm.showOzempicInfo) {
+            Button("Got it", role: .cancel) { }
+        } message: {
+            Text("Research shows that combining exercise with GLP-1 medications like Ozempic is linked to greater fat loss and better weight-loss maintenance after stopping the medication.\n\nYour training will start at a Beginner level to build a strong, sustainable foundation alongside your medication.")
         }
         .preferredColorScheme(.dark)
     }

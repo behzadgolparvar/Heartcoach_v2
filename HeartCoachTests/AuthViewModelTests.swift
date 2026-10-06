@@ -30,6 +30,21 @@ final class AuthViewModelTests: XCTestCase {
         XCTAssertEqual(vm.appState, .onboarding)
     }
 
+    func testSignIn_withPreV5Profile_goesToOnboarding() async {
+        // A Phase-1 profile (no dual experience / program state) is not v5-complete,
+        // so the user re-onboards (BR-1b-9 / Q8=B).
+        let auth = MockAuthService()
+        let firebase = MockFirebaseService()
+        firebase.profileV2ToReturn = UserProfileV2.preV5Fixture
+        let vm = AuthViewModel(authService: auth, firebaseService: firebase)
+
+        vm.email = "test@example.com"
+        vm.password = "password123"
+        await vm.submitAuth()
+
+        XCTAssertEqual(vm.appState, .onboarding)
+    }
+
     func testSignIn_loadFails_goesToLoadErrorNotOnboarding() async {
         let auth = MockAuthService()
         let firebase = MockFirebaseService()

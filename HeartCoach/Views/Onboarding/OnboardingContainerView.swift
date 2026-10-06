@@ -87,7 +87,13 @@ private struct DemographicsSectionView: View {
             }
             labeledNumber("Max HR (optional)", $vm.maxHRText)
             picker("Occupation activity (optional)", OccupationActivity.allCases, \.displayName, $vm.occupation)
-            picker("Fitness experience", FitnessExperience.allCases, \.displayName, $vm.fitnessExperience)
+
+            // v5 dual experience (spec §A). Q1 is authoritative; Q2 is an
+            // independent self-rating and intentionally does not show Q1's result.
+            Text("Be honest here — it only helps us start you at the right intensity.")
+                .font(.caption).foregroundStyle(.secondary)
+            picker("Your training history", TrainingHistory.allCases, \.displayName, $vm.q1TrainingHistory)
+            picker("How would you rate yourself?", FitnessExperience.allCases, \.displayName, $vm.q2SelfSelect)
 
             DisclosureGroup("Optional health background") {
                 VStack(alignment: .leading, spacing: 12) {
@@ -99,6 +105,11 @@ private struct DemographicsSectionView: View {
                 }.padding(.top, 8)
             }
             .tint(.white).foregroundStyle(.white)
+        }
+        .alert("A note on your training start", isPresented: $vm.showOzempicInfo) {
+            Button("Got it", role: .cancel) { }
+        } message: {
+            Text("Research shows that combining exercise with GLP-1 medications like Ozempic is linked to greater fat loss and better weight-loss maintenance after stopping the medication.\n\nYour training will start at a Beginner level to build a strong, sustainable foundation alongside your medication.")
         }
     }
 }
