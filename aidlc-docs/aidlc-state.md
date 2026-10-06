@@ -140,7 +140,8 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-06)
 - [x] NFR Design — APPROVED (2026-10-06)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/targets reused)
-- [~] Code Generation — Part 2 complete; app builds, full test suite green (incl. 24-combo resolver, subphase 0–60, pre-v5 decode), SECURITY-03 grep clean. Code summary written. Awaiting completion-gate approval.
+- [x] Code Generation — COMPLETED + APPROVED (2026-10-06). App builds, full test suite green, SECURITY-03 clean. Committed e85fdf4.
+- **Phase 1b COMPLETE.** Next: Phase 2 (Foundation protocols + coaching + cooldown + scoring) — functional-design questions in phase2-protocols-coaching-functional-design-plan.md still UNANSWERED.
 
 ### CONSTRUCTION (v2) — Phase 2 (Foundation Protocols + Coaching + Cooldown + Scoring)
 - [ ] Functional Design — questions issued (`phase2-protocols-coaching-functional-design-plan.md`), UNANSWERED — hold until v5 re-plan approved
