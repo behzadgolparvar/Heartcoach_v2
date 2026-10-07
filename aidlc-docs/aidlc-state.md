@@ -148,5 +148,6 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-07)
 - [x] NFR Design — APPROVED (2026-10-07)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/Watch/audio reused)
-- [~] Code Generation — Part 2 COMPLETE (Steps 1–10). Core committed d7f45c1; app-side flow switched to FoundationSessionManager (v2) with cooldown gate + scoring. Full suite green (84 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+- [x] Code Generation — COMPLETED + APPROVED (2026-10-07). Core d7f45c1; app-side flow switch 6aa49c1. Full suite green (84 tests); SECURITY-03 clean.
   - DEFERRED within Phase 2 (flagged in code-summary): advanced §J in v2 driver (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback) + on-device verification → Build & Test / focused follow-up before TestFlight.
+- **Phase 2 COMPLETE.** Next: Phase 3 (classification resolution + session-gated progression + relapse + non-negotiable minimum). Also pending: Build & Test stage (incl. deferred §J + device verification).
