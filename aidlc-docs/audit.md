@@ -579,3 +579,58 @@
 **Context**: Phase 1b Code Generation completion gate approved via commit; work committed.
 
 ---
+
+## Phase 2 Functional Design — Plan refreshed for v5
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "Phase 2 — Protocols + Coaching · Functional Design Plan is aligned with the new v5 design?" → "yes"
+**AI Response**: "Assessed: Foundation protocol tables + coaching model unchanged in v5 (Q1/Q2/Q6/Q7 stand), but the pre-v5 plan was missing cooldown stretch (§F), the +30s Continuous buffer, session scoring (v5 re-plan moves it into P2), safety/edge (§J), and per-stage briefing wording. Rewrote phase2 plan v5-aligned: kept Q1–Q7, fixed Q4 to 'per type per stage', added design steps + Q8–Q11 (cooldown representation, buffer, score tiers, time-in-target signal). Awaiting answers."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design — v5 alignment + questions issued.
+
+---
+
+## Phase 2 Functional Design — Answers
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "I answered all 11 questions" (Q1–Q7=A; Q8=A + user-paced "ready to stretch" transition gate; Q9=A; Q10=A even bands ≥90/75/60/40; Q11=A per-block range, training-only denominator)
+**AI Response**: "All answers unambiguous. Generating Phase 2 functional-design artifacts under construction/phase2-foundation/functional-design/ (business-logic-model, business-rules, domain-entities). Confirmed design incl. transition gate, two-clock timing, segment-tagged hr_stream, cooldown excluded from scoring denominator."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design — answers collected.
+
+---
+
+## Phase 2 Functional Design — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "Functional Design approved. Marking complete; proceeding to Phase 2 NFR Requirements."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design approved.
+
+---
+
+## Phase 2 NFR Requirements — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 2 NFR Design."
+**Context**: Phase 2 (Foundation Protocols + Coaching) NFR Requirements approved.
+
+---
+
+## Phase 2 NFR Design — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 2 Code Generation — Part 1 (Planning)."
+**Context**: Phase 2 (Foundation Protocols + Coaching) NFR Design approved; Infrastructure Design skipped.
+
+---
+
+## Phase 2 Code Generation — Plan Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Part 2 Steps 1–4 (pure core: protocol builder, CoachingEngineV2, scorer, briefing + tests), then pausing for the proposed mid-phase check-in before the app-side flow switch."
+**Context**: Phase 2 Code Generation Part 1 approved; beginning Part 2 Steps 1–4.
+
+---
+
+## Phase 2 Code Generation — Steps 1–4 complete (mid-phase check-in)
+**Timestamp**: 2026-10-07T00:00:00Z
+**AI Response**: "Generated pure core: FoundationProtocol/PhaseKind/TargetRange, CooldownStep, FoundationProtocolBuilder, CoachingCue/CoachingPriority/PhraseCategory/SeededGenerator, PhrasePool, CoachingSessionState, CoachingEngineV2, SessionScore/ScoreTier, SessionScorer, BriefingPolicy. 23 new tests pass (FoundationProtocol, CoachingEngineV2, SessionScorer, BriefingPolicy). Core builds. Pausing for the agreed mid-phase check-in before the app-side flow switch (Steps 5–10)."
+**Context**: Phase 2 Code Generation Part 2 — pure core done; awaiting go-ahead for the workout-flow switch.
+
+---

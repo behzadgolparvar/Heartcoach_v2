@@ -144,4 +144,8 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - **Phase 1b COMPLETE.** Next: Phase 2 (Foundation protocols + coaching + cooldown + scoring) — functional-design questions in phase2-protocols-coaching-functional-design-plan.md still UNANSWERED.
 
 ### CONSTRUCTION (v2) — Phase 2 (Foundation Protocols + Coaching + Cooldown + Scoring)
-- [ ] Functional Design — questions issued (`phase2-protocols-coaching-functional-design-plan.md`), UNANSWERED — hold until v5 re-plan approved
+- [x] Functional Design — APPROVED (2026-10-07). Answers Q1–Q11 all A (Q8 A + user-paced transition gate). PRODUCT NOTE flagged: treadmill→stretch transition gate for collaborator confirmation.
+- [x] NFR Requirements — APPROVED (2026-10-07)
+- [x] NFR Design — APPROVED (2026-10-07)
+- [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/Watch/audio reused)
+- [~] Code Generation — Part 2 in progress. Steps 1–4 DONE (pure core: protocol builder, CoachingEngineV2, scorer, briefing; 23 tests green, core builds). PAUSED at agreed mid-phase check-in before Steps 5–10 (session model/persistence, v2 driver, safety/edge, workout-flow switch, consumers, build).
