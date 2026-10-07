@@ -85,14 +85,14 @@
 - **Reverse Engineering Needed**: Proposed SKIP (codebase already fully understood this session; decision pending user approval in v2-requirements-questions.md)
 
 ## Stage Progress (v2)
-### INCEPTION PHASE (v2)
+### INCEPTION PHASE (v2)  ⚠️ SUPERSEDED — see "v2 Stage Progress (updated for v5)" below for current status
 - [x] Workspace Detection — COMPLETED (2026-09-15) — brownfield
-- [ ] Reverse Engineering — PROPOSED SKIP (pending approval)
-- [ ] Requirements Analysis — IN PROGRESS (questions issued)
-- [ ] User Stories — pending
-- [ ] Workflow Planning — pending
-- [ ] Application Design — pending
-- [ ] Units Generation — pending (this produces the phased implementation plan)
+- [x] Reverse Engineering — SKIPPED (codebase already understood; approved)
+- [x] Requirements Analysis — COMPLETED (see v5-updated block below)
+- [~] User Stories — SKIPPED (approved)
+- [x] Workflow Planning — COMPLETED (re-done for v5)
+- [x] Application Design — COMPLETED (folded into phased plan)
+- [x] Units Generation — COMPLETED (v2-phased-implementation-plan.md)
 
 ## Extension Configuration (v2)
 
@@ -127,9 +127,6 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 
 ### CONSTRUCTION (v2) — Phase 1 (Onboarding + Data Model)
 - [x] Functional Design — COMPLETED (2026-09-15)
-- [ ] NFR Requirements — next
-- [ ] NFR Design — pending
-- [ ] Code Generation — pending
 - [x] NFR Requirements — COMPLETED (2026-09-15)
 - [x] NFR Design — COMPLETED (2026-09-15)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/targets reused)
