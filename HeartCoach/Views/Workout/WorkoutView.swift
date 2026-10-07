@@ -20,6 +20,11 @@ struct WorkoutView: View {
                 runningContent
             }
 
+            // Transition gate — user-paced "ready to stretch" (Q8/§F).
+            if workoutVM.awaitingCooldownStart {
+                cooldownGate
+            }
+
             // Emergency stop overlay
             if showEmergencyStop {
                 EmergencyStopOverlay(onConfirm: {
@@ -71,7 +76,12 @@ struct WorkoutView: View {
 
             Spacer()
 
-            if let msg = workoutVM.coachingState?.coachingMessage {
+            if workoutVM.coachingState?.phase == .cooldown, let step = workoutVM.cooldownStepLabel {
+                Text("Stretch: \(step)")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 32)
+            } else if let msg = workoutVM.coachingState?.coachingMessage {
                 Text(msg)
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.85))
@@ -85,6 +95,32 @@ struct WorkoutView: View {
                 .padding(.bottom, 40)
         }
         .padding(.top, 16)
+    }
+
+    private var cooldownGate: some View {
+        ZStack {
+            Color.black.opacity(0.85).ignoresSafeArea()
+            VStack(spacing: 20) {
+                Image(systemName: "figure.cooldown")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.white)
+                Text("Great work!")
+                    .font(.title.bold())
+                    .foregroundStyle(.white)
+                Text("Step off and get ready for a 2-minute stretch — it's part of the session and helps prevent injury.")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                Button("Begin stretches") { workoutVM.beginCooldown() }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier("cooldown-begin-button")
+                Button("Skip") { workoutVM.end() }
+                    .buttonStyle(SecondaryButtonStyle())
+                    .accessibilityIdentifier("cooldown-skip-button")
+            }
+            .padding(.horizontal, 24)
+        }
     }
 
     private func startupView(big: String?, caption: String, showSpinner: Bool) -> some View {

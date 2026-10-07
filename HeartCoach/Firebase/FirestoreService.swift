@@ -230,15 +230,21 @@ final class FirestoreService: FirebaseServiceProtocol {
 
     private func encodeSession(_ s: Session) throws -> [String: Any] {
         let hrData = try JSONEncoder().encode(s.hrStream)
-        return [
+        var dict: [String: Any] = [
             "id": s.id,
             "date": Timestamp(date: s.date),
             "programType": s.programType.rawValue,
             "durationSec": s.durationSec,
             "avgHR": s.avgHR,
             "timeInZones": Dictionary(uniqueKeysWithValues: s.timeInZones.map { ("\($0.key)", $0.value) }),
-            "hrStream": (try? JSONSerialization.jsonObject(with: hrData)) ?? []
+            "hrStream": (try? JSONSerialization.jsonObject(with: hrData)) ?? [],
+            "cooldownSkipped": s.cooldownSkipped
         ]
+        if let p = s.scorePercent { dict["scorePercent"] = p }
+        if let t = s.scoreTier { dict["scoreTier"] = t.rawValue }
+        if let td = s.trainingDurationSec { dict["trainingDurationSec"] = td }
+        if let f = s.sessionFlag { dict["sessionFlag"] = f }
+        return dict
     }
 
     private func decodeSession(_ d: [String: Any]) -> Session? {
@@ -265,8 +271,16 @@ final class FirestoreService: FirebaseServiceProtocol {
         } else {
             hrStream = []
         }
+        let scorePercent = d["scorePercent"] as? Double
+        let scoreTier = (d["scoreTier"] as? String).flatMap { ScoreTier(rawValue: $0) }
+        let trainingDurationSec = d["trainingDurationSec"] as? Int
+        let sessionFlag = d["sessionFlag"] as? String
+        let cooldownSkipped = d["cooldownSkipped"] as? Bool ?? false
         return Session(id: id, date: ts.dateValue(), programType: type,
-                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: hrStream)
+                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: hrStream,
+                       scorePercent: scorePercent, scoreTier: scoreTier,
+                       trainingDurationSec: trainingDurationSec, sessionFlag: sessionFlag,
+                       cooldownSkipped: cooldownSkipped)
     }
 }
 

@@ -29,8 +29,11 @@ struct HomeView: View {
                     // Start Workout button
                     VStack(spacing: 8) {
                         Button("Start Workout") {
-                            if let zones = vm.zones {
-                                workoutVM = container.makeWorkoutViewModel(zones: zones)
+                            if let zones = vm.zones, let profile = vm.profile {
+                                workoutVM = container.makeWorkoutViewModel(
+                                    zones: zones,
+                                    restingHR: profile.restingHR,
+                                    maxHR: profile.effectiveMaxHR)
                                 showPreStart = true
                             }
                         }

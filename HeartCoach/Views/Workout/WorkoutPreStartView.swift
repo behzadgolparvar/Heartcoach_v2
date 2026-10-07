@@ -17,22 +17,15 @@ struct WorkoutPreStartView: View {
 
                 ProgramCard(
                     subtitle: "Steady progressive effort",
-                    phases: "12 phases · 35 min",
+                    phases: "7 blocks · 35 min + cooldown",
                     program: .continuous,
                     selectedProgram: $selectedProgram
                 )
 
                 ProgramCard(
                     subtitle: "High-intensity intervals",
-                    phases: "32 phases · 35 min",
+                    phases: "15 rounds · 35 min + cooldown",
                     program: .hiit,
-                    selectedProgram: $selectedProgram
-                )
-
-                ProgramCard(
-                    subtitle: "Varied pace, your call",
-                    phases: "17 phases · 35 min",
-                    program: .fartlek,
                     selectedProgram: $selectedProgram
                 )
 

@@ -35,35 +35,35 @@ New v2 types: `FoundationProtocol`/`FoundationPhase`/`TargetRange`/`PhaseKind`, 
 - [x] `SessionScorerTests` — tier boundaries (89/90, 74/75, 59/60, 39/40); rest/buffer/transition/cooldown excluded; all-in/all-out extremes
 - [x] `BriefingPolicyTests` — 0–4 boundary per type per stage; walk_fallback/<20-min don't count
 
-## Step 5 — Session model + persistence  [ ]
-- [ ] Extend `Session` (+ `scorePercent`, `scoreTier`, `trainingDurationSec`, `totalDurationSec`, `cooldownSkipped`; `session_flag` continuous/hiit/walk_fallback)
-- [ ] Extend `HRRecord` with `phase: PhaseKind`
-- [ ] `FirestoreService` encode/decode new fields (tolerant); `MockFirebaseService` updated
+## Step 5 — Session model + persistence  [x]
+- [x] Extend `Session` (+ `scorePercent`, `scoreTier`, `trainingDurationSec`, `totalDurationSec`, `cooldownSkipped`; `session_flag` continuous/hiit/walk_fallback)
+- [x] Extend `HRRecord` with `phase: PhaseKind`
+- [x] `FirestoreService` encode/decode new fields (tolerant); `MockFirebaseService` updated
 
-## Step 6 — v2 session driver (app)  [ ]
-- [ ] `WorkoutEngineV2` (or extend session manager): phase sequencing over `FoundationProtocol`, 15s coaching / 5s safety ticks, two clocks (training vs total), buffer, **transition gate** (pause total clock, record `transition`, watchdog timeout), cooldown step playback
-- [ ] Emit `CoachingCue` → voice + on-screen text; append phase-tagged `HRRecord`
-- [ ] Complete + score at end of training (BR-2-20); finalize after gate/cooldown or timeout
+## Step 6 — v2 session driver (app)  [x]
+- [x] `WorkoutEngineV2` (or extend session manager): phase sequencing over `FoundationProtocol`, 15s coaching / 5s safety ticks, two clocks (training vs total), buffer, **transition gate** (pause total clock, record `transition`, watchdog timeout), cooldown step playback
+- [x] Emit `CoachingCue` → voice + on-screen text; append phase-tagged `HRRecord`
+- [x] Complete + score at end of training (BR-2-20); finalize after gate/cooldown or timeout
 
-## Step 7 — Safety & edge (§J) in the driver  [ ]
-- [ ] Emergency stop (HR>maxHR, reuse v1 bridge/haptic) live in all phases except dropout/pause
-- [ ] Sensor dropout (20s), pause/resume (15-min, 3×10 snoozes), cancel (≥20 scored/<20 discard on training time), elevated-HR walk_fallback
+## Step 7 — Safety & edge (§J) in the driver  [x]
+- [x] Emergency stop (HR>maxHR, reuse v1 bridge/haptic) live in all phases except dropout/pause
+- [x] Sensor dropout (20s), pause/resume (15-min, 3×10 snoozes), cancel (≥20 scored/<20 discard on training time), elevated-HR walk_fallback
 
-## Step 8 — Wire the workout flow to v2 (the switch)  [ ]
-- [ ] `WorkoutViewModel` drives `WorkoutEngineV2` instead of v1 `WorkoutPhaseSequencer`+`CoachingEngine`
-- [ ] Manual picker (Home/`WorkoutPreStartView`): Continuous + HIIT only (remove Fartlek from selection)
-- [ ] Briefing screen (skippable per BriefingPolicy); cooldown UI (step list + "Begin" gate); updated summary (percent, tier, per-zone)
-- [ ] v1 engine/types remain compiled but no longer on the live path
+## Step 8 — Wire the workout flow to v2 (the switch)  [x]
+- [x] `WorkoutViewModel` drives `WorkoutEngineV2` instead of v1 `WorkoutPhaseSequencer`+`CoachingEngine`
+- [x] Manual picker (Home/`WorkoutPreStartView`): Continuous + HIIT only (remove Fartlek from selection)
+- [x] Briefing screen (skippable per BriefingPolicy); cooldown UI (step list + "Begin" gate); updated summary (percent, tier, per-zone)
+- [x] v1 engine/types remain compiled but no longer on the live path
 
-## Step 9 — Consumer updates + tests  [ ]
-- [ ] Update `WorkoutSummaryViewModel`/`WorkoutView`/`HomeViewModel` for score+tier+cooldown
-- [ ] Update/extend `WorkoutViewModelTests` for v2 driver (start→tick→cooldown→score); keep v1 engine tests green
+## Step 9 — Consumer updates + tests  [x]
+- [x] Update `WorkoutSummaryViewModel`/`WorkoutView`/`HomeViewModel` for score+tier+cooldown
+- [x] Update/extend `WorkoutViewModelTests` for v2 driver (start→tick→cooldown→score); keep v1 engine tests green
 
-## Step 10 — Build, test, verify  [ ]
-- [ ] `xcodegen generate`; build iOS + core; full test suite
-- [ ] **SECURITY-03 grep:** no HR/target/score/phrase values in any logging call site
-- [ ] Code summary in `construction/phase2-foundation/code/`
-- [ ] (Device Watch/HealthKit verification noted for Build&Test before any TestFlight)
+## Step 10 — Build, test, verify  [x]
+- [x] `xcodegen generate`; build iOS + core; full test suite
+- [x] **SECURITY-03 grep:** no HR/target/score/phrase values in any logging call site
+- [x] Code summary in `construction/phase2-foundation/code/`
+- [x] (Device Watch/HealthKit verification noted for Build&Test before any TestFlight)
 
 ---
 

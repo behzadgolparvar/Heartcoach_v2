@@ -22,6 +22,11 @@ final class WorkoutViewModel {
     var completedSession: Session?
     var selectedProgram: WorkoutProgram?
 
+    /// True while the session is at the user-paced "ready to stretch" gate (Q8).
+    var awaitingCooldownStart: Bool = false
+    /// Current cooldown stretch step label, shown during the cooldown sequence.
+    var cooldownStepLabel: String?
+
     /// Seconds to wait for the first HR reading before starting anyway.
     private let firstReadingTimeout: TimeInterval = 8
     private var startupTask: Task<Void, Never>?
@@ -32,16 +37,22 @@ final class WorkoutViewModel {
     private let watchBridge: WatchBridgeProtocol
     private let healthKitService: HealthKitServiceProtocol
     private let zones: HRZones
+    private let restingHR: Int
+    private let maxHR: Int
 
-    private var sessionManager: WorkoutSessionManager?
+    private var sessionManager: FoundationSessionManager?
 
     // MARK: - Init
 
     init(zones: HRZones,
+         restingHR: Int,
+         maxHR: Int,
          voiceFeedback: VoiceFeedbackServiceProtocol,
          watchBridge: WatchBridgeProtocol,
          healthKitService: HealthKitServiceProtocol) {
         self.zones = zones
+        self.restingHR = restingHR
+        self.maxHR = maxHR
         self.voiceFeedback = voiceFeedback
         self.watchBridge = watchBridge
         self.healthKitService = healthKitService
@@ -51,9 +62,11 @@ final class WorkoutViewModel {
 
     @MainActor
     func start(program: WorkoutProgram) {
-        let manager = WorkoutSessionManager(
-            program: program,
+        let manager = FoundationSessionManager(
+            type: program.workoutType,
             zones: zones,
+            restingHR: restingHR,
+            maxHR: maxHR,
             voiceFeedback: voiceFeedback,
             watchBridge: watchBridge
         )
@@ -63,6 +76,12 @@ final class WorkoutViewModel {
         manager.onWorkoutComplete = { [weak self] in
             Task { await self?.endInternal() }
         }
+        manager.onAwaitingCooldownStart = { [weak self] in
+            self?.awaitingCooldownStart = true
+        }
+        manager.onCooldownStep = { [weak self] label in
+            self?.cooldownStepLabel = label
+        }
         self.sessionManager = manager
         self.selectedProgram = program
         self.isPaused = false
@@ -70,6 +89,8 @@ final class WorkoutViewModel {
         self.startupState = .warmingUp
         self.lastMessage = nil
         self.completedSession = nil
+        self.awaitingCooldownStart = false
+        self.cooldownStepLabel = nil
 
         // Wake the Watch app into a workout so HR starts spinning up immediately,
         // then run the smart countdown before coaching begins.
@@ -97,6 +118,12 @@ final class WorkoutViewModel {
             self.voiceFeedback.speak(.letsGo)
             manager.beginCoaching()
         }
+    }
+
+    /// User tapped "Begin" on the transition gate — start the mandatory cooldown.
+    func beginCooldown() {
+        awaitingCooldownStart = false
+        sessionManager?.beginCooldown()
     }
 
     func pause() {

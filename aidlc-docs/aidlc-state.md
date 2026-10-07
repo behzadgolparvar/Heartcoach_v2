@@ -148,4 +148,5 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-07)
 - [x] NFR Design — APPROVED (2026-10-07)
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/Watch/audio reused)
-- [~] Code Generation — Part 2 in progress. Steps 1–4 DONE (pure core: protocol builder, CoachingEngineV2, scorer, briefing; 23 tests green, core builds). PAUSED at agreed mid-phase check-in before Steps 5–10 (session model/persistence, v2 driver, safety/edge, workout-flow switch, consumers, build).
+- [~] Code Generation — Part 2 COMPLETE (Steps 1–10). Core committed d7f45c1; app-side flow switched to FoundationSessionManager (v2) with cooldown gate + scoring. Full suite green (84 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+  - DEFERRED within Phase 2 (flagged in code-summary): advanced §J in v2 driver (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback) + on-device verification → Build & Test / focused follow-up before TestFlight.

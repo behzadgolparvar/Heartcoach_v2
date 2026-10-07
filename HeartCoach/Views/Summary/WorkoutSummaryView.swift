@@ -24,6 +24,30 @@ struct WorkoutSummaryView: View {
                         .foregroundStyle(.secondary)
                 }
 
+                // Score (v2) — % time in target → tier.
+                if let percent = session.scorePercent, let tier = session.scoreTier {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Session Score")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("\(Int(percent.rounded()))%")
+                                .font(.system(size: 40, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text(tier.displayName)
+                                .font(.title3.bold())
+                                .foregroundStyle(.red)
+                        }
+                        Text("Time in target zone")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+                    .background(Color.white.opacity(0.05))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
                 // Stats row
                 HStack(spacing: 0) {
                     StatTile(label: "Avg HR", value: "\(summaryVM.avgHR) bpm")
