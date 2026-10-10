@@ -154,5 +154,6 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-09)
 - [x] NFR Design — APPROVED (2026-10-09)
 - [x] Infrastructure Design — SKIPPED (no new infra)
-- [~] Code Generation — Part 2 COMPLETE (Steps 1–8). ProgressionEngine + §B tables + relapse + minimum walk + Home integration; progression advances at summary save. Full suite green (103 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+- [x] Code Generation — COMPLETED + APPROVED (2026-10-09). Committed a6670e4. Full suite green (103 tests); SECURITY-03 clean.
   - Notes: minimum walk resets relapse clock but doesn't persist a Session record in P3 (research-logging → P6); §J walk_fallback shares this plumbing (→ Build & Test).
+- **Phase 3 COMPLETE.** Next: Phase 4 (Level Up — bodyweight leg exercises). Pending: Build & Test (deferred §J + device verification).
