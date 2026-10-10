@@ -2,6 +2,7 @@ import SwiftUI
 import HeartRateCoachCore
 
 struct WorkoutPreStartView: View {
+    var assignedType: WorkoutType? = nil
     let onFinish: () -> Void
     @Environment(WorkoutViewModel.self) private var workoutVM
     @State private var navigateToWorkout = false
@@ -44,6 +45,12 @@ struct WorkoutPreStartView: View {
         .background(Color.black)
         .navigationTitle("HeartCoach")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            // Pre-select today's assigned session (Q9); the user can still override.
+            if selectedProgram == nil, let t = assignedType {
+                selectedProgram = (t == .hiit) ? .hiit : .continuous
+            }
+        }
         .navigationDestination(isPresented: $navigateToWorkout) {
             WorkoutView(onFinish: onFinish)
                 .environment(workoutVM)

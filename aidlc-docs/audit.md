@@ -648,3 +648,51 @@
 **AI Response**: "Phase 2 approved and committed (6aa49c1; core d7f45c1). §J advanced flows + device verification ride to Build & Test as planned. Phase 2 COMPLETE. Next: Phase 3 (classification + session-gated progression)."
 **Context**: Phase 2 Code Generation completion gate approved via 'approve'; committed.
 ---
+
+## Phase 3 Functional Design — Started
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "start Phase 3"
+**AI Response**: "Beginning Phase 3 (classification + session-gated progression + relapse + non-negotiable minimum) Functional Design. Read v5 §B (ratio tables), §C (relapse), §I (minimum). Issuing design-question plan."
+**Context**: Phase 3 Functional Design kickoff.
+---
+
+## Phase 3 Functional Design — Answers
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "I answered all 9 questions" (Q1=A deterministic repeating pattern; Q2=A weight-loss wins; Q3=A outcome→1-in-4 HIIT else pure Continuous; Q4=A count scored training only; Q5=B spec-literal push-back [plain subtraction, >1mo reset to Sub-Phase 1/session 0]; Q6=A store lastCountedSessionDate; Q7=A user-initiated minimum; Q8=A Foundation-complete "coming soon" state; Q9=A assigned default + manual override)
+**AI Response**: "All unambiguous. Q5=B = spec-literal relapse. Generating Phase 3 functional-design artifacts under construction/phase3-progression/functional-design/."
+**Context**: Phase 3 (Progression & Assignment) Functional Design — answers collected.
+---
+
+## Phase 3 Functional Design — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 3 NFR Requirements (concise; pure logic on fixed stack, no new questions)."
+**Context**: Phase 3 (Progression & Assignment) Functional Design approved.
+---
+
+## Phase 3 NFR Requirements — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 3 NFR Design."
+**Context**: Phase 3 NFR Requirements approved.
+---
+
+## Phase 3 NFR Design — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 3 Code Generation — Part 1 (Planning)."
+**Context**: Phase 3 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 3 Code Generation — Plan Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–8 straight through (pure core + minimum walk + Home integration + persistence + build/test)."
+**Context**: Phase 3 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 3 Code Generation — Steps 1–8 complete
+**Timestamp**: 2026-10-09T00:00:00Z
+**AI Response**: "Generated ProgressionEngine + §B tables + ratio/assignment/relapse types + ProgramState.lastCountedSessionDate; MinimumWalk flow; Home integration (today's-session card, relapse banner, minimum entry, assigned-type pre-select); progression advance at summary save. 19 new core tests + full suite green (103 tests). SECURITY-03 clean. Code summary written. Presenting completion gate."
+**Context**: Phase 3 Code Generation Part 2 — complete.
+---

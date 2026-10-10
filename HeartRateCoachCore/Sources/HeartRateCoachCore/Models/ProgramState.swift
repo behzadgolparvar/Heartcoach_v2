@@ -7,10 +7,15 @@ public struct ProgramState: Codable, Sendable, Equatable {
     public var currentStage: TrainingStage
     /// Progress per stage. Preserves history as the user advances.
     public var stageProgress: [TrainingStage: StageProgress]
+    /// Date of the last session that counted toward progression (BR-3-5) or the
+    /// last non-negotiable minimum walk (BR-3-9). Basis for the relapse gap (§C).
+    public var lastCountedSessionDate: Date?
 
-    public init(currentStage: TrainingStage, stageProgress: [TrainingStage: StageProgress]) {
+    public init(currentStage: TrainingStage, stageProgress: [TrainingStage: StageProgress],
+                lastCountedSessionDate: Date? = nil) {
         self.currentStage = currentStage
         self.stageProgress = stageProgress
+        self.lastCountedSessionDate = lastCountedSessionDate
     }
 
     /// BR-1b-7 — every new user starts at Foundation, session 0, regardless of tier.
@@ -31,12 +36,13 @@ public struct ProgramState: Codable, Sendable, Equatable {
 
 extension ProgramState {
     private enum CodingKeys: String, CodingKey {
-        case currentStage, stageProgress
+        case currentStage, stageProgress, lastCountedSessionDate
     }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         currentStage = try c.decode(TrainingStage.self, forKey: .currentStage)
+        lastCountedSessionDate = try c.decodeIfPresent(Date.self, forKey: .lastCountedSessionDate)
         // Dictionary<TrainingStage, _> encodes as an array of alternating
         // key/value pairs under the synthesized Codable; decode via an
         // intermediate [String: StageProgress] so the stored shape is a plain
@@ -55,5 +61,6 @@ extension ProgramState {
         var raw: [String: StageProgress] = [:]
         for (stage, value) in stageProgress { raw[stage.rawValue] = value }
         try c.encode(raw, forKey: .stageProgress)
+        try c.encodeIfPresent(lastCountedSessionDate, forKey: .lastCountedSessionDate)
     }
 }

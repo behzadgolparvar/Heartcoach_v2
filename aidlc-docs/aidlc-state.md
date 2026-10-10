@@ -147,4 +147,12 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] Infrastructure Design — SKIPPED (no new infra; Firebase/HealthKit/Watch/audio reused)
 - [x] Code Generation — COMPLETED + APPROVED (2026-10-07). Core d7f45c1; app-side flow switch 6aa49c1. Full suite green (84 tests); SECURITY-03 clean.
   - DEFERRED within Phase 2 (flagged in code-summary): advanced §J in v2 driver (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback) + on-device verification → Build & Test / focused follow-up before TestFlight.
-- **Phase 2 COMPLETE.** Next: Phase 3 (classification resolution + session-gated progression + relapse + non-negotiable minimum). Also pending: Build & Test stage (incl. deferred §J + device verification).
+- **Phase 2 COMPLETE.** Also pending: Build & Test stage (incl. deferred §J + device verification).
+
+### CONSTRUCTION (v2) — Phase 3 (Progression & Assignment)
+- [x] Functional Design — APPROVED (2026-10-09). Answers Q1–Q4=A, Q5=B (spec-literal relapse), Q6–Q9=A.
+- [x] NFR Requirements — APPROVED (2026-10-09)
+- [x] NFR Design — APPROVED (2026-10-09)
+- [x] Infrastructure Design — SKIPPED (no new infra)
+- [~] Code Generation — Part 2 COMPLETE (Steps 1–8). ProgressionEngine + §B tables + relapse + minimum walk + Home integration; progression advances at summary save. Full suite green (103 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+  - Notes: minimum walk resets relapse clock but doesn't persist a Session record in P3 (research-logging → P6); §J walk_fallback shares this plumbing (→ Build & Test).
