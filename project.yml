@@ -46,6 +46,8 @@ targets:
         product: FirebaseAuth
       - package: firebase-ios-sdk
         product: FirebaseFirestore
+      - package: firebase-ios-sdk
+        product: FirebaseStorage
       - package: HeartRateCoachCore
         product: HeartRateCoachCore
       - sdk: WatchConnectivity.framework

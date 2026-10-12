@@ -813,3 +813,52 @@
 **AI Response**: "Phase 5 approved and committed (b263106). Phase 5 COMPLETE — all 3 designed stages built. Next: Phase 6 (milestones/reminders/export/PDF), then Build & Test."
 **Context**: Phase 5 Code Generation completion gate approved; committed.
 ---
+
+## Phase 6 Functional Design — Started
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "start p6"
+**AI Response**: "Beginning Phase 6 (Milestones + Reminders + Export + Client PDF) Functional Design. Read §H (milestones), §K (client PDF), FR-7/FR-8, developer-owned technical decisions (§373). New surface: UserNotifications (local push), Firebase Storage (export), PDFKit — Infra Design likely NOT skipped this phase. Issuing design-question plan."
+**Context**: Phase 6 Functional Design kickoff.
+---
+
+## Phase 6 Functional Design — Answers
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "I answered all" (Q1–Q9 all = A)
+**AI Response**: "All A. Generating Phase 6 functional-design artifacts (milestones biweekly RHR-auto/weight-manual + Day2 workout-start gating; 4 local notification types + permission at reminders-consent; CSV export to Storage on save; PDFKit per-stage session-plan PDF via share sheet). Q3 'block workout start' flagged for collaborator. Infra Design will run (notifications/Storage/PDFKit)."
+**Context**: Phase 6 (Milestones/Reminders/Export/PDF) Functional Design — answers collected.
+---
+
+## Phase 6 Functional Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 6 NFR Requirements (new surface: notifications permission, Firebase Storage rules, PDFKit; key choices settled in FD, no new questions)."
+**Context**: Phase 6 Functional Design approved.
+---
+
+## Phase 6 NFR Requirements — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 6 NFR Design, then Infrastructure Design (runs this phase)."
+**Context**: Phase 6 NFR Requirements approved.
+---
+
+## Phase 6 NFR Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "APPROVE"
+**AI Response**: "NFR Design approved. Proceeding to Phase 6 Infrastructure Design (runs this phase — notifications, Firebase Storage rules, PDF)."
+**Context**: Phase 6 NFR Design approved.
+---
+
+## Phase 6 Infrastructure Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Infrastructure Design approved. Proceeding to Phase 6 Code Generation — Part 1 (Planning)."
+**Context**: Phase 6 Infrastructure Design approved.
+---
+
+## Phase 6 Code Generation — Plan Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–5 (milestone/reminder/CSV/plan core, tests, notification/export/PDF services behind protocols, wiring, build/test)."
+**Context**: Phase 6 Code Generation Part 1 approved; beginning Part 2.
+---

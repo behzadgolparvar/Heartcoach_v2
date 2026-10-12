@@ -15,13 +15,24 @@ final class HomeViewModel {
     /// Positive re-entry message after a relapse push-back (§C), shown once.
     var relapseMessage: String?
 
+    /// Biweekly milestone is due (§H) — surface the check-in prompt.
+    var isMilestoneDue = false
+    /// Weight-entry gate state (§H, Q3) — `.blockWorkout` blocks starting a workout.
+    var weightGate: WeightGateState = .ok
+
     private let firebaseService: FirebaseServiceProtocol
     private let healthKitService: HealthKitServiceProtocol
+    private let notificationService: NotificationScheduling?
 
-    init(firebaseService: FirebaseServiceProtocol, healthKitService: HealthKitServiceProtocol) {
+    init(firebaseService: FirebaseServiceProtocol, healthKitService: HealthKitServiceProtocol,
+         notificationService: NotificationScheduling? = nil) {
         self.firebaseService = firebaseService
         self.healthKitService = healthKitService
+        self.notificationService = notificationService
     }
+
+    /// True when a workout cannot start until the overdue weight is logged (BR-6-3).
+    var isWorkoutBlockedForWeight: Bool { weightGate == .blockWorkout }
 
     func loadData(userID: String) {
         isLoading = true
@@ -47,14 +58,52 @@ final class HomeViewModel {
             let assignment = p.map { ProgressionEngine.assign(profile: $0) }
             let z = p.flatMap { try? $0.computeZones() }
 
+            // Milestone cadence + weight gate (§H).
+            let now = Date()
+            let last = p?.milestones?.lastMilestoneDate
+            let due = MilestoneScheduler.isDue(lastMilestoneDate: last, now: now)
+            let gate = MilestoneScheduler.weightGate(lastMilestoneDate: last, now: now)
+
+            // Schedule local reminders (FR-7) from the profile.
+            if let profile = p, let assignment {
+                let reminders = ReminderPlanner.plan(
+                    schedule: profile.schedule,
+                    todaySessionLabel: assignment.type.displayName,
+                    sessionDurationMin: 37,
+                    milestoneDue: due,
+                    weightOverdueDays: MilestoneScheduler.weightOverdueDays(lastMilestoneDate: last, now: now))
+                await notificationService?.replace(reminders)
+            }
+
             await MainActor.run {
                 self.profile = p
                 self.zones = z
                 self.lastSession = sessions.first
                 self.assignment = assignment
                 self.relapseMessage = relapseMsg
+                self.isMilestoneDue = due
+                self.weightGate = gate
                 self.isLoading = false
             }
+        }
+    }
+
+    /// Logs a biweekly milestone: manual weight + auto RHR (nil-tolerant) (§H, BR-6-2).
+    func logMilestone(weightKg: Double?, userID: String) {
+        guard var profile = profile else { return }
+        Task {
+            let rhr = await healthKitService.fetchRestingHeartRate()
+            var state = profile.milestones ?? MilestoneState()
+            let now = Date()
+            state.history.append(Milestone(date: now, restingHR: rhr, weightKg: weightKg))
+            state.lastMilestoneDate = now
+            profile.milestones = state
+            await MainActor.run {
+                self.profile = profile
+                self.isMilestoneDue = false
+                self.weightGate = .ok
+            }
+            try? await firebaseService.saveProfileV2(profile, userID: userID)
         }
     }
 

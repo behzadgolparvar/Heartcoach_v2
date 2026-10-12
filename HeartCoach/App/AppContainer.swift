@@ -14,6 +14,10 @@ final class AppContainer {
     let networkMonitor: NetworkMonitor
     let voiceFeedbackService: VoiceFeedbackServiceProtocol
     let watchBridge: WatchBridgeProtocol
+    // Phase 6 services
+    let notificationService: NotificationScheduling
+    let exportService: ExportUploading
+    let pdfRenderer: SessionPlanRendering
 
     // MARK: - ViewModels
     let authViewModel: AuthViewModel
@@ -47,11 +51,19 @@ final class AppContainer {
         self.voiceFeedbackService = voice
         self.watchBridge = watch
 
+        let notifications = NotificationService()
+        let export = ExportService()
+        let pdf = SessionPlanPDFRenderer()
+        self.notificationService = notifications
+        self.exportService = export
+        self.pdfRenderer = pdf
+
         let authVM = AuthViewModel(authService: auth, firebaseService: firebase)
         let onboardingVM = OnboardingViewModel(firebaseService: firebase, healthKitService: hk)
-        let homeVM = HomeViewModel(firebaseService: firebase, healthKitService: hk)
+        let homeVM = HomeViewModel(firebaseService: firebase, healthKitService: hk,
+                                   notificationService: notifications)
         let settingsVM = SettingsViewModel(firebaseService: firebase, authService: auth)
-        let summaryVM = WorkoutSummaryViewModel(firebaseService: firebase)
+        let summaryVM = WorkoutSummaryViewModel(firebaseService: firebase, exportService: export)
         let historyVM = HistoryViewModel(firebaseService: firebase, offlineQueue: queue)
 
         // Wire onboarding completion → auth state transition

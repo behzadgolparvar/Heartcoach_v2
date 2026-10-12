@@ -174,7 +174,14 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] Infrastructure Design — SKIPPED (no new infra)
 - [x] Code Generation — COMPLETED + APPROVED (2026-10-11). Committed b263106. Full suite green (127 tests); SECURITY-03 clean.
   - Deferred (flagged): per-rep voice count, Shape-HIIT offset tuning, exercise-phase internal timing approximation → Build & Test; weight banks → collaborator confirm.
-- **Phase 5 COMPLETE.** All 3 designed training stages (Foundation/Level Up/Shape) built; Maintain out of scope. Remaining: Phase 6 (milestones/reminders/export/PDF), then Build & Test.
+- **Phase 5 COMPLETE.** All 3 designed training stages built; Maintain out of scope.
+
+### CONSTRUCTION (v2) — Phase 6 (Milestones, Reminders, Export, Client PDF)
+- [x] Functional Design — APPROVED (2026-10-12); Q1–Q9 all A. Q3 "block workout start" flagged for collaborator.
+- [x] NFR Requirements — APPROVED (2026-10-12)
+- [x] NFR Design — APPROVED (2026-10-12)
+- [x] Infrastructure Design — APPROVED (2026-10-12)
+- [~] Code Generation — Part 1 (plan) issued for approval (`phase6-engagement-code-generation-plan.md`, 5 steps)
 
 ### Build & Test (deferred backlog, consolidated pass after P5)
 - §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)

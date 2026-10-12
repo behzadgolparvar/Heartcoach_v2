@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import HeartRateCoachCore
 
 struct HomeView: View {
@@ -12,6 +13,10 @@ struct HomeView: View {
     @State private var showLevelUpUnlock = false
     @State private var showShapeUnlock = false
     @State private var showShapeChoice = false
+    @State private var weightText = ""
+    @State private var pdfURL: URL?
+    @State private var showShare = false
+    @State private var didRequestNotifications = false
 
     var body: some View {
         NavigationStack {
@@ -29,6 +34,33 @@ struct HomeView: View {
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(RoundedRectangle(cornerRadius: 12).fill(Color.red.opacity(0.18)))
+                    }
+
+                    // Biweekly milestone check-in (§H).
+                    if vm.isMilestoneDue {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Biweekly check-in")
+                                .font(.headline).foregroundStyle(.white)
+                            Text("Log your weight — we'll record your resting heart rate automatically.")
+                                .font(.caption).foregroundStyle(.secondary)
+                            HStack {
+                                TextField("Weight (kg)", text: $weightText)
+                                    .keyboardType(.decimalPad).textFieldStyle(.roundedBorder)
+                                    .accessibilityIdentifier("milestone-weight-field")
+                                Button("Log") {
+                                    if let uid = authViewModel.currentUserID {
+                                        vm.logMilestone(weightKg: Double(weightText), userID: uid)
+                                        weightText = ""
+                                    }
+                                }.buttonStyle(.borderedProminent)
+                            }
+                            if vm.weightGate == .blockWorkout {
+                                Text("Please log your weight to start your next workout.")
+                                    .font(.caption).foregroundStyle(.orange)
+                            }
+                        }
+                        .padding(16)
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.06)))
                     }
 
                     // Today's assigned session (Phase 3).
@@ -73,7 +105,7 @@ struct HomeView: View {
                             }
                         }
                         .buttonStyle(PrimaryButtonStyle())
-                        .disabled(!vm.isHealthKitAuthorized || vm.zones == nil)
+                        .disabled(!vm.isHealthKitAuthorized || vm.zones == nil || vm.isWorkoutBlockedForWeight)
                         .accessibilityIdentifier("home-start-workout")
 
                         Button("Not feeling it? Do your 15-min minimum") {
@@ -82,6 +114,12 @@ struct HomeView: View {
                         .font(.footnote.bold())
                         .foregroundStyle(.secondary)
                         .disabled(vm.zones == nil)
+
+                        Button("View my plan (PDF)") { generatePlan() }
+                            .font(.footnote.bold())
+                            .foregroundStyle(.secondary)
+                            .disabled(vm.profile?.program == nil)
+                            .accessibilityIdentifier("home-view-plan")
 
                         if !vm.isHealthKitAuthorized {
                             VStack(spacing: 6) {
@@ -149,13 +187,31 @@ struct HomeView: View {
                 }
             }
         }
+        .sheet(isPresented: $showShare) {
+            if let url = pdfURL { ShareSheet(items: [url]) }
+        }
         .onAppear {
             if let userID = authViewModel.currentUserID {
                 vm.loadData(userID: userID)
             }
+            if !didRequestNotifications {
+                didRequestNotifications = true
+                Task { _ = await container.notificationService.requestAuthorization() }
+            }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { vm.recheckHealthKitStatus() }
+        }
+    }
+
+    private func generatePlan() {
+        guard let profile = vm.profile, let stage = profile.program?.currentStage else { return }
+        let rows = SessionPlanBuilder.plan(stage: stage, profile: profile)
+        let note = SessionPlanBuilder.projectedCompletionNote(
+            frequencyPerWeek: profile.schedule.frequencyPerWeek, stage: stage)
+        if let url = container.pdfRenderer.render(stage: stage, rows: rows, completionNote: note) {
+            pdfURL = url
+            showShare = true
         }
     }
 
@@ -172,6 +228,16 @@ struct HomeView: View {
         default: return "evening"
         }
     }
+}
+
+// MARK: - Share sheet (PDF export)
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Today's session card

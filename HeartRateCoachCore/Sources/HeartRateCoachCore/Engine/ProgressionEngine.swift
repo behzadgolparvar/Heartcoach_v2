@@ -42,6 +42,16 @@ public enum ProgressionEngine {
         return ratio.type(forSessionIndex: n % sessionsPerSubPhase)
     }
 
+    /// Projects the assigned workout type for a 0-based session index within a stage,
+    /// for a given classification — used by the client session-plan PDF (BR-6-13).
+    public static func plannedType(experience: FitnessExperience, goals: Set<TrainingGoal>,
+                                   lean: MentalityLean, sessionIndex n: Int) -> WorkoutType {
+        let track = ProgressionTrack.resolve(experience: experience, goals: goals)
+        let sub = min(2, n / sessionsPerSubPhase)
+        let ratio = ProgressionTables.ratio(track: track, lean: lean, subPhase: sub)
+        return assignType(track: track, lean: lean, sessionsCompleted: n, ratio: ratio)
+    }
+
     // MARK: - Advancement (BR-3-5/6)
 
     public static func advance(program: ProgramState, sessionFlag: String,

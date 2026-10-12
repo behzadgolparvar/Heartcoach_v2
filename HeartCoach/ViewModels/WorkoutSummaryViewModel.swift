@@ -26,9 +26,11 @@ final class WorkoutSummaryViewModel {
     // MARK: - Dependencies
 
     private let firebaseService: FirebaseServiceProtocol
+    private let exportService: ExportUploading?
 
-    init(firebaseService: FirebaseServiceProtocol) {
+    init(firebaseService: FirebaseServiceProtocol, exportService: ExportUploading? = nil) {
         self.firebaseService = firebaseService
+        self.exportService = exportService
     }
 
     // MARK: - Actions
@@ -45,6 +47,8 @@ final class WorkoutSummaryViewModel {
             do {
                 let outcome = try await firebaseService.saveSession(session, userID: userID)
                 await self.advanceProgression(for: session, userID: userID)
+                // Best-effort research export (FR-8); never blocks the save result.
+                await exportService?.uploadSessionCSV(session, userID: userID)
                 await MainActor.run {
                     self.saveState = outcome == .synced ? .saved : .savedPendingSync
                 }

@@ -44,6 +44,8 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
     public var levelUpUnlock: LevelUpUnlock?
     /// Shape unlock answers (P5) — equipment/focus/pain; nil until Shape is unlocked.
     public var shapeUnlock: ShapeUnlock?
+    /// Biweekly milestone state (P6) — RHR/weight history + cadence.
+    public var milestones: MilestoneState?
 
     // optional sections
     public var healthHistory: HealthHistory?
@@ -62,6 +64,7 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
                 classificationMismatch: Bool = false, program: ProgramState? = nil,
                 dailyOptionSelection: ShapeOption? = nil, muscleGroupPriority: [MuscleGroup]? = nil,
                 levelUpUnlock: LevelUpUnlock? = nil, shapeUnlock: ShapeUnlock? = nil,
+                milestones: MilestoneState? = nil,
                 healthHistory: HealthHistory? = nil, facility: FacilityInfo? = nil,
                 device: DeviceInfo? = nil, schedule: Schedule, consent: Consent, v2Completed: Bool = false) {
         self.age = age
@@ -82,6 +85,7 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
         self.muscleGroupPriority = muscleGroupPriority
         self.levelUpUnlock = levelUpUnlock
         self.shapeUnlock = shapeUnlock
+        self.milestones = milestones
         self.healthHistory = healthHistory
         self.facility = facility
         self.device = device
@@ -131,7 +135,7 @@ extension UserProfileV2 {
         case restingHR, maxHROverride
         case goals, fitnessExperience, mentality
         case q1TrainingHistory, q2SelfSelect, classificationMismatch, program
-        case dailyOptionSelection, muscleGroupPriority, levelUpUnlock, shapeUnlock
+        case dailyOptionSelection, muscleGroupPriority, levelUpUnlock, shapeUnlock, milestones
         case healthHistory, facility, device
         case schedule, consent, v2Completed
     }
@@ -157,6 +161,7 @@ extension UserProfileV2 {
         muscleGroupPriority = try c.decodeIfPresent([MuscleGroup].self, forKey: .muscleGroupPriority)
         levelUpUnlock = try c.decodeIfPresent(LevelUpUnlock.self, forKey: .levelUpUnlock)
         shapeUnlock = try c.decodeIfPresent(ShapeUnlock.self, forKey: .shapeUnlock)
+        milestones = try c.decodeIfPresent(MilestoneState.self, forKey: .milestones)
         healthHistory = try c.decodeIfPresent(HealthHistory.self, forKey: .healthHistory)
         facility = try c.decodeIfPresent(FacilityInfo.self, forKey: .facility)
         device = try c.decodeIfPresent(DeviceInfo.self, forKey: .device)
