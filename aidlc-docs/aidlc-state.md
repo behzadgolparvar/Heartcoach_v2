@@ -181,7 +181,8 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-12)
 - [x] NFR Design — APPROVED (2026-10-12)
 - [x] Infrastructure Design — APPROVED (2026-10-12)
-- [~] Code Generation — Part 1 (plan) issued for approval (`phase6-engagement-code-generation-plan.md`, 5 steps)
+- [x] Code Generation — COMPLETED + APPROVED (2026-10-12). Committed 7141536. Full suite green (134 tests); SECURITY-03 clean.
+- **Phase 6 COMPLETE.** All 6 build phases done. Remaining AI-DLC stage: **Build & Test** (consolidated device pass + deferred §J + owner deploy: Storage rules).
 
 ### Build & Test (deferred backlog, consolidated pass after P5)
 - §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)
