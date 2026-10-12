@@ -48,9 +48,13 @@ final class FoundationSessionManager {
     private var exerciseIntroDone = Set<Int>()
     private var exerciseSwitchDone = Set<Int>()
 
+    /// Shape-HIIT runs are 50s with 2 checks (~15s/40s) instead of the 15s cycle (BR-5-12).
+    private let shapeHIITCadence: Bool
+
     init(type: WorkoutType, zones: HRZones, restingHR: Int, maxHR: Int,
          voiceFeedback: VoiceFeedbackServiceProtocol, watchBridge: WatchBridgeProtocol,
-         protocolOverride: FoundationProtocol? = nil) {
+         protocolOverride: FoundationProtocol? = nil, shapeHIITCadence: Bool = false) {
+        self.shapeHIITCadence = shapeHIITCadence
         self.type = type
         self.zones = zones
         self.restingHR = restingHR
@@ -158,16 +162,16 @@ final class FoundationSessionManager {
         // Exercise phase (Level Up): scripted intro + "switch legs" cue (BR-4-12).
         // Note: a literal per-rep synced voice count is deferred to Build & Test;
         // here we announce the exercise, rep target, and the mid-phase switch.
-        if phase.kind == .exercise, let ex = phase.exercise {
+        if phase.kind == .exercise {
+            let legMode = phase.exercise?.mode
+            let reps = phase.exerciseReps ?? legMode?.reps ?? 0
+            let perLeg = (legMode?.perLeg ?? false) && reps == (legMode?.reps ?? -1)
             if elapsedInPhaseSec == 0, !exerciseIntroDone.contains(phase.index) {
                 exerciseIntroDone.insert(phase.index)
-                let reps = phase.exerciseReps ?? ex.mode.reps
-                let perLeg = ex.mode.perLeg && reps == ex.mode.reps
-                let text = "\(ex.name) — \(reps) reps\(perLeg ? " per leg" : ""). Go!"
+                let text = "\(phase.label) — \(reps) reps\(perLeg ? " per leg" : ""). Go!"
                 cueText = text
                 voiceFeedback.speak(CoachingMessage(layer: 3, text: text))
-            } else if ex.mode.perLeg, (phase.exerciseReps ?? ex.mode.reps) == ex.mode.reps,
-                      let dur = phase.durationSec, elapsedInPhaseSec >= dur / 2,
+            } else if perLeg, let dur = phase.durationSec, elapsedInPhaseSec >= dur / 2,
                       !exerciseSwitchDone.contains(phase.index) {
                 exerciseSwitchDone.insert(phase.index)
                 cueText = "Switch legs."
@@ -175,14 +179,19 @@ final class FoundationSessionManager {
             }
         }
 
-        if phase.isHRCoached, let target = phase.target, elapsedInPhaseSec % 15 == 0, hr != Int.max {
+        // Shape-HIIT run phases: 2 checks at ~15s/40s; everything else: every 15s (BR-5-12).
+        let isShapeHIITRun = shapeHIITCadence && phase.kind == .work
+        let coachingDue = isShapeHIITRun
+            ? (elapsedInPhaseSec == 15 || elapsedInPhaseSec == 40)
+            : (elapsedInPhaseSec % 15 == 0)
+        if phase.isHRCoached, let target = phase.target, coachingDue, hr != Int.max {
             let bpm = target.bpmRange(restingHR: restingHR, maxHR: maxHR)
             let tick = CoachingEngineV2.Tick(
                 hr: hr, phase: phase, bpmTarget: bpm,
                 phaseElapsedSec: elapsedInPhaseSec, phaseDurationSec: phase.durationSec,
                 isPhaseStart: elapsedInPhaseSec == 0, itemsLeft: remainingScoredPhases(),
                 escalationThresholdSec: escalationThresholdSec, sessionSec: totalElapsedSec,
-                secondsPerTick: 15)
+                secondsPerTick: isShapeHIITRun ? 25 : 15)
             if let cue = CoachingEngineV2.tick(tick, state: &coaching) {
                 cueText = cue.text
                 voiceFeedback.speak(CoachingMessage(layer: 2, text: cue.text, hapticPattern: cue.haptic))

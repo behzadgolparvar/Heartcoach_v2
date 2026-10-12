@@ -41,6 +41,8 @@ final class WorkoutViewModel {
     private let maxHR: Int
     private let stage: TrainingStage
     private let levelUpUnlock: LevelUpUnlock?
+    /// Per-session Shape choice (Option A/B + muscles), set before `start` on Shape days.
+    var shapeChoice: ShapeSessionChoice?
 
     private var sessionManager: FoundationSessionManager?
 
@@ -68,15 +70,22 @@ final class WorkoutViewModel {
 
     @MainActor
     func start(program: WorkoutProgram) {
-        // Level Up builds a protocol with injury-filtered leg exercises woven in.
-        var levelUpProtocol: FoundationProtocol?
+        // Stage-specific protocol: Level Up weaves leg exercises; Shape adds Option A/B
+        // + muscle-targeted weight/plyometric phases. Foundation uses its own builder.
+        var override: FoundationProtocol?
+        var shapeHIIT = false
+        let seed = UInt64(Date().timeIntervalSince1970)
         if stage == .levelUp {
             let eligible = ExerciseSelector.eligible(bank: LegExerciseBank.all, unlock: levelUpUnlock)
             let picks = ExerciseSelector.sequence(
                 eligible: eligible,
-                count: LevelUpProtocolBuilder.exerciseCount(for: program.workoutType),
-                seed: UInt64(Date().timeIntervalSince1970))
-            levelUpProtocol = LevelUpProtocolBuilder.build(type: program.workoutType, exercises: picks)
+                count: LevelUpProtocolBuilder.exerciseCount(for: program.workoutType), seed: seed)
+            override = LevelUpProtocolBuilder.build(type: program.workoutType, exercises: picks)
+        } else if stage == .shape, let choice = shapeChoice {
+            let plan = ShapeExercisePlanner.plan(choice: choice, type: program.workoutType,
+                                                 legUnlock: levelUpUnlock, seed: seed)
+            override = ShapeProtocolBuilder.build(type: program.workoutType, planned: plan)
+            shapeHIIT = (program.workoutType == .hiit)
         }
         let manager = FoundationSessionManager(
             type: program.workoutType,
@@ -85,7 +94,8 @@ final class WorkoutViewModel {
             maxHR: maxHR,
             voiceFeedback: voiceFeedback,
             watchBridge: watchBridge,
-            protocolOverride: levelUpProtocol
+            protocolOverride: override,
+            shapeHIITCadence: shapeHIIT
         )
         manager.onStateUpdate = { [weak self] state in
             self?.coachingState = state

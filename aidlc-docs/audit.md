@@ -758,3 +758,51 @@
 **AI Response**: "Phase 4 approved and committed (7e496c2). Phase 4 COMPLETE. Next: Phase 5 (Shape)."
 **Context**: Phase 4 Code Generation completion gate approved; committed.
 ---
+
+## Phase 5 Functional Design — Started
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "consolidated approach" (→ proceed to Phase 5, then one Build & Test pass)
+**AI Response**: "Beginning Phase 5 (Shape) Functional Design. Read §Phase 3 (Shape Continuous §3.1 4-2 split; HIIT §3.2 6-5 split, 11 exercise phases, 2-checks-per-50s run), §E Shape unlock, §G weight banks. Issuing design-question plan."
+**Context**: Phase 5 Functional Design kickoff.
+---
+
+## Phase 5 Functional Design — Answers
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "answered all" (Q1–Q10 all = A; Q8 with checks at ~15s & ~40s)
+**AI Response**: "All A. Generating Phase 5 functional-design artifacts (weight banks §G, Option A/B + per-session muscle selection/ranking, Legs rule, 4-2/6-5 alternation, ShapeProtocolBuilder §3.1/§3.2, Shape-HIIT 2-checks cadence, Shape unlock + per-session re-ask, Level Up→Shape advance)."
+**Context**: Phase 5 (Shape) Functional Design — answers collected.
+---
+
+## Phase 5 Functional Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 5 NFR Requirements (concise; pure logic + Shape-HIIT cadence + per-session picker on fixed stack, no new questions)."
+**Context**: Phase 5 (Shape) Functional Design approved.
+---
+
+## Phase 5 NFR Requirements — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 5 NFR Design."
+**Context**: Phase 5 NFR Requirements approved.
+---
+
+## Phase 5 NFR Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED. Proceeding to Phase 5 Code Generation — Part 1 (Planning)."
+**Context**: Phase 5 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 5 Code Generation — Plan Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–6 (weight banks + planner + ShapeProtocolBuilder + ShapeUnlock, session-manager extension, unlock/pickers + advance, build/test)."
+**Context**: Phase 5 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 5 Code Generation — Steps 1–6 complete
+**Timestamp**: 2026-10-11T00:00:00Z
+**AI Response**: "Generated weight banks + ShapeExercisePlanner (4-2/6-5 alternation, Legs rule) + ShapeProtocolBuilder (§3.1/§3.2) + ShapeUnlock; session-manager Shape builder selection + 2-checks-per-50s HIIT cadence + generalized exercise cue (weights + plyo); Shape unlock screen + per-session Option A/B + rank-2-muscles picker; Level Up→Shape advance. 14 new core tests + full suite green (127). SECURITY-03 clean. Deferred (flagged): per-rep voice count, Shape-HIIT offset tuning, exercise-phase internal timing → Build & Test; weight banks → collaborator. All three designed stages (Foundation/Level Up/Shape) now built; Maintain out of scope. Presenting completion gate."
+**Context**: Phase 5 Code Generation Part 2 — complete.
+---

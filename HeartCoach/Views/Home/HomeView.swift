@@ -10,6 +10,8 @@ struct HomeView: View {
     @State private var showPreStart = false
     @State private var showMinimumWalk = false
     @State private var showLevelUpUnlock = false
+    @State private var showShapeUnlock = false
+    @State private var showShapeChoice = false
 
     var body: some View {
         NavigationStack {
@@ -37,6 +39,11 @@ struct HomeView: View {
                                 .buttonStyle(PrimaryButtonStyle())
                                 .accessibilityIdentifier("home-unlock-levelup")
                         }
+                        if a.isStageComplete, vm.profile?.program?.currentStage == .levelUp {
+                            Button("Unlock Shape") { showShapeUnlock = true }
+                                .buttonStyle(PrimaryButtonStyle())
+                                .accessibilityIdentifier("home-unlock-shape")
+                        }
                     }
 
                     // Zone card (empty state) or last session card
@@ -58,7 +65,11 @@ struct HomeView: View {
                                     maxHR: profile.effectiveMaxHR,
                                     stage: profile.program?.currentStage ?? .foundation,
                                     levelUpUnlock: profile.levelUpUnlock)
-                                showPreStart = true
+                                if profile.program?.currentStage == .shape {
+                                    showShapeChoice = true
+                                } else {
+                                    showPreStart = true
+                                }
                             }
                         }
                         .buttonStyle(PrimaryButtonStyle())
@@ -117,6 +128,24 @@ struct HomeView: View {
                                                  approvedExerciseIDs: approved, userID: userID)
                     }
                     showLevelUpUnlock = false
+                }
+            }
+            .navigationDestination(isPresented: $showShapeUnlock) {
+                ShapeUnlockView { equipment, focus, pain in
+                    if let userID = authViewModel.currentUserID {
+                        vm.completeShapeUnlock(equipmentPreference: equipment, focusAreas: focus,
+                                               acknowledgedPain: pain, userID: userID)
+                    }
+                    showShapeUnlock = false
+                }
+            }
+            .navigationDestination(isPresented: $showShapeChoice) {
+                if let wvm = workoutVM, let a = vm.assignment {
+                    ShapeChoiceView(assignedType: a.type,
+                                    defaultOption: vm.profile?.shapeUnlock?.equipmentPreference ?? .weights,
+                                    focusDefaults: Array(vm.profile?.shapeUnlock?.focusAreas ?? []),
+                                    onFinish: { showShapeChoice = false; workoutVM = nil })
+                    .environment(wvm)
                 }
             }
         }

@@ -50,17 +50,20 @@ public struct FoundationPhase: Sendable, Equatable {
     /// Rep target for a `.exercise` phase (Continuous uses the mode's reps; Level Up
     /// HIIT uses 20). nil for non-exercise phases.
     public let exerciseReps: Int?
+    /// Muscle group for a Shape weight-exercise phase (P5); nil otherwise.
+    public let muscle: MuscleGroup?
     public let label: String
 
     public init(index: Int, kind: PhaseKind, durationSec: Int?,
                 target: TargetRange?, exercise: LegExercise? = nil,
-                exerciseReps: Int? = nil, label: String) {
+                exerciseReps: Int? = nil, muscle: MuscleGroup? = nil, label: String) {
         self.index = index
         self.kind = kind
         self.durationSec = durationSec
         self.target = target
         self.exercise = exercise
         self.exerciseReps = exerciseReps
+        self.muscle = muscle
         self.label = label
     }
 

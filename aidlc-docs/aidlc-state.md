@@ -165,4 +165,17 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] Infrastructure Design — SKIPPED (no new infra)
 - [x] Code Generation — COMPLETED + APPROVED (2026-10-11). Committed 7e496c2. Full suite green (116 tests); SECURITY-03 clean.
   - Deferred (flagged): literal per-rep synced voice count + HIIT unilateral per-leg + tick-granularity timing → Build & Test; leg-bank size + mode/joint tags → collaborator confirm.
-- **Phase 4 COMPLETE.** Next: Phase 5 (Shape — Option A/B daily choice + muscle-group selection). Pending: Build & Test (deferred §J + P4 exercise-count/timing refinements + device verification).
+- **Phase 4 COMPLETE.** (User chose consolidated approach: finish P5, then one Build & Test pass.)
+
+### CONSTRUCTION (v2) — Phase 5 (Shape)
+- [x] Functional Design — APPROVED (2026-10-11). Answers Q1–Q10 all A (Q8 checks ~15s/40s). FLAGGED for collaborator: weight banks (§G transcription + muscle mapping).
+- [x] NFR Requirements — APPROVED (2026-10-11)
+- [x] NFR Design — APPROVED (2026-10-11)
+- [x] Infrastructure Design — SKIPPED (no new infra)
+- [~] Code Generation — Part 2 COMPLETE (Steps 1–6). Weight banks + ShapeExercisePlanner (4-2/6-5, Legs rule) + ShapeProtocolBuilder (§3.1/§3.2) + ShapeUnlock; session-manager Shape builder + 2-checks HIIT cadence + generalized exercise cue; Shape unlock + per-session Option A/B + muscle picker + Level Up→Shape advance. Full suite green (127 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+  - Deferred (flagged): per-rep voice count, Shape-HIIT offset tuning, exercise-phase internal timing approximation → Build & Test; weight banks → collaborator confirm.
+
+### Build & Test (deferred backlog, consolidated pass after P5)
+- §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)
+- P4 refinements: literal per-rep synced voice count, HIIT unilateral per-leg, tick-granularity timing
+- On-device Watch/HealthKit verification; collaborator confirms (leg-bank size, exercise tags)

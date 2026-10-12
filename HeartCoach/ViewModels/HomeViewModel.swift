@@ -88,6 +88,20 @@ final class HomeViewModel {
         Task { try? await firebaseService.saveProfileV2(profile, userID: userID) }
     }
 
+    /// Completes the Shape unlock (§E) and advances Level Up → Shape (BR-5-15).
+    func completeShapeUnlock(equipmentPreference: ShapeOption, focusAreas: Set<MuscleGroup>,
+                             acknowledgedPain: Bool, userID: String) {
+        guard var profile = profile, var program = profile.program else { return }
+        profile.shapeUnlock = ShapeUnlock(equipmentPreference: equipmentPreference, focusAreas: focusAreas,
+                                          acknowledgedLevelUpPain: acknowledgedPain, unlockedAt: Date())
+        program.currentStage = .shape
+        program.stageProgress[.shape] = StageProgress(stage: .shape, sessionsCompleted: 0)
+        profile.program = program
+        self.profile = profile
+        self.assignment = ProgressionEngine.assign(profile: profile)
+        Task { try? await firebaseService.saveProfileV2(profile, userID: userID) }
+    }
+
     private static func relapseMessage(_ o: RelapseOutcome) -> String {
         switch o.band {
         case .resetToStart:
