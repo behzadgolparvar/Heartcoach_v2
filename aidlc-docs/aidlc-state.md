@@ -156,4 +156,12 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] Infrastructure Design — SKIPPED (no new infra)
 - [x] Code Generation — COMPLETED + APPROVED (2026-10-09). Committed a6670e4. Full suite green (103 tests); SECURITY-03 clean.
   - Notes: minimum walk resets relapse clock but doesn't persist a Session record in P3 (research-logging → P6); §J walk_fallback shares this plumbing (→ Build & Test).
-- **Phase 3 COMPLETE.** Next: Phase 4 (Level Up — bodyweight leg exercises). Pending: Build & Test (deferred §J + device verification).
+- **Phase 3 COMPLETE.** Pending: Build & Test (deferred §J + device verification).
+
+### CONSTRUCTION (v2) — Phase 4 (Level Up)
+- [x] Functional Design — APPROVED (2026-10-11). Answers Q1–Q9 all A. FLAGGED for collaborator: leg-bank size (8 vs "20+") + per-exercise mode/joint tags (safety-relevant).
+- [x] NFR Requirements — APPROVED (2026-10-11)
+- [x] NFR Design — APPROVED (2026-10-11)
+- [x] Infrastructure Design — SKIPPED (no new infra)
+- [~] Code Generation — Part 2 COMPLETE (Steps 1–7). Leg bank + ExerciseSelector + LevelUpProtocolBuilder + LevelUpUnlock; session-manager exercise-cue layer + builder override; Level Up unlock screen + Foundation→Level Up advance. Full suite green (116 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+  - Deferred (flagged): literal per-rep synced voice count + HIIT unilateral per-leg + tick-granularity timing → Build & Test; leg-bank size + mode/joint tags → collaborator confirm.

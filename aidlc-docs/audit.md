@@ -703,3 +703,51 @@
 **AI Response**: "Phase 3 approved and committed (a6670e4). Phase 3 COMPLETE. Next: Phase 4 (Level Up)."
 **Context**: Phase 3 Code Generation completion gate approved; committed.
 ---
+
+## Phase 4 Functional Design — Started
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "start phase 4"
+**AI Response**: "Beginning Phase 4 (Level Up) Functional Design. Read §Phase 2 (Level Up Continuous 7-block w/ internal run/exercise/walk timeline; HIIT reworked to warmup+exercise-block+10×3:00 rounds), §G leg bank, §E Level Up unlock. Issuing design-question plan (reworked protocols, exercise bank, bilateral/unilateral timing, injury exclusion, unlock flow, stage advancement)."
+**Context**: Phase 4 Functional Design kickoff.
+---
+
+## Phase 4 Functional Design — Answers
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "I answered all questions" (Q1–Q9 all = A)
+**AI Response**: "All A. Generating Phase 4 functional-design artifacts (leg bank §G + bilateral/unilateral + joint tags [flagged for collaborator], LevelUpProtocolBuilder for reworked Continuous+HIIT, exercise selection+exclusion engine, Level Up unlock reusing P1b jointIssues, exercise-cue/rep-count coaching, Foundation→Level Up advance)."
+**Context**: Phase 4 Functional Design — answers collected.
+---
+
+## Phase 4 Functional Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 4 NFR Requirements (concise; pure logic + exercise-cue layer on fixed stack, no new questions)."
+**Context**: Phase 4 (Level Up) Functional Design approved.
+---
+
+## Phase 4 NFR Requirements — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 4 NFR Design."
+**Context**: Phase 4 NFR Requirements approved.
+---
+
+## Phase 4 NFR Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED. Proceeding to Phase 4 Code Generation — Part 1 (Planning)."
+**Context**: Phase 4 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 4 Code Generation — Plan Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–7 straight through (leg bank + selector + LevelUpProtocolBuilder + unlock, session-manager exercise-cue layer, stage advance, build/test)."
+**Context**: Phase 4 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 4 Code Generation — Steps 1–7 complete
+**Timestamp**: 2026-10-11T00:00:00Z
+**AI Response**: "Generated leg bank + ExerciseSelector + LevelUpProtocolBuilder (reworked Continuous §2.1 + HIIT §2.2) + LevelUpUnlock; PhaseKind.exercise; session-manager exercise-cue layer + builder override; Level Up unlock screen (injury pre-filled from onboarding + comfort subset + caution); Foundation→Level Up advance. 13 new core tests + full suite green (116). SECURITY-03 clean. Deferred (flagged): literal per-rep voice count, HIIT unilateral per-leg, tick-granularity timing → Build & Test; bank size + tags → collaborator. Presenting completion gate."
+**Context**: Phase 4 Code Generation Part 2 — complete.
+---

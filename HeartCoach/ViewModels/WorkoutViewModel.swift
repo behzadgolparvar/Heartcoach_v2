@@ -39,6 +39,8 @@ final class WorkoutViewModel {
     private let zones: HRZones
     private let restingHR: Int
     private let maxHR: Int
+    private let stage: TrainingStage
+    private let levelUpUnlock: LevelUpUnlock?
 
     private var sessionManager: FoundationSessionManager?
 
@@ -47,12 +49,16 @@ final class WorkoutViewModel {
     init(zones: HRZones,
          restingHR: Int,
          maxHR: Int,
+         stage: TrainingStage = .foundation,
+         levelUpUnlock: LevelUpUnlock? = nil,
          voiceFeedback: VoiceFeedbackServiceProtocol,
          watchBridge: WatchBridgeProtocol,
          healthKitService: HealthKitServiceProtocol) {
         self.zones = zones
         self.restingHR = restingHR
         self.maxHR = maxHR
+        self.stage = stage
+        self.levelUpUnlock = levelUpUnlock
         self.voiceFeedback = voiceFeedback
         self.watchBridge = watchBridge
         self.healthKitService = healthKitService
@@ -62,13 +68,24 @@ final class WorkoutViewModel {
 
     @MainActor
     func start(program: WorkoutProgram) {
+        // Level Up builds a protocol with injury-filtered leg exercises woven in.
+        var levelUpProtocol: FoundationProtocol?
+        if stage == .levelUp {
+            let eligible = ExerciseSelector.eligible(bank: LegExerciseBank.all, unlock: levelUpUnlock)
+            let picks = ExerciseSelector.sequence(
+                eligible: eligible,
+                count: LevelUpProtocolBuilder.exerciseCount(for: program.workoutType),
+                seed: UInt64(Date().timeIntervalSince1970))
+            levelUpProtocol = LevelUpProtocolBuilder.build(type: program.workoutType, exercises: picks)
+        }
         let manager = FoundationSessionManager(
             type: program.workoutType,
             zones: zones,
             restingHR: restingHR,
             maxHR: maxHR,
             voiceFeedback: voiceFeedback,
-            watchBridge: watchBridge
+            watchBridge: watchBridge,
+            protocolOverride: levelUpProtocol
         )
         manager.onStateUpdate = { [weak self] state in
             self?.coachingState = state

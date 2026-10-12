@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var workoutVM: WorkoutViewModel?
     @State private var showPreStart = false
     @State private var showMinimumWalk = false
+    @State private var showLevelUpUnlock = false
 
     var body: some View {
         NavigationStack {
@@ -31,6 +32,11 @@ struct HomeView: View {
                     // Today's assigned session (Phase 3).
                     if let a = vm.assignment {
                         TodaysSessionCard(assignment: a)
+                        if a.isStageComplete, vm.profile?.program?.currentStage == .foundation {
+                            Button("Unlock Level Up") { showLevelUpUnlock = true }
+                                .buttonStyle(PrimaryButtonStyle())
+                                .accessibilityIdentifier("home-unlock-levelup")
+                        }
                     }
 
                     // Zone card (empty state) or last session card
@@ -49,7 +55,9 @@ struct HomeView: View {
                                 workoutVM = container.makeWorkoutViewModel(
                                     zones: zones,
                                     restingHR: profile.restingHR,
-                                    maxHR: profile.effectiveMaxHR)
+                                    maxHR: profile.effectiveMaxHR,
+                                    stage: profile.program?.currentStage ?? .foundation,
+                                    levelUpUnlock: profile.levelUpUnlock)
                                 showPreStart = true
                             }
                         }
@@ -100,6 +108,15 @@ struct HomeView: View {
                         vm.recordMinimumWalk(userID: userID)
                     }
                     showMinimumWalk = false
+                }
+            }
+            .navigationDestination(isPresented: $showLevelUpUnlock) {
+                LevelUpUnlockView(prefilledInjuredJoints: vm.prefilledInjuredJoints) { injured, comfortable, approved in
+                    if let userID = authViewModel.currentUserID {
+                        vm.completeLevelUpUnlock(injuredJoints: injured, comfortable: comfortable,
+                                                 approvedExerciseIDs: approved, userID: userID)
+                    }
+                    showLevelUpUnlock = false
                 }
             }
         }

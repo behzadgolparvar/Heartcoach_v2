@@ -68,6 +68,26 @@ final class HomeViewModel {
         Task { try? await firebaseService.saveProfileV2(profile, userID: userID) }
     }
 
+    /// Injured leg joints implied by onboarding (`jointIssues`) — pre-fills the Level Up unlock.
+    var prefilledInjuredJoints: Set<LegJoint> {
+        LegJoint.injured(from: profile?.healthHistory?.jointIssues ?? [])
+    }
+
+    /// Completes the Level Up unlock (§E) and advances Foundation → Level Up (BR-4-15).
+    func completeLevelUpUnlock(injuredJoints: Set<LegJoint>, comfortable: Bool,
+                               approvedExerciseIDs: Set<String>?, userID: String) {
+        guard var profile = profile, var program = profile.program else { return }
+        profile.levelUpUnlock = LevelUpUnlock(
+            injuredJoints: injuredJoints, comfortableWithBodyweight: comfortable,
+            approvedExerciseIDs: comfortable ? nil : approvedExerciseIDs, unlockedAt: Date())
+        program.currentStage = .levelUp
+        program.stageProgress[.levelUp] = StageProgress(stage: .levelUp, sessionsCompleted: 0)
+        profile.program = program
+        self.profile = profile
+        self.assignment = ProgressionEngine.assign(profile: profile)
+        Task { try? await firebaseService.saveProfileV2(profile, userID: userID) }
+    }
+
     private static func relapseMessage(_ o: RelapseOutcome) -> String {
         switch o.band {
         case .resetToStart:

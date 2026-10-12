@@ -40,6 +40,9 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
     public var dailyOptionSelection: ShapeOption?
     public var muscleGroupPriority: [MuscleGroup]?
 
+    /// Level Up unlock answers (P4) — injury/comfort; nil until Level Up is unlocked.
+    public var levelUpUnlock: LevelUpUnlock?
+
     // optional sections
     public var healthHistory: HealthHistory?
     public var facility: FacilityInfo?
@@ -56,6 +59,7 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
                 q1TrainingHistory: TrainingHistory? = nil, q2SelfSelect: FitnessExperience? = nil,
                 classificationMismatch: Bool = false, program: ProgramState? = nil,
                 dailyOptionSelection: ShapeOption? = nil, muscleGroupPriority: [MuscleGroup]? = nil,
+                levelUpUnlock: LevelUpUnlock? = nil,
                 healthHistory: HealthHistory? = nil, facility: FacilityInfo? = nil,
                 device: DeviceInfo? = nil, schedule: Schedule, consent: Consent, v2Completed: Bool = false) {
         self.age = age
@@ -74,6 +78,7 @@ public struct UserProfileV2: Codable, Sendable, Equatable {
         self.program = program
         self.dailyOptionSelection = dailyOptionSelection
         self.muscleGroupPriority = muscleGroupPriority
+        self.levelUpUnlock = levelUpUnlock
         self.healthHistory = healthHistory
         self.facility = facility
         self.device = device
@@ -123,7 +128,7 @@ extension UserProfileV2 {
         case restingHR, maxHROverride
         case goals, fitnessExperience, mentality
         case q1TrainingHistory, q2SelfSelect, classificationMismatch, program
-        case dailyOptionSelection, muscleGroupPriority
+        case dailyOptionSelection, muscleGroupPriority, levelUpUnlock
         case healthHistory, facility, device
         case schedule, consent, v2Completed
     }
@@ -147,6 +152,7 @@ extension UserProfileV2 {
         program = try c.decodeIfPresent(ProgramState.self, forKey: .program)
         dailyOptionSelection = try c.decodeIfPresent(ShapeOption.self, forKey: .dailyOptionSelection)
         muscleGroupPriority = try c.decodeIfPresent([MuscleGroup].self, forKey: .muscleGroupPriority)
+        levelUpUnlock = try c.decodeIfPresent(LevelUpUnlock.self, forKey: .levelUpUnlock)
         healthHistory = try c.decodeIfPresent(HealthHistory.self, forKey: .healthHistory)
         facility = try c.decodeIfPresent(FacilityInfo.self, forKey: .facility)
         device = try c.decodeIfPresent(DeviceInfo.self, forKey: .device)

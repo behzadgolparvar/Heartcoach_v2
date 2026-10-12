@@ -44,15 +44,21 @@ final class FoundationSessionManager {
     var onAwaitingCooldownStart: (() -> Void)?
     var onCooldownStep: ((String) -> Void)?
 
+    /// Tracks exercise-phase cues already spoken (intro / switch-legs).
+    private var exerciseIntroDone = Set<Int>()
+    private var exerciseSwitchDone = Set<Int>()
+
     init(type: WorkoutType, zones: HRZones, restingHR: Int, maxHR: Int,
-         voiceFeedback: VoiceFeedbackServiceProtocol, watchBridge: WatchBridgeProtocol) {
+         voiceFeedback: VoiceFeedbackServiceProtocol, watchBridge: WatchBridgeProtocol,
+         protocolOverride: FoundationProtocol? = nil) {
         self.type = type
         self.zones = zones
         self.restingHR = restingHR
         self.maxHR = maxHR
         self.voiceFeedback = voiceFeedback
         self.watchBridge = watchBridge
-        self.proto = FoundationProtocolBuilder.build(type: type)
+        // Level Up passes a prebuilt protocol (with exercises); Foundation builds its own.
+        self.proto = protocolOverride ?? FoundationProtocolBuilder.build(type: type)
         self.escalationThresholdSec = CoachingEngineV2.escalationThreshold(for: type)
         self.coaching = CoachingSessionState(seed: UInt64(Date().timeIntervalSince1970))
     }
@@ -148,6 +154,27 @@ final class FoundationSessionManager {
         }
 
         var cueText: String?
+
+        // Exercise phase (Level Up): scripted intro + "switch legs" cue (BR-4-12).
+        // Note: a literal per-rep synced voice count is deferred to Build & Test;
+        // here we announce the exercise, rep target, and the mid-phase switch.
+        if phase.kind == .exercise, let ex = phase.exercise {
+            if elapsedInPhaseSec == 0, !exerciseIntroDone.contains(phase.index) {
+                exerciseIntroDone.insert(phase.index)
+                let reps = phase.exerciseReps ?? ex.mode.reps
+                let perLeg = ex.mode.perLeg && reps == ex.mode.reps
+                let text = "\(ex.name) — \(reps) reps\(perLeg ? " per leg" : ""). Go!"
+                cueText = text
+                voiceFeedback.speak(CoachingMessage(layer: 3, text: text))
+            } else if ex.mode.perLeg, (phase.exerciseReps ?? ex.mode.reps) == ex.mode.reps,
+                      let dur = phase.durationSec, elapsedInPhaseSec >= dur / 2,
+                      !exerciseSwitchDone.contains(phase.index) {
+                exerciseSwitchDone.insert(phase.index)
+                cueText = "Switch legs."
+                voiceFeedback.speak(CoachingMessage(layer: 3, text: "Switch legs."))
+            }
+        }
+
         if phase.isHRCoached, let target = phase.target, elapsedInPhaseSec % 15 == 0, hr != Int.max {
             let bpm = target.bpmRange(restingHR: restingHR, maxHR: maxHR)
             let tick = CoachingEngineV2.Tick(
@@ -247,6 +274,7 @@ final class FoundationSessionManager {
         case .warmup: return .warmup
         case .block, .work: return .exercise
         case .rest: return .recovery
+        case .exercise: return .exercise
         case .buffer, .transition, .cooldown: return .cooldown
         }
     }
