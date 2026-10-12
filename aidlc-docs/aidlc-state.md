@@ -172,8 +172,9 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Requirements — APPROVED (2026-10-11)
 - [x] NFR Design — APPROVED (2026-10-11)
 - [x] Infrastructure Design — SKIPPED (no new infra)
-- [~] Code Generation — Part 2 COMPLETE (Steps 1–6). Weight banks + ShapeExercisePlanner (4-2/6-5, Legs rule) + ShapeProtocolBuilder (§3.1/§3.2) + ShapeUnlock; session-manager Shape builder + 2-checks HIIT cadence + generalized exercise cue; Shape unlock + per-session Option A/B + muscle picker + Level Up→Shape advance. Full suite green (127 tests); SECURITY-03 clean. Code summary written. Awaiting completion-gate approval.
+- [x] Code Generation — COMPLETED + APPROVED (2026-10-11). Committed b263106. Full suite green (127 tests); SECURITY-03 clean.
   - Deferred (flagged): per-rep voice count, Shape-HIIT offset tuning, exercise-phase internal timing approximation → Build & Test; weight banks → collaborator confirm.
+- **Phase 5 COMPLETE.** All 3 designed training stages (Foundation/Level Up/Shape) built; Maintain out of scope. Remaining: Phase 6 (milestones/reminders/export/PDF), then Build & Test.
 
 ### Build & Test (deferred backlog, consolidated pass after P5)
 - §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)
