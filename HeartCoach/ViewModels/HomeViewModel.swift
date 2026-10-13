@@ -75,12 +75,15 @@ final class HomeViewModel {
                 await notificationService?.replace(reminders)
             }
 
+            // Bind to immutable values before crossing the actor hop (Swift 6 concurrency).
+            let finalProfile = p
+            let finalRelapseMsg = relapseMsg
             await MainActor.run {
-                self.profile = p
+                self.profile = finalProfile
                 self.zones = z
                 self.lastSession = sessions.first
                 self.assignment = assignment
-                self.relapseMessage = relapseMsg
+                self.relapseMessage = finalRelapseMsg
                 self.isMilestoneDue = due
                 self.weightGate = gate
                 self.isLoading = false
@@ -90,20 +93,22 @@ final class HomeViewModel {
 
     /// Logs a biweekly milestone: manual weight + auto RHR (nil-tolerant) (§H, BR-6-2).
     func logMilestone(weightKg: Double?, userID: String) {
-        guard var profile = profile else { return }
+        guard let base = profile else { return }
         Task {
             let rhr = await healthKitService.fetchRestingHeartRate()
-            var state = profile.milestones ?? MilestoneState()
+            var state = base.milestones ?? MilestoneState()
             let now = Date()
             state.history.append(Milestone(date: now, restingHR: rhr, weightKg: weightKg))
             state.lastMilestoneDate = now
-            profile.milestones = state
+            var updated = base
+            updated.milestones = state
+            let finalProfile = updated   // immutable across the actor hop
             await MainActor.run {
-                self.profile = profile
+                self.profile = finalProfile
                 self.isMilestoneDue = false
                 self.weightGate = .ok
             }
-            try? await firebaseService.saveProfileV2(profile, userID: userID)
+            try? await firebaseService.saveProfileV2(finalProfile, userID: userID)
         }
     }
 
