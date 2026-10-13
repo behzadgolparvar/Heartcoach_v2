@@ -17,7 +17,6 @@ public enum ProgressionEngine {
         let lean = profile.mentalityLean
         let complete = n >= sessionsPerStage
         let sub = min(2, n / sessionsPerSubPhase)
-        let idx = n % sessionsPerSubPhase
 
         let ratio = ProgressionTables.ratio(track: track, lean: lean, subPhase: sub)
         let type = assignType(track: track, lean: lean, sessionsCompleted: n, ratio: ratio)
@@ -28,7 +27,6 @@ public enum ProgressionEngine {
             subPhase: sub,
             ratio: ratio,
             isStageComplete: complete)
-        // (idx used inside assignType; kept local for clarity)
     }
 
     private static func assignType(track: ProgressionTrack, lean: MentalityLean,

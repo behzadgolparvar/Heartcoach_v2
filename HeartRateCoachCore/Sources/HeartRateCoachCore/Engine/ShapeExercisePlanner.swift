@@ -34,7 +34,7 @@ public enum ShapeExercisePlanner {
         let roles = ShapeAlternation.roles(for: type)
         // Pre-draw a leg sequence long enough for all possible leg phases.
         let eligibleLegs = ExerciseSelector.eligible(bank: LegExerciseBank.all, unlock: legUnlock)
-        var legSeq = ExerciseSelector.sequence(eligible: eligibleLegs, count: roles.count, seed: seed)
+        let legSeq = ExerciseSelector.sequence(eligible: eligibleLegs, count: roles.count, seed: seed)
         var legIdx = 0
         // Per-muscle weight sequences (seeded, no-repeat), lazily built.
         var weightSeqs: [MuscleGroup: [WeightExercise]] = [:]
