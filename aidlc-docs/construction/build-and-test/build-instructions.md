@@ -1,165 +1,41 @@
-# Build Instructions
+# Build Instructions — HeartCoach v5
+
+**Branch:** `new_design_Sep_2026` · **Workspace root:** repo root.
 
 ## Prerequisites
+- Xcode 26, iOS 17+ / watchOS 10+ SDKs; a paid Apple Developer account (TEAM `Z5F9A35728`).
+- `xcodegen` installed (`brew install xcodegen`).
+- `GoogleService-Info.plist` present at the app path (gitignored — never commit).
 
-| Requirement | Version | Notes |
-|---|---|---|
-| macOS | 14.0+ (Sonoma) | Required for Xcode 15 |
-| Xcode | 15.4+ | Set in `project.yml` `xcodeVersion` |
-| XcodeGen | 2.40+ | Generates `.xcodeproj` from `project.yml` |
-| Apple Developer Account | Any (free or paid) | Required for device signing |
-| Swift | 5.9 | Bundled with Xcode 15 |
-
----
-
-## Step 1: Install XcodeGen
-
-XcodeGen converts `project.yml` into the Xcode project. It must be run before opening the project in Xcode.
-
-```bash
-# Install via Homebrew (one-time)
-brew install xcodegen
+## Core package (SPM)
 ```
-
----
-
-## Step 2: Configure Firebase
-
-> **SECURITY**: `GoogleService-Info.plist` must NEVER be committed to git (see `.gitignore`).
-
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Open your `HeartCoach` project (or create one)
-3. Download `GoogleService-Info.plist` for the iOS app
-4. Place it at: `HeartCoach/GoogleService-Info.plist`
-
-Verify the file is gitignored:
-```bash
-git check-ignore -v HeartCoach/GoogleService-Info.plist
-# Expected: .gitignore:X:GoogleService-Info.plist  HeartCoach/GoogleService-Info.plist
+swift build --package-path HeartRateCoachCore
 ```
+Note: the core's SwiftCheck test target does not compile under Xcode 26 (pre-existing); PBT lives in the app test target instead.
 
----
-
-## Step 3: Configure Apple Developer Team
-
-Edit `project.yml` and set your Apple Developer Team ID in all three `DEVELOPMENT_TEAM` fields:
-
-```yaml
-# HeartCoach target
-DEVELOPMENT_TEAM: "XXXXXXXXXX"   # ← your 10-character Team ID
-
-# HeartCoachWatch target
-DEVELOPMENT_TEAM: "XXXXXXXXXX"
-
-# HeartCoachWatchTests target
-# (inherits from parent)
+## Generate the Xcode project (after any file add/remove)
 ```
-
-Find your Team ID at [developer.apple.com/account](https://developer.apple.com/account) → Membership.
-
----
-
-## Step 4: Generate Xcode Project
-
-```bash
-cd /path/to/Heartcoach_v2
 xcodegen generate
 ```
+`.xcodeproj` is gitignored and must be regenerated. Phase 6 added `FirebaseStorage` to the iOS target in `project.yml`.
 
-**Expected output:**
+## Build the app (simulator)
 ```
-⚙️  Resolving packages...
-✅  Generated: HeartCoach.xcodeproj
-```
-
-This generates `HeartCoach.xcodeproj`. Open it in Xcode (do not commit `.xcodeproj` — regenerate as needed from `project.yml`).
-
----
-
-## Step 5: Resolve Swift Package Manager Dependencies
-
-XcodeGen will prompt SPM resolution on first open. Alternatively, run:
-
-```bash
-xcodebuild -resolvePackageDependencies \
-    -project HeartCoach.xcodeproj \
-    -scheme HeartCoach
+xcodebuild build -project HeartCoach.xcodeproj -scheme HeartCoach \
+  -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
 
-SPM packages resolved:
-- `firebase-ios-sdk` → FirebaseAuth, FirebaseFirestore
-- `HeartRateCoachCore` (local path `./HeartRateCoachCore`) → HeartRateCoachCore, SwiftCheck (test only)
+## Build + install on device (iPhone + Watch)
+- Select the paired device; ensure Developer Mode is enabled on both iPhone and Watch.
+- The Watch app is embedded in the iPhone app. If companion install stalls at 75%, install the Watch app directly:
+  `xcrun devicectl device install app --device <watch-udid> <DerivedData>/.../HeartCoachWatch.app`
+  (See the `wcsession-install-fix` note.)
 
----
+## Config / capabilities
+- `WKBackgroundModes: [workout-processing]` (Watch) — required for background HR.
+- Local notifications (`UserNotifications`) — no entitlement needed; permission requested at runtime.
+- Firebase Storage uses the existing `GoogleService-Info.plist`; **publish the Storage security rules** (see infrastructure-design) before relying on export.
 
-## Step 6: Build All Targets
-
-### Build HeartRateCoachCore (SPM package)
-
-```bash
-swift build \
-    --package-path HeartRateCoachCore \
-    -c release
-```
-
-**Expected output:** `Build complete!`
-
-### Build HeartCoach (iPhone app)
-
-```bash
-xcodebuild build \
-    -project HeartCoach.xcodeproj \
-    -scheme HeartCoach \
-    -destination 'platform=iOS Simulator,name=iPhone 15 Pro' \
-    -configuration Debug \
-    | xcpretty
-```
-
-### Build HeartCoachWatch (Watch app)
-
-```bash
-xcodebuild build \
-    -project HeartCoach.xcodeproj \
-    -scheme HeartCoachWatch \
-    -destination 'platform=watchOS Simulator,name=Apple Watch Series 9 (45mm)' \
-    -configuration Debug \
-    | xcpretty
-```
-
----
-
-## Step 7: Verify Build Success
-
-**Expected:** Zero errors, zero warnings (warnings from Firebase/third-party are acceptable).
-
-**Build artifacts (Debug):**
-- `~/Library/Developer/Xcode/DerivedData/HeartCoach-*/Build/Products/Debug-iphonesimulator/HeartCoach.app`
-- `~/Library/Developer/Xcode/DerivedData/HeartCoach-*/Build/Products/Debug-watchossimulator/HeartCoachWatch.app`
-
----
-
-## Troubleshooting
-
-### `xcodegen: command not found`
-```bash
-brew install xcodegen
-# or update: brew upgrade xcodegen
-```
-
-### `Missing package product 'HeartRateCoachCore'`
-The local SPM package path in `project.yml` must match the directory name exactly.
-```bash
-ls HeartRateCoachCore/Package.swift   # verify this exists
-```
-
-### `GoogleService-Info.plist not found` (build error)
-Place the file at `HeartCoach/GoogleService-Info.plist` (see Step 2).
-
-### `Signing requires a development team`
-Set `DEVELOPMENT_TEAM` in `project.yml` (see Step 3), then re-run `xcodegen generate`.
-
-### `Module 'SwiftCheck' not found` (test build only)
-SwiftCheck is declared in `HeartRateCoachCore/Package.swift` as a test dependency. Run `swift package resolve` inside `HeartRateCoachCore/` to fetch it.
-```bash
-cd HeartRateCoachCore && swift package resolve
-```
+## TestFlight
+- Bump `CFBundleVersion` in `project.yml`; `xcodegen generate`; Archive → upload via Xcode Organizer or `xcodebuild -exportArchive`.
+- Internal testers re-onboard once (Q8=B). Keep internal until the §J safety items (backlog A) are wired.

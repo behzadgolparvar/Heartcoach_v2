@@ -182,7 +182,12 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 - [x] NFR Design — APPROVED (2026-10-12)
 - [x] Infrastructure Design — APPROVED (2026-10-12)
 - [x] Code Generation — COMPLETED + APPROVED (2026-10-12). Committed 7141536. Full suite green (134 tests); SECURITY-03 clean.
-- **Phase 6 COMPLETE.** All 6 build phases done. Remaining AI-DLC stage: **Build & Test** (consolidated device pass + deferred §J + owner deploy: Storage rules).
+- **Phase 6 COMPLETE.** All 6 build phases done.
+
+### Build & Test (IN PROGRESS)
+- [x] Build & test instruction set generated (`construction/build-and-test/`: build/unit/integration/performance/summary + backlog.md)
+- [x] Automated verification: core + app build on simulator; full suite green (134 tests); SECURITY-03 clean
+- [ ] Device pass + deferred §J (backlog A) + owner Storage-rules deploy (D) + collaborator confirms (E) — tracked in build-and-test/backlog.md (also in memory: v5_build_test_backlog)
 
 ### Build & Test (deferred backlog, consolidated pass after P5)
 - §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)

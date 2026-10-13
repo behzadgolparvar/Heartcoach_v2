@@ -869,3 +869,10 @@
 **AI Response**: "Phase 6 approved and committed (7141536). Phase 6 COMPLETE — all 6 build phases (P1/P1b/P2/P3/P4/P5/P6) done. Remaining: Build & Test stage (device verification + deferred §J + owner Storage-rules deploy)."
 **Context**: Phase 6 Code Generation completion gate approved; committed. Construction feature phases complete.
 ---
+
+## Build & Test — Started
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "let's build and test but keep a note of our backlog"
+**AI Response**: "Saved the Build & Test backlog to persistent memory (v5_build_test_backlog.md). Starting Build & Test stage: generating build/test instruction files + an in-repo backlog doc under construction/build-and-test/."
+**Context**: Construction → Build & Test stage kickoff (all 6 feature phases complete).
+---
