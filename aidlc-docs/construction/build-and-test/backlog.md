@@ -18,7 +18,7 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 - [ ] Watch HR pipeline (WCSession, auto-start, HealthKit) across Foundation / Level Up / Shape
 - [ ] Voice + haptics + background workout session; voice-off on-screen fallback
 - [ ] Notifications: permission flow + delivery (session / milestone / weight / relapse nudge)
-- [ ] Firebase Storage CSV upload (research export) lands at `users/{uid}/exports/`
+- [~] Research export: now **Firestore-only** (hr_stream has epoch-ms timestamps); Storage CSV upload **disabled/commented** in WorkoutSummaryViewModel (code kept). TODO: on-demand **Firestore→CSV export script** (Node or Python) when research data is needed.
 - [ ] Client PDF generates + share sheet works per stage
 - [ ] Milestone check-in: auto RHR read + weight gate (Day-2 blocks Start)
 

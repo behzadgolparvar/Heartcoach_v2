@@ -48,10 +48,12 @@ final class EngagementTests: XCTestCase {
                               timeInZones: [:], hrStream: records, scorePercent: 82, scoreTier: .great,
                               trainingDurationSec: 1200, sessionFlag: "hiit")
         let csv = SessionCSV.rows(for: session)
-        XCTAssertTrue(csv.contains("time_sec,hr,current_zone,phase,target_zone,phrase_type,phrase_time"))
+        XCTAssertTrue(csv.contains("time_sec,timestamp,hr,current_zone,phase,target_zone,phrase_type,phrase_time"))
         XCTAssertTrue(csv.contains("# score_tier,great"))
-        XCTAssertTrue(csv.contains("0,120,2,warmup,2,,"))        // no cue
-        XCTAssertTrue(csv.contains("5,150,3,block,3,cue,5"))     // cue fired at second 5
+        // Rows now carry an ISO-8601 timestamp between time_sec and hr; assert the stable parts.
+        XCTAssertTrue(csv.contains(",120,2,warmup,2,,"))        // no cue
+        XCTAssertTrue(csv.contains(",150,3,block,3,cue,5"))     // cue fired at second 5
+        XCTAssertTrue(csv.contains("T"))                        // ISO-8601 date present (e.g. 2026-…T…Z)
     }
 
     // MARK: - Session plan (Q9)

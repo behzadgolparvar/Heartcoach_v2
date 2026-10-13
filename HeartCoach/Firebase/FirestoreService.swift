@@ -229,7 +229,11 @@ final class FirestoreService: FirebaseServiceProtocol {
     }
 
     private func encodeSession(_ s: Session) throws -> [String: Any] {
-        let hrData = try JSONEncoder().encode(s.hrStream)
+        // hr_stream timestamps as Unix epoch milliseconds (unambiguous for research),
+        // not the default Apple reference-date double.
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        let hrData = try encoder.encode(s.hrStream)
         var dict: [String: Any] = [
             "id": s.id,
             "date": Timestamp(date: s.date),
@@ -264,9 +268,11 @@ final class FirestoreService: FirebaseServiceProtocol {
         // Reverse of encodeSession's hrStream serialization. Empty if absent/undecodable
         // (e.g. legacy records saved before the stream was persisted).
         let hrStream: [HRRecord]
+        let hrDecoder = JSONDecoder()
+        hrDecoder.dateDecodingStrategy = .millisecondsSince1970   // matches encodeSession
         if let raw = d["hrStream"],
            let data = try? JSONSerialization.data(withJSONObject: raw),
-           let decoded = try? JSONDecoder().decode([HRRecord].self, from: data) {
+           let decoded = try? hrDecoder.decode([HRRecord].self, from: data) {
             hrStream = decoded
         } else {
             hrStream = []

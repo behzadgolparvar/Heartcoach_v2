@@ -15,14 +15,16 @@ public enum SessionCSV {
         lines.append("# score_tier,\(session.scoreTier?.rawValue ?? "")")
         lines.append("# training_sec,\(session.trainingDurationSec ?? session.durationSec)")
         lines.append("# total_sec,\(session.durationSec)")
-        lines.append("time_sec,hr,current_zone,phase,target_zone,phrase_type,phrase_time")
+        lines.append("time_sec,timestamp,hr,current_zone,phase,target_zone,phrase_type,phrase_time")
 
+        let iso = ISO8601DateFormatter()
         for r in session.hrStream {
             let phase = r.phaseKind?.rawValue ?? r.phase.rawValue
             let target = r.targetZone.map(String.init) ?? ""
             let phraseType = r.coachingMessage == nil ? "" : "cue"
             let phraseTime = r.coachingMessage == nil ? "" : String(r.second)
-            lines.append("\(r.second),\(r.hr),\(r.currentZone),\(phase),\(target),\(phraseType),\(phraseTime)")
+            let ts = iso.string(from: r.timestamp)   // real measurement time (ISO-8601 UTC)
+            lines.append("\(r.second),\(ts),\(r.hr),\(r.currentZone),\(phase),\(target),\(phraseType),\(phraseTime)")
         }
         return lines.joined(separator: "\n")
     }

@@ -47,8 +47,11 @@ final class WorkoutSummaryViewModel {
             do {
                 let outcome = try await firebaseService.saveSession(session, userID: userID)
                 await self.advanceProgression(for: session, userID: userID)
-                // Best-effort research export (FR-8); never blocks the save result.
-                await exportService?.uploadSessionCSV(session, userID: userID)
+                // Research data lives in the Firestore session doc (hr_stream with epoch-ms
+                // timestamps); export CSVs on demand from Firestore instead. The Storage
+                // upload is kept but disabled for now — re-enable if per-session CSVs in
+                // Storage are wanted again.
+                // await exportService?.uploadSessionCSV(session, userID: userID)
                 await MainActor.run {
                     self.saveState = outcome == .synced ? .saved : .savedPendingSync
                 }
