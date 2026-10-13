@@ -84,6 +84,8 @@ final class FoundationSessionManager {
 
     // MARK: - Lifecycle
     var hasReceivedHR: Bool { lastHRReceived != nil }
+    /// The protocol currently driving the session (post walk-fallback switch).
+    var activeProtocol: FoundationProtocol { proto }
 
     /// §J elevated starting HR: if the first reading is well above a calm baseline,
     /// swap the session for the walk_fallback protocol (gentle walk, excluded from

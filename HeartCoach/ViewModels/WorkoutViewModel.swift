@@ -55,6 +55,16 @@ final class WorkoutViewModel {
     /// Per-session Shape choice (Option A/B + muscles), set before `start` on Shape days.
     var shapeChoice: ShapeSessionChoice?
 
+    // Broadcast-redesign live state (Direction D)
+    var sessionProtocol: FoundationProtocol?
+    var hrTrace: [(second: Int, hr: Int)] = []
+    var peakHR = 0
+    var liveAvgHR = 0
+    var exerciseSeconds = 0
+    var inTargetSeconds = 0
+    private var hrSum = 0
+    private var hrCount = 0
+
     private var sessionManager: FoundationSessionManager?
 
     // MARK: - Init
@@ -110,6 +120,7 @@ final class WorkoutViewModel {
         )
         manager.onStateUpdate = { [weak self] state in
             self?.coachingState = state
+            self?.ingest(state)
         }
         manager.onWorkoutComplete = { [weak self] in
             Task { await self?.endInternal() }
@@ -136,6 +147,11 @@ final class WorkoutViewModel {
         self.showPausePrompt = false
         self.pauseSnoozesUsed = 0
         self.walkFallbackActive = false
+        self.sessionProtocol = nil
+        self.hrTrace = []
+        self.peakHR = 0; self.liveAvgHR = 0
+        self.exerciseSeconds = 0; self.inTargetSeconds = 0
+        self.hrSum = 0; self.hrCount = 0
 
         // Wake the Watch app into a workout so HR starts spinning up immediately,
         // then run the smart countdown before coaching begins.
@@ -157,6 +173,8 @@ final class WorkoutViewModel {
                 self.voiceFeedback.speak(CoachingMessage(layer: 3,
                     text: "Your heart rate is a little high to start. We'll do an easy walk session today instead."))
             }
+            // Capture the final protocol for the HR-trace background.
+            self.sessionProtocol = manager.activeProtocol
 
             // 2) Countdown 3 … 2 … 1.
             for n in [3, 2, 1] {
@@ -244,5 +262,72 @@ final class WorkoutViewModel {
     var isMuted: Bool {
         get { voiceFeedback.isMuted }
         set { voiceFeedback.isMuted = newValue }
+    }
+
+    // MARK: - Broadcast-redesign derived state
+
+    private func ingest(_ state: CoachingState) {
+        let sec = Int(state.elapsedTime)
+        guard state.currentHR > 0 else { return }
+        hrSum += state.currentHR; hrCount += 1
+        liveAvgHR = Int((Double(hrSum) / Double(max(1, hrCount))).rounded())
+        peakHR = max(peakHR, state.currentHR)
+        if hrTrace.last?.second != sec, sec % 5 == 0 { hrTrace.append((sec, state.currentHR)) }
+        if state.phase == .warmup || state.phase == .exercise {
+            exerciseSeconds += 1
+            if let tz = state.targetZone, let band = zones.zone(number: tz),
+               (band.min...band.max).contains(state.currentHR) {
+                inTargetSeconds += 1
+            }
+        }
+    }
+
+    /// % of exercise seconds spent in the target zone (for the stats row).
+    var inTargetPercent: Int {
+        exerciseSeconds > 0 ? Int((Double(inTargetSeconds) / Double(exerciseSeconds) * 100).rounded()) : 0
+    }
+
+    /// Total session seconds (incl. cooldown) and remaining, from the protocol.
+    var totalSessionSec: Int {
+        (sessionProtocol?.phases.compactMap { $0.durationSec }.reduce(0, +)) ?? 0
+    }
+    var remainingSessionSec: Int {
+        max(0, totalSessionSec - Int(coachingState?.elapsedTime ?? 0))
+    }
+
+    /// A round/segment label for the trace caption ("ROUND 4 / 15", "BLOCK 2 / 7", …).
+    var roundLabel: String {
+        guard let proto = sessionProtocol, let state = coachingState else { return "" }
+        let now = Int(state.elapsedTime)
+        // Find the current phase by cumulative time.
+        var start = 0
+        for phase in proto.phases {
+            let dur = phase.durationSec ?? 0
+            if now < start + dur { return label(for: phase, in: proto) }
+            start += dur
+        }
+        return proto.phases.last.map { label(for: $0, in: proto) } ?? ""
+    }
+
+    private func label(for phase: FoundationPhase, in proto: FoundationProtocol) -> String {
+        switch phase.kind {
+        case .warmup: return "WARM-UP"
+        case .work:
+            let total = proto.phases.filter { $0.kind == .work }.count
+            let n = proto.phases.filter { $0.kind == .work && $0.index <= phase.index }.count
+            return "ROUND \(n) / \(total)"
+        case .block:
+            let total = proto.phases.filter { $0.kind == .block || $0.kind == .warmup }.count
+            let n = proto.phases.filter { ($0.kind == .block || $0.kind == .warmup) && $0.index <= phase.index }.count
+            return "BLOCK \(n) / \(total)"
+        case .exercise: return "EXERCISE"
+        case .rest: return "RECOVERY"
+        case .buffer: return "COOL-DOWN WALK"
+        case .transition: return "READY TO STRETCH"
+        case .cooldown:
+            let total = proto.phases.filter { $0.kind == .cooldown }.count
+            let n = proto.phases.filter { $0.kind == .cooldown && $0.index <= phase.index }.count
+            return "STRETCH \(n) / \(total)"
+        }
     }
 }
