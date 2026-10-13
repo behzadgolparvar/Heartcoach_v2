@@ -13,6 +13,27 @@ public enum FoundationProtocolBuilder {
         }
     }
 
+    /// Elevated-starting-HR fallback (§J): ~30 min of 1-min brisk / 1-min easy walk
+    /// intervals — no HR targets, not scored, excluded from progression. Flagged
+    /// `walk_fallback` by the session manager.
+    public static func walkFallback() -> FoundationProtocol {
+        var phases: [FoundationPhase] = []
+        var idx = 0
+        for _ in 0..<15 {
+            phases.append(FoundationPhase(index: idx, kind: .rest, durationSec: 60,
+                                          target: nil, label: "Brisk walk")); idx += 1
+            phases.append(FoundationPhase(index: idx, kind: .rest, durationSec: 60,
+                                          target: nil, label: "Easy walk")); idx += 1
+        }
+        phases.append(FoundationPhase(index: idx, kind: .transition, durationSec: nil,
+                                      target: nil, label: "Ready to stretch?")); idx += 1
+        for step in CooldownStep.allCases {
+            phases.append(FoundationPhase(index: idx, kind: .cooldown, durationSec: step.durationSec,
+                                          target: nil, label: step.label)); idx += 1
+        }
+        return FoundationProtocol(type: .continuous, phases: phases)
+    }
+
     // MARK: - Continuous (7 × 5:00, §Phase 1 table)
 
     private static func continuousPhases() -> [FoundationPhase] {

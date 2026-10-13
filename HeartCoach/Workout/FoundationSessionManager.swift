@@ -18,7 +18,8 @@ final class FoundationSessionManager {
     private let maxHR: Int
 
     // MARK: - Protocol + coaching
-    private let proto: FoundationProtocol
+    private var proto: FoundationProtocol
+    private var sessionFlagOverride: String?
     private let type: WorkoutType
     private let escalationThresholdSec: Int
     private var coaching: CoachingSessionState
@@ -38,11 +39,17 @@ final class FoundationSessionManager {
 
     private let tickInterval = 5   // seconds per tick (safety cadence); coaching every 15s
 
+    // Sensor-dropout tracking (§J, BR-2-24).
+    private var noSignalSec = 0
+    private var dropoutActive = false
+
     // MARK: - Callbacks
     var onStateUpdate: ((CoachingState) -> Void)?
     var onWorkoutComplete: (() -> Void)?      // fires after cooldown finishes
     var onAwaitingCooldownStart: (() -> Void)?
     var onCooldownStep: ((String) -> Void)?
+    /// Fires with true when HR has been absent ≥20s, false when it returns.
+    var onSensorDropout: ((Bool) -> Void)?
 
     /// Tracks exercise-phase cues already spoken (intro / switch-legs).
     private var exerciseIntroDone = Set<Int>()
@@ -69,6 +76,21 @@ final class FoundationSessionManager {
 
     // MARK: - Lifecycle
     var hasReceivedHR: Bool { lastHRReceived != nil }
+
+    /// §J elevated starting HR: if the first reading is well above a calm baseline,
+    /// swap the session for the walk_fallback protocol (gentle walk, excluded from
+    /// progression). Call once after the first HR arrives, before coaching begins.
+    /// Returns true if it switched.
+    func switchToWalkFallbackIfElevated() -> Bool {
+        guard let reading = lastHRReceived,
+              SafetyPolicy.isElevatedStartHR(hr: reading.value, restingHR: restingHR, maxHR: maxHR)
+        else { return false }
+        proto = FoundationProtocolBuilder.walkFallback()
+        sessionFlagOverride = "walk_fallback"
+        phaseIndex = 0
+        elapsedInPhaseSec = 0
+        return true
+    }
 
     func beginWatchSession() {
         voiceFeedback.configureAudioSession()
@@ -150,6 +172,20 @@ final class FoundationSessionManager {
         if let reading = lastHRReceived {
             hr = now.timeIntervalSince(reading.timestamp) >= 15 ? Int.max : reading.value
         } else { hr = Int.max }
+
+        // Sensor dropout (§J): no reading for ≥20s → surface a warning (safety
+        // temporarily unavailable); clear when HR returns. Data gap is implicit
+        // (no record is appended while hr == Int.max).
+        if hr == Int.max {
+            noSignalSec += tickInterval
+            if noSignalSec >= SafetyPolicy.sensorDropoutSec, !dropoutActive {
+                dropoutActive = true
+                onSensorDropout?(true)
+            }
+        } else {
+            noSignalSec = 0
+            if dropoutActive { dropoutActive = false; onSensorDropout?(false) }
+        }
 
         // Safety (every tick): HR above HRmax.
         if hr != Int.max, hr > maxHR {
@@ -262,7 +298,7 @@ final class FoundationSessionManager {
             durationSec: totalElapsedSec, avgHR: avg,
             timeInZones: score.timeInZoneSec, hrStream: hrRecords,
             scorePercent: score.percentInTarget, scoreTier: score.tier,
-            trainingDurationSec: trainingElapsedSec, sessionFlag: type.rawValue,
+            trainingDurationSec: trainingElapsedSec, sessionFlag: sessionFlagOverride ?? type.rawValue,
             cooldownSkipped: !reachedEnd)
     }
 

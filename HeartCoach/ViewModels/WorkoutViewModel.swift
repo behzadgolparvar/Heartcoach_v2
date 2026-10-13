@@ -27,6 +27,17 @@ final class WorkoutViewModel {
     /// Current cooldown stretch step label, shown during the cooldown sequence.
     var cooldownStepLabel: String?
 
+    // §J safety/edge
+    /// Elevated starting HR → switched to a gentle walk session (BR-2-27).
+    var walkFallbackActive: Bool = false
+    /// HR signal lost for ≥20s — show a "safety paused" banner (BR-2-24).
+    var sensorDropout: Bool = false
+    /// Shown after 15 min paused — Continue / Finish / Need More Time (BR-2-25).
+    var showPausePrompt: Bool = false
+    private var pausePromptTask: Task<Void, Never>?
+    private var pauseSnoozesUsed = 0
+    var canSnoozePause: Bool { SafetyPolicy.canSnooze(usedSnoozes: pauseSnoozesUsed) }
+
     /// Seconds to wait for the first HR reading before starting anyway.
     private let firstReadingTimeout: TimeInterval = 8
     private var startupTask: Task<Void, Never>?
@@ -109,6 +120,9 @@ final class WorkoutViewModel {
         manager.onCooldownStep = { [weak self] label in
             self?.cooldownStepLabel = label
         }
+        manager.onSensorDropout = { [weak self] active in
+            self?.sensorDropout = active
+        }
         self.sessionManager = manager
         self.selectedProgram = program
         self.isPaused = false
@@ -118,6 +132,10 @@ final class WorkoutViewModel {
         self.completedSession = nil
         self.awaitingCooldownStart = false
         self.cooldownStepLabel = nil
+        self.sensorDropout = false
+        self.showPausePrompt = false
+        self.pauseSnoozesUsed = 0
+        self.walkFallbackActive = false
 
         // Wake the Watch app into a workout so HR starts spinning up immediately,
         // then run the smart countdown before coaching begins.
@@ -132,6 +150,13 @@ final class WorkoutViewModel {
                 try? await Task.sleep(nanoseconds: 150_000_000)
             }
             if Task.isCancelled { return }
+
+            // 1b) Elevated starting HR → switch to the gentle walk_fallback (§J).
+            if manager.switchToWalkFallbackIfElevated() {
+                self.walkFallbackActive = true
+                self.voiceFeedback.speak(CoachingMessage(layer: 3,
+                    text: "Your heart rate is a little high to start. We'll do an easy walk session today instead."))
+            }
 
             // 2) Countdown 3 … 2 … 1.
             for n in [3, 2, 1] {
@@ -156,11 +181,36 @@ final class WorkoutViewModel {
     func pause() {
         sessionManager?.pause()
         isPaused = true
+        schedulePausePrompt(afterMinutes: SafetyPolicy.pausePromptMinutes)
     }
 
     func resume() {
         sessionManager?.resume()
         isPaused = false
+        cancelPausePrompt()
+    }
+
+    /// "Need More Time" — snooze the resume prompt (max 3 × 10 min, BR-2-25).
+    func snoozePause() {
+        guard canSnoozePause else { return }
+        pauseSnoozesUsed += 1
+        showPausePrompt = false
+        schedulePausePrompt(afterMinutes: SafetyPolicy.pauseSnoozeMinutes)
+    }
+
+    private func schedulePausePrompt(afterMinutes minutes: Int) {
+        pausePromptTask?.cancel()
+        pausePromptTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(minutes) * 60 * 1_000_000_000)
+            guard let self, !Task.isCancelled, self.isPaused else { return }
+            self.showPausePrompt = true
+        }
+    }
+
+    private func cancelPausePrompt() {
+        pausePromptTask?.cancel()
+        pausePromptTask = nil
+        showPausePrompt = false
     }
 
     func end() {
@@ -171,6 +221,7 @@ final class WorkoutViewModel {
     private func endInternal() async {
         startupTask?.cancel()
         startupTask = nil
+        cancelPausePrompt()
         guard let manager = sessionManager else { return }
         let session = await manager.end()
         completedSession = session
@@ -183,6 +234,7 @@ final class WorkoutViewModel {
     func emergencyStop() {
         startupTask?.cancel()
         startupTask = nil
+        cancelPausePrompt()
         sessionManager?.emergencyStop()
         isWorkoutActive = false
         startupState = .running

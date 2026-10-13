@@ -25,6 +25,11 @@ struct WorkoutView: View {
                 cooldownGate
             }
 
+            // Pause resume-prompt after 15 min (§J).
+            if workoutVM.showPausePrompt {
+                pausePrompt
+            }
+
             // Emergency stop overlay
             if showEmergencyStop {
                 EmergencyStopOverlay(onConfirm: {
@@ -66,6 +71,22 @@ struct WorkoutView: View {
         VStack(spacing: 0) {
             phaseHeader
 
+            // Walk-fallback notice (§J) — elevated starting HR.
+            if workoutVM.walkFallbackActive {
+                Text("Easy walk session — your heart rate was high to start.")
+                    .font(.caption).foregroundStyle(.white.opacity(0.85))
+                    .padding(.vertical, 6)
+            }
+
+            // Sensor-dropout warning (§J) — safety temporarily unavailable.
+            if workoutVM.sensorDropout {
+                Text("No heart-rate signal — safety checks paused. Check your Watch.")
+                    .font(.caption).foregroundStyle(.black)
+                    .padding(.horizontal, 16).padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.yellow.opacity(0.9))
+            }
+
             Spacer()
 
             if workoutVM.isPaused {
@@ -95,6 +116,33 @@ struct WorkoutView: View {
                 .padding(.bottom, 40)
         }
         .padding(.top, 16)
+    }
+
+    private var pausePrompt: some View {
+        ZStack {
+            Color.black.opacity(0.85).ignoresSafeArea()
+            VStack(spacing: 20) {
+                Image(systemName: "pause.circle")
+                    .font(.system(size: 56)).foregroundStyle(.white)
+                Text("Still there?")
+                    .font(.title.bold()).foregroundStyle(.white)
+                Text("Your workout has been paused for a while. What would you like to do?")
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center).padding(.horizontal, 32)
+                Button("Continue workout") { workoutVM.resume() }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .accessibilityIdentifier("pause-continue")
+                if workoutVM.canSnoozePause {
+                    Button("Need more time") { workoutVM.snoozePause() }
+                        .buttonStyle(SecondaryButtonStyle())
+                        .accessibilityIdentifier("pause-more-time")
+                }
+                Button("Finish workout") { workoutVM.end() }
+                    .font(.subheadline).foregroundStyle(.red)
+                    .accessibilityIdentifier("pause-finish")
+            }
+            .padding(.horizontal, 24)
+        }
     }
 
     private var cooldownGate: some View {

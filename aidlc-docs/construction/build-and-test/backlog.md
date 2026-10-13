@@ -3,9 +3,9 @@
 Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests green. This tracks the device-dependent + deferred work to close before a wider TestFlight release. Check items off as done.
 
 ## A. Deferred §J safety (from Phase 2 — wire into the v2 session driver)
-- [ ] **Sensor dropout:** 20s no reading → on-screen prompt; resume in place; data-gap flag; "safety temporarily unavailable" warning
-- [ ] **Pause/resume:** 15-min prompt (Continue / Finish / Need More Time), max 3 snoozes × 10 min; safety off while paused (user informed)
-- [ ] **Elevated starting HR → `walk_fallback`:** 5-min walk check → settled? normal : full-session 1-min fast / 1-min slow; flag `walk_fallback`, exclude from progression (reuse P3 non-counting plumbing), retain for research
+- [x] **Sensor dropout:** 20s no reading → yellow banner "safety checks paused"; HR recording gaps are implicit; clears on return (SafetyPolicy.sensorDropoutSec) — wired, device-verify
+- [x] **Pause/resume:** 15-min resume prompt (Continue / Finish / Need More Time), max 3×10-min snoozes; safety off while paused (tick loop cancelled) — wired, device-verify
+- [~] **Elevated starting HR → `walk_fallback`:** on first HR reading, if >40% HRR above resting → switch to a 30-min brisk/easy walk session, flagged `walk_fallback`, excluded from progression. NOTE: implemented as a start-time decision; the spec's "5-min settle walk then re-check" is a device-tuning refinement (TODO).
 - [ ] Cancel rule (≥20 scored / <20 discarded) — confirm wired via training-time (partially in place)
 
 ## B. P4 / P5 coaching refinements (device-tuning)
@@ -23,8 +23,9 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 - [ ] Milestone check-in: auto RHR read + weight gate (Day-2 blocks Start)
 
 ## D. Owner deploy steps (console)
-- [ ] Publish Firebase **Storage** own-data security rules (`users/{uid}/exports/**`) — see `phase6-engagement/infrastructure-design/`
-- [ ] Confirm a Storage bucket is enabled on the project
+- [x] Publish Firebase **Storage** own-data security rules (`users/{uid}/exports/**`) — DONE (Blaze linked, bucket `heartcoach-dcec5.firebasestorage.app`, rules published 2026-10-12)
+- [x] Confirm a Storage bucket is enabled on the project — DONE (regional US-EAST1, no-cost)
+- [ ] **Re-download `GoogleService-Info.plist`** (Project Settings → iOS) so `STORAGE_BUCKET` = `heartcoach-dcec5.firebasestorage.app` — needed before device export test
 - [ ] (Firestore rules already published in an earlier cycle)
 
 ## E. Collaborator confirmations (safety-relevant, flagged in FDs)
@@ -38,3 +39,8 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 
 ## Status
 - Feature code: **complete** (P1–P6). Unit/PBT: **134 green**. Security (SECURITY-01/02/03): satisfied in code + rules spec; 02 pending the owner rules deploy (D).
+
+
+## G. Optional future enhancements (not in v5 spec)
+- [ ] **Remote Config** for collaborator-tunable constants (score tiers, Shape-HIIT offsets, bank size, reminder copy) — change values from console without an app update; free tier.
+- [ ] **Gemini / Firebase AI Logic** — any in-app AI feature is pay-per-token AND would conflict with the deterministic/testable coaching + health-data privacy (SECURITY-03). Out of scope; a deliberate product/privacy/cost decision if ever pursued. (Console "Gemini in Firebase" dev-assistant is free and fine.)
