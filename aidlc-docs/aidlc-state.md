@@ -187,7 +187,9 @@ Collaborator supplied `hr-coaching-app-full-spec-v5.md`; user chose "A" (adopt v
 ### Build & Test (IN PROGRESS)
 - [x] Build & test instruction set generated (`construction/build-and-test/`: build/unit/integration/performance/summary + backlog.md)
 - [x] Automated verification: core + app build on simulator; full suite green (134 tests); SECURITY-03 clean
-- [ ] Device pass + deferred §J (backlog A) + owner Storage-rules deploy (D) + collaborator confirms (E) — tracked in build-and-test/backlog.md (also in memory: v5_build_test_backlog)
+- [x] §J safety wired (A) — dropout + pause prompt + walk_fallback (commit 0895341); 139 tests green
+- [x] Owner Storage-rules deploy (D) — Blaze linked, bucket + own-data rules published
+- [ ] PARKED for device pass: B (coaching tuning), C (on-device verification), E (collaborator confirms) — see build-and-test/backlog.md
 
 ### Build & Test (deferred backlog, consolidated pass after P5)
 - §J advanced safety (dropout UI, pause 15-min prompt/snoozes, elevated-HR walk_fallback)

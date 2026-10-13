@@ -876,3 +876,10 @@
 **AI Response**: "Saved the Build & Test backlog to persistent memory (v5_build_test_backlog.md). Starting Build & Test stage: generating build/test instruction files + an in-repo backlog doc under construction/build-and-test/."
 **Context**: Construction → Build & Test stage kickoff (all 6 feature phases complete).
 ---
+
+## Build & Test — §J wired + Storage deployed; B/C/E parked
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "let's keep the backlog items for a later time"
+**AI Response**: "§J safety wired (dropout, pause prompt, walk_fallback; 139 tests green; commit 0895341). Firebase Storage set up on Blaze + own-data rules published (D done). Remaining backlog B (coaching device-tuning), C (on-device verification), E (collaborator confirms) parked for the device pass. Updated backlog.md, aidlc-state.md, and memory."
+**Context**: Build & Test — code-side complete; device/collaborator items deferred by user.
+---

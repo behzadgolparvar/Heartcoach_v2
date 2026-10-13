@@ -25,7 +25,7 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 ## D. Owner deploy steps (console)
 - [x] Publish Firebase **Storage** own-data security rules (`users/{uid}/exports/**`) — DONE (Blaze linked, bucket `heartcoach-dcec5.firebasestorage.app`, rules published 2026-10-12)
 - [x] Confirm a Storage bucket is enabled on the project — DONE (regional US-EAST1, no-cost)
-- [ ] **Re-download `GoogleService-Info.plist`** (Project Settings → iOS) so `STORAGE_BUCKET` = `heartcoach-dcec5.firebasestorage.app` — needed before device export test
+- [x] **`GoogleService-Info.plist` bucket check** — verified: existing plist's `STORAGE_BUCKET` already = `heartcoach-dcec5.firebasestorage.app` (matches the created bucket). No re-download needed.
 - [ ] (Firestore rules already published in an earlier cycle)
 
 ## E. Collaborator confirmations (safety-relevant, flagged in FDs)
@@ -37,8 +37,10 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 ## F. Release notes
 - Q8=B: pre-v5 testers **re-onboard once** (old profiles aren't v5-complete). Keep builds internal until §A is wired. TestFlight: bump build number before upload.
 
-## Status
-- Feature code: **complete** (P1–P6). Unit/PBT: **134 green**. Security (SECURITY-01/02/03): satisfied in code + rules spec; 02 pending the owner rules deploy (D).
+## Status (2026-10-12)
+- Feature code: **complete** (P1–P6). §J safety **wired** (A: dropout + pause prompt done; walk_fallback done, 5-min-recheck refinement = TODO). Unit/PBT: **139 green**. Security (SECURITY-01/02/03): satisfied; **Storage own-data rules published (D done)**.
+- **Remaining = device/collaborator only:** B (coaching device-tuning), C (on-device verification), E (collaborator confirms). No further pure-code work outstanding.
+- Next action is a **physical-device build + integration pass**; then internal TestFlight (testers re-onboard once, Q8=B).
 
 
 ## G. Optional future enhancements (not in v5 spec)
