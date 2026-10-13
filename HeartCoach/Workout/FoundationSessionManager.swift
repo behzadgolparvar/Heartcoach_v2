@@ -32,6 +32,10 @@ final class FoundationSessionManager {
     private var lastHRReceived: HRReading?
     private var hrRecords: [HRRecord] = []
     private var scoredSamples: [HRSample] = []
+    /// Timestamp of the last Watch reading we persisted — dedups forward-filled ticks.
+    private var lastRecordedReadingTime: Date?
+    /// A coaching cue awaiting attachment to the next real-measurement row.
+    private var pendingCue: String?
     private var sessionStartDate: Date?
     private var finalScore: SessionScore?
     private var cooldownSkipped = false
@@ -108,6 +112,8 @@ final class FoundationSessionManager {
         sessionStartDate = Date()
         hrRecords = []
         scoredSamples = []
+        lastRecordedReadingTime = nil
+        pendingCue = nil
         startTickLoop()
     }
 
@@ -239,14 +245,25 @@ final class FoundationSessionManager {
             }
         }
 
-        // Record + score (scored phases only count toward the score).
+        // A cue fired this tick → carry it to the next real-measurement row so its
+        // phrase_type/phrase_time is preserved without inventing an HR point.
+        if let c = cueText { pendingCue = c }
+
         if hr != Int.max {
             let zone = ZoneCalculator.zone(for: hr, in: zones)
-            hrRecords.append(HRRecord(
-                timestamp: now, second: totalElapsedSec, hr: hr, currentZone: zone,
-                targetZone: representativeZone(for: phase), phase: mapPhaseType(phase.kind),
-                phaseKind: phase.kind, coachingMessage: cueText))
+            // Scoring samples every scored tick (forward-filled) — correct time-weighting
+            // for % time in target / time-in-zones.
             if phase.kind.isScored { scoredSamples.append(HRSample(phaseIndex: phaseIndex, hr: hr)) }
+            // Persist only *genuine* Watch measurements (dedup by the reading's timestamp),
+            // so the saved hr_stream carries real timestamps, not forward-filled repeats.
+            if let reading = lastHRReceived, reading.timestamp != lastRecordedReadingTime {
+                lastRecordedReadingTime = reading.timestamp
+                hrRecords.append(HRRecord(
+                    timestamp: reading.timestamp, second: totalElapsedSec, hr: hr, currentZone: zone,
+                    targetZone: representativeZone(for: phase), phase: mapPhaseType(phase.kind),
+                    phaseKind: phase.kind, coachingMessage: pendingCue))
+                pendingCue = nil
+            }
         }
 
         publishSnapshot(hr: hr, phase: phase, cue: cueText)
