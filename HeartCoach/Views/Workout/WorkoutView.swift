@@ -1,62 +1,35 @@
 import SwiftUI
 import HeartRateCoachCore
 
+/// Live workout — Direction D "Broadcast + Trace".
 struct WorkoutView: View {
     let onFinish: () -> Void
     @Environment(WorkoutViewModel.self) private var workoutVM
-    @State private var showEmergencyStop = false
+    @State private var showStopConfirm = false
     @State private var navigateToSummary = false
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            WT.bg.ignoresSafeArea()
 
             switch workoutVM.startupState {
             case .warmingUp:
                 startupView(big: nil, caption: "Getting your heart rate…", showSpinner: true)
             case .countdown(let n):
-                startupView(big: "\(n)", caption: "Get ready", showSpinner: false)
+                startupView(big: "\(n)", caption: "GET READY", showSpinner: false)
             case .running:
                 runningContent
             }
 
-            // Transition gate — user-paced "ready to stretch" (Q8/§F).
-            if workoutVM.awaitingCooldownStart {
-                cooldownGate
-            }
-
-            // Pause resume-prompt after 15 min (§J).
-            if workoutVM.showPausePrompt {
-                pausePrompt
-            }
-
-            // Emergency stop overlay
-            if showEmergencyStop {
-                EmergencyStopOverlay(onConfirm: {
-                    workoutVM.emergencyStop()
-                    showEmergencyStop = false
-                    navigateToSummary = true
-                }, onCancel: {
-                    showEmergencyStop = false
-                })
-            }
+            if workoutVM.isPaused { pausedOverlay }
+            if workoutVM.awaitingCooldownStart { cooldownGate }
+            if workoutVM.showPausePrompt { pausePrompt }
+            if showStopConfirm { stopConfirm }
         }
         .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showEmergencyStop = true
-                } label: {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                }
-                .accessibilityIdentifier("emergency-stop-button")
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .onChange(of: workoutVM.isWorkoutActive) { _, active in
-            if !active, workoutVM.completedSession != nil {
-                navigateToSummary = true
-            }
+            if !active, workoutVM.completedSession != nil { navigateToSummary = true }
         }
         .navigationDestination(isPresented: $navigateToSummary) {
             if let session = workoutVM.completedSession {
@@ -65,233 +38,285 @@ struct WorkoutView: View {
         }
     }
 
-    // MARK: - Sub-Views
+    // MARK: - Running (broadcast layout)
 
     private var runningContent: some View {
-        VStack(spacing: 0) {
-            phaseHeader
+        VStack(spacing: 14) {
+            scoreboardHeader
 
-            // Walk-fallback notice (§J) — elevated starting HR.
-            if workoutVM.walkFallbackActive {
-                Text("Easy walk session — your heart rate was high to start.")
-                    .font(.caption).foregroundStyle(.white.opacity(0.85))
-                    .padding(.vertical, 6)
+            if let proto = workoutVM.sessionProtocol {
+                HRTraceView(
+                    proto: proto,
+                    zones: workoutVM.displayZones,
+                    restingHR: workoutVM.displayRestingHR,
+                    maxHR: workoutVM.displayMaxHR,
+                    hrTrace: workoutVM.hrTrace,
+                    currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
+                    currentZone: zone,
+                    roundLabel: workoutVM.roundLabel,
+                    remainingSec: workoutVM.remainingSessionSec)
             }
 
-            // Sensor-dropout warning (§J) — safety temporarily unavailable.
             if workoutVM.sensorDropout {
                 Text("No heart-rate signal — safety checks paused. Check your Watch.")
-                    .font(.caption).foregroundStyle(.black)
-                    .padding(.horizontal, 16).padding(.vertical, 8)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.yellow.opacity(0.9))
+                    .font(WT.body(13, .bold)).foregroundStyle(.black)
+                    .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 12)
+                    .background(WT.warning)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
+            hero
+            ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
+                          zones: workoutVM.displayZones, recoveryMode: recoveryMode)
+            Spacer(minLength: 0)
 
-            if workoutVM.isPaused {
-                pausedContent
-            } else {
-                activeContent
-            }
-
-            Spacer()
-
-            if workoutVM.coachingState?.phase == .cooldown, let step = workoutVM.cooldownStepLabel {
-                Text("Stretch: \(step)")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 32)
-            } else if let msg = workoutVM.coachingState?.coachingMessage {
-                Text(msg)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .transition(.opacity)
-                    .animation(.easeInOut, value: msg)
-            }
-
-            controlButtons
-                .padding(.bottom, 40)
+            coachLowerThird
+            statsRow
+            controls
         }
-        .padding(.top, 16)
+        .padding(.top, 60).padding(.horizontal, 18).padding(.bottom, 30)
+        .foregroundStyle(.white)
+    }
+
+    // MARK: Scoreboard header
+
+    private var scoreboardHeader: some View {
+        HStack(spacing: 0) {
+            Text(phaseChip)
+                .font(WT.cond(20, .heavy)).tracking(1).foregroundStyle(.white)
+                .padding(.horizontal, 12).frame(height: 44).background(WT.red)
+            Text(Int(workoutVM.coachingState?.elapsedTime ?? 0).msClock)
+                .font(WT.cond(28, .bold)).monospacedDigit().foregroundStyle(.white)
+                .padding(.horizontal, 12).frame(height: 44).background(WT.surface)
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("PHASE ENDS").font(WT.body(10, .semibold)).tracking(1.6).foregroundStyle(WT.textSecondary)
+                Text(Int(workoutVM.coachingState?.phaseTimeRemaining ?? 0).msClock)
+                    .font(WT.cond(26, .bold)).monospacedDigit().foregroundStyle(.white)
+            }
+        }
+        .frame(height: 44)
+    }
+
+    // MARK: Hero
+
+    private var hero: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Text("Z\(zone)")
+                    .font(WT.cond(18, .heavy)).foregroundStyle(.black)
+                    .padding(.horizontal, 8).padding(.vertical, 5).background(WT.zoneColor(zone))
+                Text(WT.zoneName(zone))
+                    .font(WT.cond(18, .bold)).tracking(0.8).foregroundStyle(WT.zoneColor(zone))
+            }
+            .animation(.easeInOut(duration: 0.4), value: zone)
+
+            Text(hr > 0 ? "\(hr)" : "--")
+                .font(WT.cond(140, .heavy)).monospacedDigit()
+                .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
+                .padding(.top, 6)
+            Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
+        }
+    }
+
+    // MARK: Coach lower-third
+
+    private var coachLowerThird: some View {
+        ZStack {
+            if let msg = workoutVM.coachingState?.coachingMessage, !msg.isEmpty {
+                HStack(spacing: 0) {
+                    Rectangle().fill(WT.red).frame(width: 10)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("COACH").font(WT.body(10.5, .bold)).tracking(1.8).foregroundStyle(WT.textTertiary)
+                        Text(msg.uppercased())
+                            .font(WT.cond(26, .heavy)).foregroundStyle(.black).lineLimit(1).truncationMode(.tail)
+                    }
+                    .padding(.horizontal, 14)
+                    Spacer()
+                }
+                .background(WT.bannerPaper)
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            } else {
+                HStack {
+                    Text(idleLine).font(WT.cond(15, .bold)).tracking(1.2).foregroundStyle(WT.textLight)
+                        .lineLimit(1)
+                    Spacer()
+                }
+                .padding(.horizontal, 14)
+                .overlay(RoundedRectangle(cornerRadius: 0).strokeBorder(WT.divider, lineWidth: 1))
+            }
+        }
+        .frame(height: 76).clipped()
+        .animation(.easeOut(duration: 0.4), value: workoutVM.coachingState?.coachingMessage)
+    }
+
+    private var idleLine: String {
+        if workoutVM.sensorDropout { return "NO SIGNAL — CHECK YOUR WATCH" }
+        if let step = workoutVM.cooldownStepLabel, workoutVM.coachingState?.phase == .cooldown {
+            return "STRETCH · \(step.uppercased())"
+        }
+        switch recoveryMode {
+        case .walk: return "RECOVERY — WALK IT OUT"
+        case .stretch: return "COOL DOWN — STRETCH"
+        case .none: return "KEEP IT STEADY"
+        }
+    }
+
+    // MARK: Stats row
+
+    private var statsRow: some View {
+        HStack(spacing: 0) {
+            stat("AVG", "\(workoutVM.liveAvgHR)")
+            Divider().frame(height: 30).overlay(WT.divider)
+            stat("PEAK", "\(workoutVM.peakHR)")
+            Divider().frame(height: 30).overlay(WT.divider)
+            stat("IN TARGET", "\(workoutVM.inTargetPercent)%")
+        }
+        .padding(.vertical, 8)
+        .overlay(alignment: .top) { Rectangle().fill(WT.divider).frame(height: 1) }
+        .overlay(alignment: .bottom) { Rectangle().fill(WT.divider).frame(height: 1) }
+    }
+
+    private func stat(_ label: String, _ value: String) -> some View {
+        VStack(spacing: 2) {
+            Text(label).font(WT.body(10, .semibold)).tracking(1.6).foregroundStyle(WT.textSecondary)
+            Text(value).font(WT.cond(24, .bold)).monospacedDigit().foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: Controls
+
+    private var controls: some View {
+        HStack(spacing: 10) {
+            Button { workoutVM.pause() } label: {
+                Text("PAUSE").font(WT.cond(21, .heavy)).tracking(1).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity).frame(height: 56).background(WT.surface)
+            }
+            .accessibilityIdentifier("workout-pause-button")
+            Button { showStopConfirm = true } label: {
+                Text("STOP").font(WT.cond(21, .heavy)).tracking(1).foregroundStyle(WT.redText)
+                    .frame(width: 120).frame(height: 56)
+                    .overlay(Rectangle().strokeBorder(WT.red, lineWidth: 2))
+            }
+            .accessibilityIdentifier("emergency-stop-button")
+        }
+        .frame(height: 56)
+    }
+
+    // MARK: Derived
+
+    private var hr: Int { workoutVM.sensorDropout ? 0 : (workoutVM.coachingState?.currentHR ?? 0) }
+    private var zone: Int { workoutVM.sensorDropout ? 0 : (workoutVM.coachingState?.currentZone ?? 0) }
+    private var targetZone: Int? { workoutVM.coachingState?.targetZone }
+    private var phaseChip: String {
+        switch workoutVM.coachingState?.phase {
+        case .warmup: return "WARM UP"; case .exercise: return "EXERCISE"
+        case .recovery: return "RECOVERY"; case .cooldown: return "COOL DOWN"; default: return "—"
+        }
+    }
+    private var recoveryMode: ZoneGaugeView.RecoveryMode {
+        switch workoutVM.coachingState?.phase {
+        case .recovery: return .walk; case .cooldown: return .stretch; default: return .none
+        }
+    }
+
+    // MARK: - Overlays
+
+    private var pausedOverlay: some View {
+        overlayScrim {
+            VStack(spacing: 16) {
+                Text("PAUSED").font(WT.cond(64, .heavy)).foregroundStyle(.white)
+                Text("\(Int(workoutVM.coachingState?.elapsedTime ?? 0).msClock) in · \(workoutVM.remainingSessionSec.msClock) to go")
+                    .font(WT.body(15)).foregroundStyle(WT.textLight)
+                primaryButton("Resume") { workoutVM.resume() }.accessibilityIdentifier("workout-resume-button")
+                secondaryButton("End workout") { workoutVM.end() }.accessibilityIdentifier("workout-end-button")
+            }
+        }
+    }
+
+    private var stopConfirm: some View {
+        overlayScrim(alignment: .bottom) {
+            VStack(spacing: 16) {
+                Text("STOP NOW?").font(WT.cond(44, .heavy)).foregroundStyle(.white)
+                Text("Feeling unwell — dizzy, chest pain, short of breath? Stop and rest. Your session so far will be saved.")
+                    .font(WT.body(15)).foregroundStyle(WT.textLight).multilineTextAlignment(.center).padding(.horizontal, 20)
+                primaryButton("Stop workout") {
+                    showStopConfirm = false; workoutVM.end()
+                }
+                secondaryButton("Keep going") { showStopConfirm = false }
+            }
+            .padding(.bottom, 40)
+        }
     }
 
     private var pausePrompt: some View {
-        ZStack {
-            Color.black.opacity(0.85).ignoresSafeArea()
-            VStack(spacing: 20) {
-                Image(systemName: "pause.circle")
-                    .font(.system(size: 56)).foregroundStyle(.white)
-                Text("Still there?")
-                    .font(.title.bold()).foregroundStyle(.white)
-                Text("Your workout has been paused for a while. What would you like to do?")
-                    .font(.subheadline).foregroundStyle(.white.opacity(0.8))
-                    .multilineTextAlignment(.center).padding(.horizontal, 32)
-                Button("Continue workout") { workoutVM.resume() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .accessibilityIdentifier("pause-continue")
+        overlayScrim {
+            VStack(spacing: 16) {
+                Text("STILL THERE?").font(WT.cond(44, .heavy)).foregroundStyle(.white)
+                Text("Your workout has been paused for a while.")
+                    .font(WT.body(15)).foregroundStyle(WT.textLight).multilineTextAlignment(.center)
+                primaryButton("Continue workout") { workoutVM.resume() }.accessibilityIdentifier("pause-continue")
                 if workoutVM.canSnoozePause {
-                    Button("Need more time") { workoutVM.snoozePause() }
-                        .buttonStyle(SecondaryButtonStyle())
-                        .accessibilityIdentifier("pause-more-time")
+                    secondaryButton("Need more time") { workoutVM.snoozePause() }.accessibilityIdentifier("pause-more-time")
                 }
                 Button("Finish workout") { workoutVM.end() }
-                    .font(.subheadline).foregroundStyle(.red)
+                    .font(WT.body(15, .semibold)).foregroundStyle(WT.redText)
                     .accessibilityIdentifier("pause-finish")
             }
-            .padding(.horizontal, 24)
         }
     }
 
     private var cooldownGate: some View {
-        ZStack {
-            Color.black.opacity(0.85).ignoresSafeArea()
-            VStack(spacing: 20) {
-                Image(systemName: "figure.cooldown")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.white)
-                Text("Great work!")
-                    .font(.title.bold())
-                    .foregroundStyle(.white)
+        overlayScrim {
+            VStack(spacing: 14) {
+                Text("TRAINING COMPLETE").font(WT.body(12, .bold)).tracking(2).foregroundStyle(WT.success)
+                Text("GREAT WORK!").font(WT.cond(56, .heavy)).foregroundStyle(.white)
                 Text("Step off and get ready for a 2-minute stretch — it's part of the session and helps prevent injury.")
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.8))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                Button("Begin stretches") { workoutVM.beginCooldown() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .accessibilityIdentifier("cooldown-begin-button")
-                Button("Skip") { workoutVM.end() }
-                    .buttonStyle(SecondaryButtonStyle())
-                    .accessibilityIdentifier("cooldown-skip-button")
+                    .font(WT.body(15)).foregroundStyle(WT.textLight).multilineTextAlignment(.center).padding(.horizontal, 24)
+                primaryButton("Begin stretches") { workoutVM.beginCooldown() }.accessibilityIdentifier("cooldown-begin-button")
+                secondaryButton("Skip") { workoutVM.end() }.accessibilityIdentifier("cooldown-skip-button")
             }
-            .padding(.horizontal, 24)
         }
     }
 
     private func startupView(big: String?, caption: String, showSpinner: Bool) -> some View {
         VStack(spacing: 24) {
             if let big {
-                Text(big)
-                    .font(.system(size: 120, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .contentTransition(.numericText())
-                    .transition(.scale.combined(with: .opacity))
-                    .id(big)
+                Text(big).font(WT.cond(220, .heavy)).monospacedDigit().foregroundStyle(.white)
+                    .contentTransition(.numericText()).id(big)
             } else if showSpinner {
-                ProgressView()
-                    .controlSize(.large)
-                    .tint(.white)
+                ProgressView().controlSize(.large).tint(WT.red)
             }
-            Text(caption)
-                .font(.headline)
-                .foregroundStyle(.white.opacity(0.7))
+            Text(caption).font(showSpinner ? WT.body(17, .semibold) : WT.body(16, .bold))
+                .tracking(showSpinner ? 0 : 3)
+                .foregroundStyle(showSpinner ? WT.textLight : WT.redText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(.snappy, value: big)
     }
 
-    private var phaseHeader: some View {
-        VStack(spacing: 4) {
-            if let state = workoutVM.coachingState {
-                Text(state.phase.displayName)
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
+    // MARK: - Overlay building blocks
 
-                HStack(spacing: 16) {
-                    Label(state.elapsedTime.formatted, systemImage: "timer")
-                    if let target = state.targetZone {
-                        Label("Target: Zone \(target)", systemImage: "target")
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white.opacity(0.05))
-    }
-
-    private var activeContent: some View {
-        VStack(spacing: 20) {
-            ZoneRingView(
-                zone: workoutVM.coachingState?.currentZone ?? 0,
-                hr: workoutVM.coachingState?.currentHR ?? 0,
-                targetZone: workoutVM.coachingState?.targetZone
-            )
-
-            if let state = workoutVM.coachingState, state.isGracePeriodActive {
-                Text("Grace period — settle in")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(Color.white.opacity(0.08)))
-            }
-
-            if let state = workoutVM.coachingState {
-                HStack {
-                    Text("Phase ends in")
-                    Text(state.phaseTimeRemaining.formatted)
-                        .bold()
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
+    private func overlayScrim<Content: View>(alignment: Alignment = .center,
+                                             @ViewBuilder _ content: () -> Content) -> some View {
+        ZStack(alignment: alignment) {
+            Color.black.opacity(0.9).ignoresSafeArea()
+            content().padding(.horizontal, 24)
         }
     }
-
-    private var pausedContent: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "pause.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(.white.opacity(0.4))
-            Text("Paused")
-                .font(.title.bold())
-                .foregroundStyle(.white)
+    private func primaryButton(_ title: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title).font(WT.cond(20, .heavy)).tracking(0.6).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).frame(height: 56)
+                .background(RoundedRectangle(cornerRadius: 16).fill(WT.red))
         }
     }
-
-    private var controlButtons: some View {
-        HStack(spacing: 20) {
-            if workoutVM.isPaused {
-                Button("Resume") { workoutVM.resume() }
-                    .buttonStyle(PrimaryButtonStyle())
-                    .accessibilityIdentifier("workout-resume-button")
-
-                Button("End Workout") { workoutVM.end() }
-                    .buttonStyle(SecondaryButtonStyle())
-                    .accessibilityIdentifier("workout-end-button")
-            } else {
-                Button("Pause") { workoutVM.pause() }
-                    .buttonStyle(SecondaryButtonStyle())
-                    .accessibilityIdentifier("workout-pause-button")
-            }
+    private func secondaryButton(_ title: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title).font(WT.cond(20, .heavy)).tracking(0.6).foregroundStyle(.white)
+                .frame(maxWidth: .infinity).frame(height: 56)
+                .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.10)))
         }
-        .padding(.horizontal, 24)
-    }
-}
-
-// MARK: - Helpers
-
-private extension PhaseType {
-    var displayName: String {
-        switch self {
-        case .warmup: return "Warm Up"
-        case .exercise: return "Exercise"
-        case .recovery: return "Recovery"
-        case .cooldown: return "Cool Down"
-        }
-    }
-}
-
-private extension TimeInterval {
-    var formatted: String {
-        let mins = Int(self) / 60
-        let secs = Int(self) % 60
-        return String(format: "%d:%02d", mins, secs)
     }
 }

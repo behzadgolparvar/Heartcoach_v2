@@ -50,6 +50,10 @@ final class WorkoutViewModel {
     private let zones: HRZones
     private let restingHR: Int
     private let maxHR: Int
+    // Read-only accessors for the workout UI.
+    var displayZones: HRZones { zones }
+    var displayRestingHR: Int { restingHR }
+    var displayMaxHR: Int { maxHR }
     private let stage: TrainingStage
     private let levelUpUnlock: LevelUpUnlock?
     /// Per-session Shape choice (Option A/B + muscles), set before `start` on Shape days.
