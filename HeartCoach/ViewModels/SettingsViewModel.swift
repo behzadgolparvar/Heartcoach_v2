@@ -98,10 +98,11 @@ final class SettingsViewModel {
         profile.healthHistory = health
 
         isSaving = true
+        let snapshot = profile   // immutable copy for the concurrent save (Swift 6)
         Task {
             do {
-                try await firebaseService.saveProfileV2(profile, userID: userID)
-                await MainActor.run { self.loaded = profile; self.isSaving = false; self.saveSuccess = true }
+                try await firebaseService.saveProfileV2(snapshot, userID: userID)
+                await MainActor.run { self.loaded = snapshot; self.isSaving = false; self.saveSuccess = true }
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 await MainActor.run { self.saveSuccess = false }
             } catch {
