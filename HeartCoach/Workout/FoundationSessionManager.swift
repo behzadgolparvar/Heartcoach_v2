@@ -37,7 +37,11 @@ final class FoundationSessionManager {
     private var cooldownSkipped = false
     private var tickTask: Task<Void, Never>?
 
-    private let tickInterval = 5   // seconds per tick (safety cadence); coaching every 15s
+    private let tickInterval = 1   // 1s loop: timer/UI/safety/per-second HR; coaching still every 15s
+    private let watchSendIntervalSec = 5   // throttle Watch coaching-state sends (don't flood WCSession)
+    private var lastWatchSendSec = -100
+    private var lastWatchZone = -1
+    private var lastWatchPhase: PhaseType?
 
     // Sensor-dropout tracking (§J, BR-2-24).
     private var noSignalSec = 0
@@ -147,7 +151,7 @@ final class FoundationSessionManager {
     private func startTickLoop() {
         tickTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
                 guard !Task.isCancelled else { return }
                 await MainActor.run { self?.processTick() }
             }
@@ -335,7 +339,17 @@ final class FoundationSessionManager {
             elapsedTime: TimeInterval(totalElapsedSec),
             coachingMessage: cue,
             isGracePeriodActive: false)
+        // Local UI updates every second (smooth timer).
         onStateUpdate?(state)
-        watchBridge.sendCoachingState(state)
+        // Throttle Watch sends: every ~5s, on zone/phase change, or when a cue fires.
+        let zoneChanged = state.currentZone != lastWatchZone
+        let phaseChanged = state.phase != lastWatchPhase
+        if cue != nil || zoneChanged || phaseChanged
+            || totalElapsedSec - lastWatchSendSec >= watchSendIntervalSec {
+            watchBridge.sendCoachingState(state)
+            lastWatchSendSec = totalElapsedSec
+            lastWatchZone = state.currentZone
+            lastWatchPhase = state.phase
+        }
     }
 }
