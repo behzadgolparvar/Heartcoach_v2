@@ -54,6 +54,13 @@ struct WorkoutWatchView: View {
         .padding(.vertical, 6)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
+        // Tick the phase countdown locally every second (the phone only pushes
+        // state ~every 5s to spare WCSession); a fresh packet re-syncs the value.
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if viewModel.isWorkoutActive, viewModel.phaseRemainingSec > 0 {
+                viewModel.phaseRemainingSec -= 1
+            }
+        }
     }
 
     // MARK: - Mini zone gauge (6 blocks, dimming + target outline)
