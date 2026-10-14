@@ -67,18 +67,32 @@ struct WorkoutWatchView: View {
     }
 
     // MARK: - Mini zone gauge (6 blocks, dimming + target outline)
+    // A caret above the current block shows "where you are"; the white box is the target.
 
     private var miniGauge: some View {
-        HStack(spacing: 2) {
-            ForEach(0..<6, id: \.self) { i in
-                RoundedRectangle(cornerRadius: 1)
-                    .fill(i == viewModel.currentZone ? WWT.zoneColor(i) : WWT.zoneDim(i))
-                    .frame(height: 8)
-                    .overlay {
-                        if i == viewModel.targetZone, i >= 1 {
-                            RoundedRectangle(cornerRadius: 1).strokeBorder(.white, lineWidth: 1.5)
+        VStack(spacing: 2) {
+            // Current-zone caret row (aligned to the blocks by equal-width cells).
+            HStack(spacing: 2) {
+                ForEach(0..<6, id: \.self) { i in
+                    DownCaret()
+                        .fill(Color.white)
+                        .frame(height: 5)
+                        .frame(maxWidth: .infinity)
+                        .opacity(i == viewModel.currentZone ? 1 : 0)
+                }
+            }
+            // Blocks
+            HStack(spacing: 2) {
+                ForEach(0..<6, id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(i == viewModel.currentZone ? WWT.zoneColor(i) : WWT.zoneDim(i))
+                        .frame(height: 8)
+                        .overlay {
+                            if i == viewModel.targetZone, i >= 1 {
+                                RoundedRectangle(cornerRadius: 1).strokeBorder(.white, lineWidth: 1.5)
+                            }
                         }
-                    }
+                }
             }
         }
     }
@@ -86,10 +100,18 @@ struct WorkoutWatchView: View {
     // MARK: - Derived
 
     private var zoneCaption: String {
-        let cz = viewModel.currentZone
-        let czStr = (cz >= 1 && cz <= 5) ? "Z\(cz)" : "—"
-        if viewModel.targetZone >= 1 { return "\(czStr) · TARGET Z\(viewModel.targetZone)" }
-        return czStr
+        let target = viewModel.targetZone >= 1 ? " · TARGET Z\(viewModel.targetZone)" : ""
+        let here: String
+        if viewModel.currentHR <= 0 {
+            here = "—"                              // no signal
+        } else {
+            switch viewModel.currentZone {
+            case 1...5: here = "Z\(viewModel.currentZone)"
+            case 6:     here = "ABOVE"              // over HRmax
+            default:    here = "BELOW"              // under Zone 1
+            }
+        }
+        return here + target
     }
 
     private var messageColor: Color {
@@ -161,4 +183,18 @@ private extension Color {
 
 private extension Int {
     var clock: String { String(format: "%d:%02d", self / 60, self % 60) }
+}
+
+/// Small downward triangle marking the current zone above the gauge.
+private struct DownCaret: Shape {
+    func path(in r: CGRect) -> Path {
+        let w: CGFloat = 9
+        let cx = r.midX
+        var p = Path()
+        p.move(to: CGPoint(x: cx - w / 2, y: r.minY))
+        p.addLine(to: CGPoint(x: cx + w / 2, y: r.minY))
+        p.addLine(to: CGPoint(x: cx, y: r.maxY))
+        p.closeSubpath()
+        return p
+    }
 }
