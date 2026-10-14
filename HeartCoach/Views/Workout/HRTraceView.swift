@@ -76,12 +76,17 @@ struct HRTraceView: View {
             start += dur
         }
 
-        // HRmax dashed line.
+        // HRmax dashed line + a red "MAX" chip on the right so it's clearly legible.
         let yMax = yFor(Double(maxHR))
         var maxPath = Path(); maxPath.move(to: CGPoint(x: 0, y: yMax)); maxPath.addLine(to: CGPoint(x: w, y: yMax))
-        ctx.stroke(maxPath, with: .color(WT.redText), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
-        ctx.draw(Text("MAX \(maxHR)").font(WT.cond(9, .semibold)).foregroundColor(WT.redText),
-                 at: CGPoint(x: w - 6, y: yMax - 7), anchor: .topTrailing)
+        ctx.stroke(maxPath, with: .color(WT.redText), style: StrokeStyle(lineWidth: 1.2, dash: [4, 3]))
+
+        let label = ctx.resolve(Text("MAX \(maxHR)").font(WT.cond(13, .heavy)).foregroundColor(.white))
+        let ls = label.measure(in: CGSize(width: 200, height: 40))
+        let chip = CGRect(x: w - ls.width - 12, y: yMax - (ls.height + 4) / 2,
+                          width: ls.width + 10, height: ls.height + 4)
+        ctx.fill(Path(roundedRect: chip, cornerRadius: 3), with: .color(WT.red))
+        ctx.draw(label, at: CGPoint(x: chip.midX, y: chip.midY), anchor: .center)
 
         // HR line.
         if hrTrace.count > 1 {
