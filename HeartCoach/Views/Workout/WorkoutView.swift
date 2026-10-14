@@ -43,47 +43,44 @@ struct WorkoutView: View {
     // MARK: - Running (broadcast layout)
 
     private var runningContent: some View {
-        // Controls stay pinned at the bottom; everything above lives in a scroll
-        // view bounded to the safe area, so an optional element (the dropout banner)
-        // can never push the header under the status bar / Dynamic Island — it
-        // scrolls instead. A minHeight keeps the hero centered when it all fits.
-        GeometryReader { geo in
-            VStack(spacing: 12) {
-                ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 14) {
-                        scoreboardHeader
+        // Single screen, no scroll. Flexible spacers absorb slack around the hero.
+        // The dropout banner is an overlay so it never changes the layout height
+        // (which would otherwise push the header under the Dynamic Island).
+        VStack(spacing: 14) {
+            scoreboardHeader
 
-                        if let proto = workoutVM.sessionProtocol {
-                            HRTraceView(
-                                proto: proto,
-                                zones: workoutVM.displayZones,
-                                restingHR: workoutVM.displayRestingHR,
-                                maxHR: workoutVM.displayMaxHR,
-                                hrTrace: workoutVM.hrTrace,
-                                currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
-                                currentZone: zone,
-                                roundLabel: workoutVM.roundLabel,
-                                remainingSec: workoutVM.remainingSessionSec)
-                        }
-
-                        if workoutVM.sensorDropout { dropoutBanner }
-
-                        Spacer(minLength: 6)
-                        hero
-                        ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
-                                      zones: workoutVM.displayZones, recoveryMode: recoveryMode)
-                        Spacer(minLength: 6)
-
-                        coachLowerThird
-                        statsRow
-                    }
-                    .frame(minHeight: geo.size.height - 56 - 12, alignment: .center)
-                }
-                controls
+            if let proto = workoutVM.sessionProtocol {
+                HRTraceView(
+                    proto: proto,
+                    zones: workoutVM.displayZones,
+                    restingHR: workoutVM.displayRestingHR,
+                    maxHR: workoutVM.displayMaxHR,
+                    hrTrace: workoutVM.hrTrace,
+                    currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
+                    currentZone: zone,
+                    roundLabel: workoutVM.roundLabel,
+                    remainingSec: workoutVM.remainingSessionSec)
             }
+
+            Spacer(minLength: 0)
+            hero
+            ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
+                          zones: workoutVM.displayZones, recoveryMode: recoveryMode)
+            Spacer(minLength: 0)
+
+            coachLowerThird
+            statsRow
+            controls
         }
         .padding(.top, 12).padding(.horizontal, 18).padding(.bottom, 16)
         .foregroundStyle(.white)
+        .overlay(alignment: .top) {
+            if workoutVM.sensorDropout {
+                dropoutBanner
+                    .padding(.horizontal, 18)
+                    .padding(.top, 12 + 44 + 14)   // float just below the scoreboard header
+            }
+        }
     }
 
     private var dropoutBanner: some View {
@@ -91,6 +88,7 @@ struct WorkoutView: View {
             .font(WT.body(13, .bold)).foregroundStyle(.black)
             .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 12)
             .background(WT.warning)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     // MARK: Scoreboard header
@@ -117,14 +115,18 @@ struct WorkoutView: View {
 
     private var hero: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Text("Z\(zone)")
-                    .font(WT.cond(18, .heavy)).foregroundStyle(.black)
-                    .padding(.horizontal, 8).padding(.vertical, 5).background(WT.zoneColor(zone))
-                Text(WT.zoneName(zone))
-                    .font(WT.cond(18, .bold)).tracking(0.8).foregroundStyle(WT.zoneColor(zone))
+            // Zone tag only while actually in a zone (hidden below Z1 / no signal).
+            if zone >= 1 {
+                HStack(spacing: 8) {
+                    Text("Z\(zone)")
+                        .font(WT.cond(18, .heavy)).foregroundStyle(.black)
+                        .padding(.horizontal, 8).padding(.vertical, 5).background(WT.zoneColor(zone))
+                    Text(WT.zoneName(zone))
+                        .font(WT.cond(18, .bold)).tracking(0.8).foregroundStyle(WT.zoneColor(zone))
+                }
+                .padding(.bottom, 2)
+                .animation(.easeInOut(duration: 0.4), value: zone)
             }
-            .animation(.easeInOut(duration: 0.4), value: zone)
 
             Text(hr > 0 ? "\(hr)" : "--")
                 .font(WT.cond(140, .heavy)).monospacedDigit()

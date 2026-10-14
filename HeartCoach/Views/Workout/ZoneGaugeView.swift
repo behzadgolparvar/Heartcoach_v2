@@ -13,9 +13,8 @@ struct ZoneGaugeView: View {
 
     enum RecoveryMode { case none, walk, stretch }
 
-    // Domain + block layout (units sum to 75).
-    private let domainLo = 110.0, domainHi = 190.0
-    private let units: [CGFloat] = [12, 13, 12, 13, 12, 13]   // index 0 = below-Z1
+    // Block layout (relative widths over the 110–190 bpm domain; index 0 = below-Z1).
+    private let units: [CGFloat] = [12, 13, 12, 13, 12, 13]
     private let spacing: CGFloat = 3
 
     var body: some View {
@@ -47,12 +46,14 @@ struct ZoneGaugeView: View {
                             .offset(x: xs[tz] - 3, y: -3)
                             .animation(.easeInOut(duration: 0.4), value: tz)
                     }
-                    // Marker (downward triangle), tip 13pt above the track top
+                    // Marker (downward triangle), centered on the current zone block
+                    // (discrete, like the Watch) — tip 13pt above the track top.
+                    let mi = min(5, max(0, currentZone))
                     DownTriangle()
                         .fill(Color.white)
                         .frame(width: 14, height: 10)
-                        .offset(x: markerX(w) - 7, y: -23)
-                        .animation(.easeOut(duration: 0.5), value: currentHR)
+                        .offset(x: xs[mi] + widths[mi] / 2 - 7, y: -23)
+                        .animation(.easeInOut(duration: 0.4), value: currentZone)
                 }
             }
             .frame(height: 30)
@@ -105,10 +106,6 @@ struct ZoneGaugeView: View {
         var xs: [CGFloat] = []; var x: CGFloat = 0
         for (i, wdt) in widths.enumerated() { xs.append(x); x += wdt + (i < 5 ? spacing : 0) }
         return xs
-    }
-    private func markerX(_ w: CGFloat) -> CGFloat {
-        let f = min(0.99, max(0.01, (Double(currentHR) - domainLo) / (domainHi - domainLo)))
-        return CGFloat(f) * w
     }
 }
 
