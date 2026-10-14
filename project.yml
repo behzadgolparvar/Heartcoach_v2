@@ -91,6 +91,10 @@ targets:
     deploymentTarget: "10.0"
     sources:
       - path: HeartCoachWatch
+      # Barlow Condensed faces used by the Watch broadcast view (shared from the
+      # iPhone Fonts folder); only the two weights the Watch renders.
+      - path: HeartCoach/Fonts/BarlowCondensed-ExtraBold.ttf
+      - path: HeartCoach/Fonts/BarlowCondensed-Bold.ttf
     info:
       path: HeartCoachWatch/Info.plist
       properties:
@@ -99,6 +103,9 @@ targets:
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "3"
         WKApplication: true
+        UIAppFonts:
+          - BarlowCondensed-ExtraBold.ttf
+          - BarlowCondensed-Bold.ttf
         WKCompanionAppBundleIdentifier: com.golkoosh.heartcoach
         WKBackgroundModes:
           - workout-processing

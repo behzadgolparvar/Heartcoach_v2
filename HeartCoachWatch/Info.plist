@@ -24,6 +24,11 @@
 	<string>HeartCoach reads your heart rate during workouts.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>HeartCoach writes workout data to your health records.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BarlowCondensed-ExtraBold.ttf</string>
+		<string>BarlowCondensed-Bold.ttf</string>
+	</array>
 	<key>WKApplication</key>
 	<true/>
 	<key>WKBackgroundModes</key>

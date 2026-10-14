@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Apple Watch live workout — Direction D "Broadcast + Trace" (mirrors the iPhone).
 /// Phase chip + countdown, big zone-colored HR, zone/target caption, mini zone gauge,
@@ -11,7 +14,7 @@ struct WorkoutWatchView: View {
             // Phase chip + phase-remaining countdown.
             HStack(spacing: 4) {
                 Text(viewModel.phaseName.uppercased())
-                    .font(.system(size: 12, weight: .heavy).width(.condensed))
+                    .font(WWT.cond(12, .heavy))
                     .tracking(0.5).foregroundStyle(.white)
                     .padding(.horizontal, 5).padding(.vertical, 3)
                     .background(WWT.red)
@@ -19,7 +22,7 @@ struct WorkoutWatchView: View {
                 Spacer(minLength: 0)
                 if viewModel.phaseRemainingSec > 0 {
                     Text(viewModel.phaseRemainingSec.clock)
-                        .font(.system(size: 15, weight: .bold).width(.condensed))
+                        .font(WWT.cond(15, .bold))
                         .monospacedDigit().foregroundStyle(.white)
                 }
             }
@@ -28,14 +31,14 @@ struct WorkoutWatchView: View {
 
             // Big HR numeral, colored by current zone.
             Text("\(viewModel.currentHR)")
-                .font(.system(size: 88, weight: .heavy).width(.condensed))
+                .font(WWT.cond(88, .heavy))
                 .monospacedDigit()
                 .foregroundStyle(WWT.zoneColor(viewModel.currentZone))
                 .lineLimit(1).minimumScaleFactor(0.5)
                 .accessibilityLabel("\(viewModel.currentHR) beats per minute")
 
             Text(zoneCaption)
-                .font(.system(size: 12, weight: .bold).width(.condensed))
+                .font(WWT.cond(12, .bold))
                 .tracking(1).foregroundStyle(WWT.secondary)
                 .lineLimit(1)
 
@@ -45,7 +48,7 @@ struct WorkoutWatchView: View {
 
             // Message line (fresh coaching message in its type color, else blank).
             Text(viewModel.lastMessage?.uppercased() ?? "")
-                .font(.system(size: 15, weight: .heavy).width(.condensed))
+                .font(WWT.cond(15, .heavy))
                 .foregroundStyle(messageColor)
                 .lineLimit(1).minimumScaleFactor(0.7)
                 .frame(height: 20)
@@ -122,6 +125,15 @@ private enum WWT {
         default: return 0x48484A
         }
     }
+    /// Barlow Condensed (ExtraBold for heavy, else Bold) with a system-condensed fallback.
+    static func cond(_ size: CGFloat, _ weight: Font.Weight) -> Font {
+        let name = (weight == .heavy || weight == .black) ? "BarlowCondensed-ExtraBold" : "BarlowCondensed-Bold"
+        #if canImport(UIKit)
+        if UIFont(name: name, size: size) != nil { return .custom(name, size: size) }
+        #endif
+        return .system(size: size, weight: weight).width(.condensed)
+    }
+
     static func zoneColor(_ zone: Int) -> Color { Color(hex: zoneHex(zone)) }
     /// Dimmed block = zone color mixed 32% into surface (blend raw hex, no UIColor).
     static func zoneDim(_ zone: Int) -> Color {
