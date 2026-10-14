@@ -1,5 +1,4 @@
 import XCTest
-import SwiftCheck
 @testable import HeartRateCoachCore
 
 final class WorkoutPhaseSequencerTests: XCTestCase {
@@ -91,16 +90,12 @@ final class WorkoutPhaseSequencerTests: XCTestCase {
         // 2 warm-up + 15 cycles × 2 = 32
     }
 
-    // MARK: - Property-Based Tests (SwiftCheck)
+    // MARK: - Property-Based Tests
 
     func testTotalDurationInvariant() {
-        let programs: [WorkoutProgram] = [.continuous, .hiit, .fartlek]
-        for program in programs {
-            property("total duration of \(program) equals 2100 seconds")
-                <- forAll(Gen.pure(program)) { p in
-                    let total = p.phases.reduce(0.0) { $0 + $1.duration }
-                    return total == 2100
-                }
+        for program in [WorkoutProgram.continuous, .hiit, .fartlek] {
+            let total = program.phases.reduce(0.0) { $0 + $1.duration }
+            XCTAssertEqual(total, 2100, "total duration of \(program) must equal 2100 seconds")
         }
     }
 }

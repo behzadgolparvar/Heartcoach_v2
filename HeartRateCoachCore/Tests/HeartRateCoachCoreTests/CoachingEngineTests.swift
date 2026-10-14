@@ -1,5 +1,4 @@
 import XCTest
-import SwiftCheck
 @testable import HeartRateCoachCore
 
 final class CoachingEngineTests: XCTestCase {
@@ -11,7 +10,7 @@ final class CoachingEngineTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // Zone5 max = 190 for a 30-year-old with RHR 60 (Karvonen)
-        zones = try! ZoneCalculator.calculate(age: 30, restingHR: 60)
+        zones = try! ZoneCalculator.calculate(age: 30, restingHR: 60).zones
     }
 
     private func makePhase(targetZone: Int?, hasGracePeriod: Bool = false) -> WorkoutPhase {
@@ -144,7 +143,9 @@ final class CoachingEngineTests: XCTestCase {
     func test_layer3_doesNotFire_before30Seconds() {
         let zone3 = zones.zone(number: 3)!
         let inZoneHR = (zone3.min + zone3.max) / 2
-        var state = CoachingEngineState(hrBuffer: [inZoneHR], consecutiveInZoneSeconds: 20)
+        // An in-zone tick adds +10 (Layer 2's in-zone counter and Layer 3 each add 5),
+        // so start low enough that it stays under the 30s threshold after this tick.
+        var state = CoachingEngineState(hrBuffer: [inZoneHR], consecutiveInZoneSeconds: 10)
         let phase = makePhase(targetZone: 3)
 
         let msg = CoachingEngine.tick(hr: inZoneHR, phase: phase,
@@ -166,13 +167,16 @@ final class CoachingEngineTests: XCTestCase {
         XCTAssertEqual(msg?.layer, 1, "Layer 1 should win — got layer \(msg?.layer ?? -1)")
     }
 
-    // MARK: - PBT: 9 Invariants
+    // MARK: - PBT: 9 Invariants (seeded)
 
     func test_pbt_layer1AlwaysFires_whenHRAboveZone5Max() {
-        property("Layer 1 always fires when HR > zone5.max regardless of state") <-
-        forAll(coachingEngineStateGen, workoutPhaseGen) { stateIn, phase in
+        pbtAssert("Layer 1 always fires when HR > zone5.max regardless of state",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhase(&$0)) }) { stateIn, phase in
             var state = stateIn
             let hr = self.zones.zone5.max + 1
+            // Safety is evaluated on the smoothed buffer HR — seed the buffer with the
+            // emergency reading so the smoothed value actually exceeds zone5.max.
+            state.hrBuffer = [hr]
             let msg = CoachingEngine.tick(hr: hr, phase: phase, elapsedInPhase: 30,
                                          state: &state, zones: self.zones)
             return msg?.layer == 1
@@ -180,8 +184,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_layer2NeverFires_whenPhaseHasNoTargetZone() {
-        property("Layer 2 never fires when phase.targetZone == nil") <-
-        forAll(coachingEngineStateGen) { stateIn in
+        pbtAssert("Layer 2 never fires when phase.targetZone == nil",
+                  gen: genCoachingEngineState) { stateIn in
             var state = stateIn
             let phase = WorkoutPhase(index: 0, duration: 300, targetZone: nil,
                                     type: .recovery, hasGracePeriod: false)
@@ -194,8 +198,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_layer2NeverFires_duringGracePeriod() {
-        property("Layer 2 never fires when elapsedInPhase < 10") <-
-        forAll(coachingEngineStateGen) { stateIn in
+        pbtAssert("Layer 2 never fires when elapsedInPhase < 10",
+                  gen: genCoachingEngineState) { stateIn in
             var state = stateIn
             state.hrBuffer = [120]
             let phase = WorkoutPhase(index: 0, duration: 300, targetZone: 3,
@@ -207,8 +211,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_layer2NeverFires_withinAntiSpamWindow() {
-        property("Layer 2 never fires within 20 seconds of last Layer 2 message") <-
-        forAll(coachingEngineStateGen, workoutPhaseWithZoneGen) { stateIn, phase in
+        pbtAssert("Layer 2 never fires within 20 seconds of last Layer 2 message",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhaseWithZone(&$0)) }) { stateIn, phase in
             var state = stateIn
             let now = Date()
             state.lastLayer2MessageAt = now.addingTimeInterval(-10)  // 10s ago — inside window
@@ -220,10 +224,11 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_layer3NeverFires_whenConsecutiveSecondsBelowThreshold() {
-        property("Layer 3 never fires when consecutiveInZoneSeconds < 30") <-
-        forAll(coachingEngineStateGen, workoutPhaseWithZoneGen) { stateIn, phase in
+        pbtAssert("Layer 3 never fires when consecutiveInZoneSeconds stays below 30 after the tick",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhaseWithZone(&$0)) }) { stateIn, phase in
             var state = stateIn
-            state.consecutiveInZoneSeconds = 20  // below threshold
+            // An in-zone tick adds +10 (Layer 2 counter + Layer 3), so 15 → 25 < 30.
+            state.consecutiveInZoneSeconds = 15
             let targetZone = phase.targetZone!
             let zone = self.zones.zone(number: targetZone)!
             let inZoneHR = (zone.min + zone.max) / 2
@@ -235,8 +240,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_atMostOneLayerFiresPerTick() {
-        property("At most one layer fires per tick") <-
-        forAll(coachingEngineStateGen, workoutPhaseGen) { stateIn, phase in
+        pbtAssert("At most one layer fires per tick",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhase(&$0)) }) { stateIn, phase in
             var state = stateIn
             let hr = 130
             state.hrBuffer = [hr]
@@ -248,9 +253,9 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_hrSmooth_withinBufferBounds() {
-        property("hrSmooth is always within [min(hrBuffer), max(hrBuffer)]") <-
-        forAll(coachingEngineStateGen) { stateIn in
-            var state = stateIn
+        pbtAssert("hrSmooth is always within [min(hrBuffer), max(hrBuffer)]",
+                  gen: genCoachingEngineState) { stateIn in
+            let state = stateIn
             guard !state.hrBuffer.isEmpty else { return true }
             let smooth = state.hrSmooth
             return smooth >= state.hrBuffer.min()! && smooth <= state.hrBuffer.max()! + 1
@@ -259,8 +264,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_consecutiveInZoneSeconds_neverNegative() {
-        property("consecutiveInZoneSeconds is always >= 0 after any tick") <-
-        forAll(coachingEngineStateGen, workoutPhaseGen) { stateIn, phase in
+        pbtAssert("consecutiveInZoneSeconds is always >= 0 after any tick",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhase(&$0)) }) { stateIn, phase in
             var state = stateIn
             let hr = 130
             state.hrBuffer = [hr]
@@ -271,8 +276,8 @@ final class CoachingEngineTests: XCTestCase {
     }
 
     func test_pbt_determinism_sameInputsSameOutput() {
-        property("Same inputs always produce the same output") <-
-        forAll(coachingEngineStateGen, workoutPhaseGen) { stateIn, phase in
+        pbtAssert("Same inputs always produce the same output",
+                  gen: { (genCoachingEngineState(&$0), genWorkoutPhase(&$0)) }) { stateIn, phase in
             let hr = 130
             let now = Date(timeIntervalSince1970: 1_000_000)  // fixed time
             var state1 = stateIn

@@ -1,5 +1,4 @@
 import XCTest
-import SwiftCheck
 @testable import HeartRateCoachCore
 
 final class ZoneCalculatorTests: XCTestCase {
@@ -116,93 +115,89 @@ final class ZoneCalculatorTests: XCTestCase {
         }
     }
 
-    // MARK: - Property-Based Tests (SwiftCheck)
+    // MARK: - Property-Based Tests (seeded)
 
     func testZoneBoundariesStrictlyIncreasing() {
-        property("zone boundaries are strictly increasing for all valid profiles")
-            <- forAll(validProfileGen) { profile in
-                guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                let z = result.zones
-                return z.zone1.max < z.zone2.max
-                    && z.zone2.max < z.zone3.max
-                    && z.zone3.max < z.zone4.max
-                    && z.zone4.max < z.zone5.max
+        pbtAssert("zone boundaries are strictly increasing for all valid profiles",
+                  gen: genValidProfile) { profile in
+            guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            let z = result.zones
+            return z.zone1.max < z.zone2.max
+                && z.zone2.max < z.zone3.max
+                && z.zone3.max < z.zone4.max
+                && z.zone4.max < z.zone5.max
+        }
     }
 
     func testNoGapsBetweenZones() {
-        property("zone(n).max == zone(n+1).min for all valid profiles")
-            <- forAll(validProfileGen) { profile in
-                guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                let z = result.zones
-                return z.zone1.max == z.zone2.min
-                    && z.zone2.max == z.zone3.min
-                    && z.zone3.max == z.zone4.min
-                    && z.zone4.max == z.zone5.min
+        pbtAssert("zone(n).max == zone(n+1).min for all valid profiles",
+                  gen: genValidProfile) { profile in
+            guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            let z = result.zones
+            return z.zone1.max == z.zone2.min
+                && z.zone2.max == z.zone3.min
+                && z.zone3.max == z.zone4.min
+                && z.zone4.max == z.zone5.min
+        }
     }
 
     func testZone5MaxEqualsHRmaxProperty() {
-        property("zone5.max always equals HRmax (220 - age)")
-            <- forAll(validProfileGen) { profile in
-                guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                return result.zones.zone5.max == ZoneCalculator.maxHR(for: profile.age)
+        pbtAssert("zone5.max always equals HRmax (220 - age)",
+                  gen: genValidProfile) { profile in
+            guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            return result.zones.zone5.max == ZoneCalculator.maxHR(for: profile.age)
+        }
     }
 
     func testZoneClassificationConsistency() {
-        property("zone() returns correct zone for HR within each zone's range")
-            <- forAll(validProfileGen) { profile in
-                guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                let z = result.zones
-                // Test midpoint of each zone
-                let mid1 = (z.zone1.min + z.zone1.max) / 2
-                let mid2 = (z.zone2.min + z.zone2.max) / 2
-                let mid3 = (z.zone3.min + z.zone3.max) / 2
-                let mid4 = (z.zone4.min + z.zone4.max) / 2
-                let mid5 = (z.zone5.min + z.zone5.max) / 2
-                return ZoneCalculator.zone(for: mid1, in: z) == 1
-                    && ZoneCalculator.zone(for: mid2, in: z) == 2
-                    && ZoneCalculator.zone(for: mid3, in: z) == 3
-                    && ZoneCalculator.zone(for: mid4, in: z) == 4
-                    && ZoneCalculator.zone(for: mid5, in: z) == 5
+        pbtAssert("zone() returns correct zone for HR within each zone's range",
+                  gen: genValidProfile) { profile in
+            guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            let z = result.zones
+            let mid1 = (z.zone1.min + z.zone1.max) / 2
+            let mid2 = (z.zone2.min + z.zone2.max) / 2
+            let mid3 = (z.zone3.min + z.zone3.max) / 2
+            let mid4 = (z.zone4.min + z.zone4.max) / 2
+            let mid5 = (z.zone5.min + z.zone5.max) / 2
+            return ZoneCalculator.zone(for: mid1, in: z) == 1
+                && ZoneCalculator.zone(for: mid2, in: z) == 2
+                && ZoneCalculator.zone(for: mid3, in: z) == 3
+                && ZoneCalculator.zone(for: mid4, in: z) == 4
+                && ZoneCalculator.zone(for: mid5, in: z) == 5
+        }
     }
 
     func testBoundaryClassificationProperty() {
-        property("HR at zone(n).max classifies as zone n (lower zone wins)")
-            <- forAll(validProfileGen) { profile in
-                guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                let z = result.zones
-                return ZoneCalculator.zone(for: z.zone1.max, in: z) == 1
-                    && ZoneCalculator.zone(for: z.zone2.max, in: z) == 2
-                    && ZoneCalculator.zone(for: z.zone3.max, in: z) == 3
-                    && ZoneCalculator.zone(for: z.zone4.max, in: z) == 4
+        pbtAssert("HR at zone(n).max classifies as zone n (lower zone wins)",
+                  gen: genValidProfile) { profile in
+            guard let result = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            let z = result.zones
+            return ZoneCalculator.zone(for: z.zone1.max, in: z) == 1
+                && ZoneCalculator.zone(for: z.zone2.max, in: z) == 2
+                && ZoneCalculator.zone(for: z.zone3.max, in: z) == 3
+                && ZoneCalculator.zone(for: z.zone4.max, in: z) == 4
+        }
     }
 
     func testCalculateDeterministic() {
-        property("same inputs always produce identical HRZones")
-            <- forAll(validProfileGen) { profile in
-                guard let r1 = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR),
-                      let r2 = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
-                    return false
-                }
-                return r1.zones.zone1.min == r2.zones.zone1.min
-                    && r1.zones.zone5.max == r2.zones.zone5.max
+        pbtAssert("same inputs always produce identical HRZones",
+                  gen: genValidProfile) { profile in
+            guard let r1 = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR),
+                  let r2 = try? ZoneCalculator.calculate(age: profile.age, restingHR: profile.restingHR) else {
+                return false
             }
+            return r1.zones.zone1.min == r2.zones.zone1.min
+                && r1.zones.zone5.max == r2.zones.zone5.max
+        }
     }
 }
-
-// MARK: - RHRWarning Equatable (test support)
-extension RHRWarning: Equatable {}
