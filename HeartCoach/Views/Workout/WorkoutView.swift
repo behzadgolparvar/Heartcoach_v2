@@ -29,6 +29,7 @@ struct WorkoutView: View {
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)   // full-screen: don't let the tab bar cover the controls
         .onChange(of: workoutVM.isWorkoutActive) { _, active in
             if !active, workoutVM.completedSession != nil { navigateToSummary = true }
         }
@@ -75,7 +76,7 @@ struct WorkoutView: View {
             statsRow
             controls
         }
-        .padding(.top, 60).padding(.horizontal, 18).padding(.bottom, 30)
+        .padding(.top, 12).padding(.horizontal, 18).padding(.bottom, 16)
         .foregroundStyle(.white)
     }
 
@@ -115,6 +116,7 @@ struct WorkoutView: View {
             Text(hr > 0 ? "\(hr)" : "--")
                 .font(WT.cond(140, .heavy)).monospacedDigit()
                 .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
+                .lineLimit(1).minimumScaleFactor(0.6)
                 .padding(.top, 6)
             Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
         }
