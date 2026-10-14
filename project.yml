@@ -41,7 +41,7 @@ targets:
         CFBundleName: HeartCoach
         CFBundleDisplayName: HeartCoach
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "3"
+        CFBundleVersion: "4"
         UILaunchScreen: {}
         UIUserInterfaceStyle: Dark
         UISupportedInterfaceOrientations:
@@ -101,7 +101,7 @@ targets:
         CFBundleName: HeartCoachWatch
         CFBundleDisplayName: HeartCoach
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "3"
+        CFBundleVersion: "4"
         WKApplication: true
         UIAppFonts:
           - BarlowCondensed-ExtraBold.ttf
