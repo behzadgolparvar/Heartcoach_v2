@@ -52,6 +52,34 @@ final class FirestoreService: FirebaseServiceProtocol {
         }
     }
 
+    // MARK: - Profile (v2 onboarding schema)
+
+    /// Persists the full v2 profile under `users/{uid}.v2profile` (Codable JSON map).
+    /// The Codable round-trip is unit-tested; storage is robust to schema growth.
+    func saveProfileV2(_ profile: UserProfileV2, userID: String) async throws {
+        do {
+            let json = try JSONEncoder().encode(profile)
+            let dict = (try? JSONSerialization.jsonObject(with: json)) as? [String: Any] ?? [:]
+            try await userDoc(userID).setData(
+                ["v2profile": dict, "updatedAt": FieldValue.serverTimestamp()],
+                merge: true
+            )
+        } catch {
+            throw mapError(error)
+        }
+    }
+
+    func loadProfileV2(userID: String) async throws -> UserProfileV2? {
+        do {
+            let snapshot = try await userDoc(userID).getDocument()
+            guard snapshot.exists, let raw = snapshot.data()?["v2profile"] else { return nil }
+            let data = try JSONSerialization.data(withJSONObject: raw)
+            return try JSONDecoder().decode(UserProfileV2.self, from: data)
+        } catch {
+            throw mapError(error)
+        }
+    }
+
     func loadZones(userID: String) async throws -> HRZones? {
         do {
             let snapshot = try await userDoc(userID).getDocument()
@@ -201,16 +229,26 @@ final class FirestoreService: FirebaseServiceProtocol {
     }
 
     private func encodeSession(_ s: Session) throws -> [String: Any] {
-        let hrData = try JSONEncoder().encode(s.hrStream)
-        return [
+        // hr_stream timestamps as Unix epoch milliseconds (unambiguous for research),
+        // not the default Apple reference-date double.
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .millisecondsSince1970
+        let hrData = try encoder.encode(s.hrStream)
+        var dict: [String: Any] = [
             "id": s.id,
             "date": Timestamp(date: s.date),
             "programType": s.programType.rawValue,
             "durationSec": s.durationSec,
             "avgHR": s.avgHR,
             "timeInZones": Dictionary(uniqueKeysWithValues: s.timeInZones.map { ("\($0.key)", $0.value) }),
-            "hrStream": (try? JSONSerialization.jsonObject(with: hrData)) ?? []
+            "hrStream": (try? JSONSerialization.jsonObject(with: hrData)) ?? [],
+            "cooldownSkipped": s.cooldownSkipped
         ]
+        if let p = s.scorePercent { dict["scorePercent"] = p }
+        if let t = s.scoreTier { dict["scoreTier"] = t.rawValue }
+        if let td = s.trainingDurationSec { dict["trainingDurationSec"] = td }
+        if let f = s.sessionFlag { dict["sessionFlag"] = f }
+        return dict
     }
 
     private func decodeSession(_ d: [String: Any]) -> Session? {
@@ -230,15 +268,25 @@ final class FirestoreService: FirebaseServiceProtocol {
         // Reverse of encodeSession's hrStream serialization. Empty if absent/undecodable
         // (e.g. legacy records saved before the stream was persisted).
         let hrStream: [HRRecord]
+        let hrDecoder = JSONDecoder()
+        hrDecoder.dateDecodingStrategy = .millisecondsSince1970   // matches encodeSession
         if let raw = d["hrStream"],
            let data = try? JSONSerialization.data(withJSONObject: raw),
-           let decoded = try? JSONDecoder().decode([HRRecord].self, from: data) {
+           let decoded = try? hrDecoder.decode([HRRecord].self, from: data) {
             hrStream = decoded
         } else {
             hrStream = []
         }
+        let scorePercent = d["scorePercent"] as? Double
+        let scoreTier = (d["scoreTier"] as? String).flatMap { ScoreTier(rawValue: $0) }
+        let trainingDurationSec = d["trainingDurationSec"] as? Int
+        let sessionFlag = d["sessionFlag"] as? String
+        let cooldownSkipped = d["cooldownSkipped"] as? Bool ?? false
         return Session(id: id, date: ts.dateValue(), programType: type,
-                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: hrStream)
+                       durationSec: duration, avgHR: avgHR, timeInZones: timeInZones, hrStream: hrStream,
+                       scorePercent: scorePercent, scoreTier: scoreTier,
+                       trainingDurationSec: trainingDurationSec, sessionFlag: sessionFlag,
+                       cooldownSkipped: cooldownSkipped)
     }
 }
 

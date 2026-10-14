@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0c0c0d;color:#f2f2f0;-webkit-font-smoothing:antialiased}
+a{color:#ff453a}a:hover{color:#ff6961}
+button{font:inherit;cursor:pointer;border:0;padding:0;background:none;color:inherit}
+@keyframes hcspin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="min-height:100vh;padding:36px 40px 60px;box-sizing:border-box;font-family:'Barlow',system-ui,sans-serif;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:6px;max-width:520px">
+      <span style="font:700 12px 'Barlow';letter-spacing:.18em;color:#ff453a;white-space:nowrap">HEARTCOACH · LIVE WORKOUT</span>
+      <span style="font:800 44px/1 'Barlow Condensed';letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap">Three directions, one real session</span>
+      <span style="font:400 15px/1.45 'Barlow';color:#a1a1a6;text-wrap:pretty">Pick a program and run it. HR is simulated against your Karvonen zones (age 35, RHR 60, max 185) and coached with the real rules — 10s grace, 20s anti-spam, 30s in-zone praise, safety stop above max.</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <sc-for list="{{ dirs }}" as="d" hint-placeholder-count="3">
+        <button onClick="{{ d.onClick }}" style="width:220px;text-align:left;padding:14px 16px;border-radius:14px;background:{{ d.bg }};color:{{ d.ink }};display:flex;flex-direction:column;gap:4px;transition:background .2s">
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="font:800 22px/1 'Barlow Condensed'">{{ d.k2 }}</span><span style="font:700 18px/1 'Barlow Condensed';letter-spacing:.04em;text-transform:uppercase;white-space:nowrap">{{ d.name }}</span></span>
+          <span style="font:400 12.5px/1.35 'Barlow';color:{{ d.sub }}">{{ d.desc }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+    <div style="flex:none;padding:12px;background:#1a1a1c;border-radius:64px;box-shadow:0 0 0 1px #2c2c2e,0 30px 80px rgba(0,0,0,.6)">
+      <div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;background:#000">
+
+        <sc-if value="{{ isPre }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;padding:64px 20px 34px;display:flex;flex-direction:column;gap:14px;font-family:{{ textFont }};color:#fff;background:#000">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font:600 12px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">TODAY · SESSION 14 OF 60</span>
+              <span style="display:flex;align-items:center;gap:6px;font:600 12px 'Barlow';color:#30d158"><span style="width:7px;height:7px;border-radius:50%;background:#30d158"></span>Watch ready</span>
+            </div>
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:40px;line-height:1;text-transform:uppercase;letter-spacing:-.01em;white-space:nowrap">Choose a program</span>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+              <sc-for list="{{ programs }}" as="p" hint-placeholder-count="3">
+                <button onClick="{{ p.onClick }}" style="text-align:left;padding:16px;border-radius:16px;background:{{ p.bg }};box-shadow:{{ p.ring }};display:flex;flex-direction:column;gap:10px;transition:background .2s,box-shadow .2s">
+                  <span style="display:flex;justify-content:space-between;align-items:baseline">
+                    <span style="font-family:{{ numFont }};font-weight:800;font-size:26px;line-height:1;text-transform:uppercase">{{ p.name }}</span>
+                    <span style="font:600 12px 'Barlow';color:#ff453a;letter-spacing:.04em;white-space:nowrap">{{ p.meta }}</span>
+                  </span>
+                  <span style="font:400 14px 'Barlow';color:#a1a1a6">{{ p.sub }}</span>
+                  <span style="display:flex;gap:2px;height:22px;align-items:flex-end">
+                    <sc-for list="{{ p.bars }}" as="b" hint-placeholder-count="10"><span style="flex-grow:{{ b.grow }};flex-basis:0;height:{{ b.h }};background:{{ b.color }};border-radius:2px"></span></sc-for>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <span style="font:400 13px/1.4 'Barlow';color:#8e8e93;text-align:center">Today's plan pre-selected. Starts on your Apple Watch too.</span>
+            <button onClick="{{ start }}" style="height:58px;border-radius:16px;background:#ff3b30;color:#fff;font-family:{{ numFont }};font-weight:800;font-size:22px;letter-spacing:.06em;text-transform:uppercase">Start {{ progName }}</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isWarming }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#000">
+            {{ spinner }}
+            <span style="font:600 17px 'Barlow';color:#a1a1a6">Getting your heart rate…</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isCount }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#000">
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:220px;line-height:.9;color:#fff">{{ count }}</span>
+            <span style="font:700 16px 'Barlow';letter-spacing:.3em;color:#ff453a;white-space:nowrap">GET READY</span>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ runA }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;gap:14px;padding:60px 18px 30px;background:#0a0a0b;color:#fff;font-family:'Barlow',sans-serif">
+            <div style="display:flex;align-items:stretch;height:44px">
+              <div style="background:#ff3b30;padding:0 12px;display:flex;align-items:center;font:800 20px/1 'Barlow Condensed';letter-spacing:.05em;text-transform:uppercase;white-space:nowrap">{{ phaseName }}</div>
+              <div style="background:#1c1c1e;padding:0 12px;display:flex;align-items:center;font:700 28px/1 'Barlow Condensed';font-variant-numeric:tabular-nums">{{ elapsed }}</div>
+              <div style="flex:1"></div>
+              <div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:2px">
+                <span style="font:600 10px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">PHASE ENDS</span>
+                <span style="font:700 26px/1 'Barlow Condensed';font-variant-numeric:tabular-nums">{{ remain }}</span>
+              </div>
+            </div>
+            <sc-if value="{{ isD }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:14px;background:#111214;padding:10px 0 6px;box-shadow:inset 0 0 0 1px #1f2023">
+                <div>{{ graph }}</div>
+                <div style="display:flex;justify-content:space-between;gap:10px;font:600 11px 'Barlow';letter-spacing:.14em;color:#8e8e93;padding:6px 12px 2px;white-space:nowrap"><span style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis">{{ roundLabel }}</span><span style="flex:none">{{ totalRemain }} TO GO</span></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notD }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:2px;height:8px">
+                <sc-for list="{{ ticker }}" as="s" hint-placeholder-count="20"><div style="flex-grow:{{ s.grow }};flex-basis:0;background:{{ s.dim }};position:relative;overflow:hidden;box-shadow:{{ s.ring }}"><div style="position:absolute;left:0;top:0;bottom:0;width:{{ s.fill }};background:{{ s.color }}"></div></div></sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;font:600 11px 'Barlow';letter-spacing:.14em;color:#8e8e93;gap:10px;white-space:nowrap"><span style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis">{{ roundLabel }}</span><span style="flex:none">{{ totalRemain }} TO GO</span></div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ dropout }}" hint-placeholder-val="{{ false }}"><div style="background:#ffd60a;color:#000;font:700 13px 'Barlow';padding:8px 12px;text-align:center">No heart-rate signal — safety checks paused. Check your Watch.</div></sc-if>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="background:{{ zc }};color:#000;font:800 18px/1 'Barlow Condensed';padding:5px 8px;letter-spacing:.04em;transition:background .4s;white-space:nowrap">{{ zoneTag }}</span>
+                <span style="font:700 18px 'Barlow Condensed';letter-spacing:.08em;color:{{ zc }};text-transform:uppercase;transition:color .4s;white-space:nowrap">{{ zoneName }}</span>
+              </div>
+              <sc-if value="{{ notD }}" hint-placeholder-val="{{ true }}"><span style="font:800 216px/.86 'Barlow Condensed';letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:12px;white-space:nowrap">{{ hrText }}</span></sc-if>
+              <sc-if value="{{ isD }}" hint-placeholder-val="{{ false }}"><span style="font:800 140px/.86 'Barlow Condensed';letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:6px;white-space:nowrap">{{ hrText }}</span></sc-if>
+              <span style="font:700 15px 'Barlow Condensed';letter-spacing:.34em;color:#8e8e93;white-space:nowrap">BPM</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="position:relative;height:30px;display:flex;gap:3px;margin-top:10px">
+                <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="6"><div style="flex:{{ b.flex }};background:{{ b.bg }};outline:{{ b.outline }};outline-offset:3px;display:flex;align-items:center;justify-content:center;font:800 13px 'Barlow Condensed';letter-spacing:.04em;color:{{ b.ink }};transition:background .4s">{{ b.label }}</div></sc-for>
+                <div style="position:absolute;top:-13px;left:{{ markerLeft }};transform:translateX(-50%);transition:left .5s;width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid #fff"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font:600 12px 'Barlow';letter-spacing:.1em;color:#8e8e93;white-space:nowrap;gap:10px"><span>TARGET <span style="color:{{ tc }}">{{ tzTag }}</span> · {{ tRange }}</span><span style="color:{{ deltaColor }}">{{ deltaU }}</span></div>
+            </div>
+            <div style="height:76px;position:relative;overflow:hidden">
+              <div style="position:absolute;inset:0;display:flex;align-items:center;padding:0 14px;border:1px solid #2c2c2e;font:700 15px 'Barlow Condensed';letter-spacing:.12em;color:#a1a1a6;opacity:{{ idleOpacity }};transition:opacity .3s">{{ idleLine }}</div>
+              <div style="position:absolute;inset:0;display:flex;transform:translateX({{ bannerX }});transition:transform .45s cubic-bezier(.2,.8,.2,1)">
+                <div style="width:10px;background:{{ msgColor }}"></div>
+                <div style="flex:1;background:#f2f2f0;color:#000;padding:0 14px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0">
+                  <span style="font:700 10.5px 'Barlow';letter-spacing:.18em;color:#636366;text-transform:uppercase;white-space:nowrap">Coach · {{ msgKicker }}</span>
+                  <span style="font:800 26px/1.02 'Barlow Condensed';text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ msgText }}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #2c2c2e;border-bottom:1px solid #2c2c2e">
+              <div style="padding:8px 0;display:flex;flex-direction:column;gap:2px"><span style="font:600 10px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">AVG</span><span style="font:700 24px/1 'Barlow Condensed'">{{ avg }}</span></div>
+              <div style="padding:8px 0 8px 12px;border-left:1px solid #2c2c2e;display:flex;flex-direction:column;gap:2px"><span style="font:600 10px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">PEAK</span><span style="font:700 24px/1 'Barlow Condensed'">{{ peak }}</span></div>
+              <div style="padding:8px 0 8px 12px;border-left:1px solid #2c2c2e;display:flex;flex-direction:column;gap:2px"><span style="font:600 10px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">IN TARGET</span><span style="font:700 24px/1 'Barlow Condensed'">{{ inPct }}</span></div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button onClick="{{ pause }}" style="flex:1;height:56px;background:#1c1c1e;font:800 21px 'Barlow Condensed';letter-spacing:.1em">PAUSE</button>
+              <button onClick="{{ askStop }}" style="width:120px;height:56px;box-shadow:inset 0 0 0 2px #ff3b30;color:#ff453a;font:800 21px 'Barlow Condensed';letter-spacing:.1em">STOP</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ runB }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding-top:58px;background:{{ heatBg }};transition:background 1.4s ease;color:#fff;font-family:'Archivo',sans-serif">
+            <div style="padding:6px 22px 0;display:flex;justify-content:space-between;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font-weight:800;font-size:13px;font-stretch:125%;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">{{ phaseName }}</span>
+                <span style="font-weight:500;font-size:12px;font-stretch:100%;letter-spacing:.06em;color:rgba(255,255,255,.75);white-space:nowrap">{{ roundLabel }} · {{ elapsed }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+                <span style="font-weight:500;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.75);white-space:nowrap">PHASE ENDS</span>
+                <span style="font-weight:800;font-size:28px;line-height:1;font-stretch:112%;font-variant-numeric:tabular-nums">{{ remain }}</span>
+              </div>
+            </div>
+            <div style="margin:12px 22px 0;height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden"><div style="height:100%;width:{{ progress }};background:#fff;transition:width .3s"></div></div>
+            <sc-if value="{{ dropout }}" hint-placeholder-val="{{ false }}"><div style="margin:10px 22px 0;background:#ffd60a;color:#000;font-weight:700;font-size:13px;padding:8px 12px;border-radius:10px">No heart-rate signal — safety checks paused.</div></sc-if>
+
+            <sc-if value="{{ tabNow }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1;display:flex;flex-direction:column;padding:0 22px;min-height:0">
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+                  <span style="font-weight:600;font-size:14px;letter-spacing:.1em;color:rgba(255,255,255,.8);text-transform:uppercase;white-space:nowrap">Zone {{ zoneNum }} · {{ zoneName }}</span>
+                  <span style="font-weight:900;font-size:156px;line-height:.86;font-stretch:118%;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin-left:-6px;white-space:nowrap">{{ hrText }}</span>
+                  <span style="font-weight:700;font-size:14px;letter-spacing:.3em;color:rgba(255,255,255,.8);white-space:nowrap">BPM</span>
+                </div>
+                <div style="height:190px;position:relative">
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;opacity:{{ idleOpacity }};transition:opacity .35s">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(255,255,255,.3);padding-top:12px">
+                      <span style="font-weight:600;font-size:13px;letter-spacing:.1em;color:rgba(255,255,255,.8);white-space:nowrap">TARGET</span>
+                      <span style="font-weight:800;font-size:24px;font-stretch:112%">{{ tzTag }} · {{ tRange }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid rgba(255,255,255,.3);padding-top:12px">
+                      <span style="font-weight:600;font-size:13px;letter-spacing:.1em;color:rgba(255,255,255,.8);white-space:nowrap">STATUS</span>
+                      <span style="font-weight:800;font-size:24px;font-stretch:112%;text-transform:uppercase">{{ statusB }}</span>
+                    </div>
+                  </div>
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;opacity:{{ msgOpacity }};transform:translateY({{ msgY }});transition:opacity .3s,transform .45s cubic-bezier(.2,.8,.2,1)">
+                    <span style="align-self:flex-start;background:#fff;color:#000;font-weight:800;font-size:11px;letter-spacing:.14em;padding:5px 8px;border-radius:4px;text-transform:uppercase;white-space:nowrap">{{ msgKicker }}</span>
+                    <span style="font-weight:900;font-size:58px;line-height:.9;font-stretch:125%;letter-spacing:-.02em;text-transform:uppercase">{{ msgShort }}</span>
+                    <span style="font-weight:500;font-size:15px;line-height:1.3;color:rgba(255,255,255,.85)">{{ msgText }}</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tabPlan }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:18px 22px 0;min-height:0;overflow:hidden">
+                <span style="font-weight:600;font-size:12px;letter-spacing:.12em;color:rgba(255,255,255,.75);white-space:nowrap">{{ doneLabel }}</span>
+                <sc-for list="{{ plan }}" as="r" hint-placeholder-count="8">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:{{ r.bg }};color:{{ r.ink }};opacity:{{ r.op }}">
+                    <span style="width:38px;font-weight:900;font-size:18px;font-stretch:112%">{{ r.tag }}</span>
+                    <span style="flex:1;font-weight:600;font-size:15px">{{ r.label }}</span>
+                    <span style="font-weight:700;font-size:15px;font-variant-numeric:tabular-nums">{{ r.dur }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ tabZones }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1;display:flex;flex-direction:column;gap:18px;padding:22px 22px 0">
+                <span style="font-weight:600;font-size:12px;letter-spacing:.12em;color:rgba(255,255,255,.75);white-space:nowrap">TIME IN ZONES · {{ inPct }} IN TARGET</span>
+                <sc-for list="{{ zoneRows }}" as="r" hint-placeholder-count="5">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="display:flex;justify-content:space-between;font-weight:700;font-size:15px"><span>{{ r.label }} · {{ r.name }}</span><span style="font-variant-numeric:tabular-nums">{{ r.time }}</span></div>
+                    <div style="height:12px;background:rgba(255,255,255,.16);border-radius:6px;overflow:hidden"><div style="height:100%;width:{{ r.pct }};background:#fff;border-radius:6px;transition:width .4s"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;gap:10px;padding:14px 22px 12px">
+              <button onClick="{{ pause }}" style="flex:1;height:54px;border-radius:27px;background:rgba(255,255,255,.18);font-weight:800;font-size:16px;font-stretch:112%;letter-spacing:.08em">PAUSE</button>
+              <button onClick="{{ askStop }}" style="flex:1;height:54px;border-radius:27px;background:#fff;color:#c4140c;font-weight:800;font-size:16px;font-stretch:112%;letter-spacing:.08em">STOP</button>
+            </div>
+            <div style="display:flex;padding:0 22px 26px;gap:6px">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.onClick }}" style="flex:1;padding:12px 0 10px;border-top:2px solid {{ t.line }};color:{{ t.color }};font-weight:800;font-size:13px;font-stretch:118%;letter-spacing:.1em">{{ t.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ runC }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:58px 18px 0;background:#08090a;color:#f2f2f0;font-family:'IBM Plex Sans Condensed',sans-serif">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;font:500 13px 'IBM Plex Mono';color:#8e8e93;padding:4px 2px 10px">
+              <span>T+{{ elapsed }}</span>
+              <span style="color:#f2f2f0;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">{{ phaseName }} · {{ roundShort }}</span>
+              <span>−{{ totalRemain }}</span>
+            </div>
+            <div style="border-radius:14px;background:#111214;padding:10px 0 6px;box-shadow:inset 0 0 0 1px #1f2023">
+              <div style="padding:0 0 0 0">{{ graph }}</div>
+              <div style="display:flex;justify-content:space-between;font:400 10px 'IBM Plex Mono';color:#636366;padding:4px 10px 0;white-space:nowrap"><span>0:00</span><span>TARGET BANDS · LIVE HR</span><span>35:00+</span></div>
+            </div>
+            <sc-if value="{{ dropout }}" hint-placeholder-val="{{ false }}"><div style="margin-top:10px;background:#ffd60a;color:#000;font:600 13px 'IBM Plex Sans Condensed';padding:8px 12px;border-radius:8px">No heart-rate signal — safety checks paused.</div></sc-if>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:18px 2px 6px">
+              <div style="display:flex;align-items:baseline;gap:6px">
+                <span style="font:500 100px/.82 'IBM Plex Mono';letter-spacing:-.06em;font-variant-numeric:tabular-nums;white-space:nowrap">{{ hrText }}</span>
+                <span style="font:500 13px 'IBM Plex Mono';color:#8e8e93">bpm</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-bottom:4px">
+                <span style="display:flex;align-items:center;gap:6px;font:600 13px 'IBM Plex Mono';color:{{ zc }};transition:color .4s;white-space:nowrap"><span style="width:10px;height:10px;border-radius:2px;background:{{ zc }}"></span>{{ zoneTag }} {{ zoneName }}</span>
+                <span style="font:600 22px/1 'IBM Plex Sans Condensed';color:{{ deltaColor }};white-space:nowrap">{{ deltaText }}</span>
+                <span style="font:400 12px 'IBM Plex Mono';color:#8e8e93;white-space:nowrap">target {{ tzTag }} {{ tRange }}</span>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-top:12px;min-height:0;overflow:hidden">
+              <span style="font:500 11px 'IBM Plex Mono';letter-spacing:.1em;color:#636366;white-space:nowrap">COACH</span>
+              <sc-if value="{{ isGrace }}" hint-placeholder-val="{{ false }}"><span style="font:500 13px 'IBM Plex Mono';color:#8e8e93">· grace period — settle in</span></sc-if>
+              <sc-for list="{{ feed }}" as="m" hint-placeholder-count="3">
+                <div style="display:flex;gap:10px;align-items:flex-start;opacity:{{ m.op }};transition:opacity .4s">
+                  <span style="width:3px;align-self:stretch;border-radius:2px;background:{{ m.color }}"></span>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px;padding:2px 0">
+                    <span style="font:600 {{ m.size }}/1.15 'IBM Plex Sans Condensed';text-wrap:pretty">{{ m.text }}</span>
+                    <span style="font:400 11px 'IBM Plex Mono';color:#8e8e93">{{ m.time }} · {{ m.kicker }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin:0 -18px;background:#16171a;border-radius:24px 24px 0 0;box-shadow:0 -1px 0 #26272b;padding:8px 18px 28px;display:flex;flex-direction:column;gap:12px">
+              <button onClick="{{ toggleSheet }}" style="display:flex;flex-direction:column;gap:10px;text-align:left">
+                <span style="align-self:center;width:36px;height:5px;border-radius:3px;background:#3a3a3c"></span>
+                <span style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                  <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                    <span style="font:500 11px 'IBM Plex Mono';letter-spacing:.1em;color:#8e8e93;white-space:nowrap">UP NEXT IN {{ remain }}</span>
+                    <span style="font:600 18px 'IBM Plex Sans Condensed';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nextLabel }}</span>
+                  </span>
+                  <span style="font:600 13px 'IBM Plex Mono';padding:6px 10px;border-radius:8px;background:{{ nextBg }};color:#000">{{ nextTag }}</span>
+                </span>
+              </button>
+              <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;border-top:1px solid #26272b">
+                  <sc-for list="{{ planC }}" as="r" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #202124;font:400 14px 'IBM Plex Sans Condensed'">
+                      <span style="width:8px;height:8px;border-radius:2px;background:{{ r.color }}"></span>
+                      <span style="flex:1">{{ r.label }}</span>
+                      <span style="font:400 13px 'IBM Plex Mono';color:#8e8e93">{{ r.dur }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;gap:10px">
+                <button onClick="{{ pause }}" style="flex:1;height:52px;border-radius:12px;background:#26272b;font:600 16px 'IBM Plex Sans Condensed';letter-spacing:.04em">Pause</button>
+                <button onClick="{{ askStop }}" style="flex:1;height:52px;border-radius:12px;background:#ff3b30;font:600 16px 'IBM Plex Sans Condensed';letter-spacing:.04em">Stop</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 24px;color:#fff;z-index:20">
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:64px;line-height:1;text-transform:uppercase;text-align:center">Paused</span>
+            <span style="font:400 15px 'Barlow';color:#a1a1a6;text-align:center;margin-bottom:12px">{{ elapsed }} in · {{ totalRemain }} to go</span>
+            <button onClick="{{ resume }}" style="height:56px;border-radius:16px;background:#ff3b30;font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Resume</button>
+            <button onClick="{{ endWorkout }}" style="height:56px;border-radius:16px;background:rgba(255,255,255,.1);font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">End workout</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isGate }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 24px;color:#fff;z-index:20">
+            <span style="font:700 12px 'Barlow';letter-spacing:.2em;color:#30d158;text-align:center;white-space:nowrap">TRAINING COMPLETE</span>
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:56px;line-height:1;text-transform:uppercase;text-align:center">Great work!</span>
+            <span style="font:400 15px/1.45 'Barlow';color:#c7c7cc;text-align:center;margin-bottom:12px;text-wrap:pretty">Step off and get ready for a 2-minute stretch — it's part of the session and helps prevent injury.</span>
+            <button onClick="{{ beginCool }}" style="height:56px;border-radius:16px;background:#ff3b30;font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Begin stretches</button>
+            <button onClick="{{ endWorkout }}" style="height:56px;border-radius:16px;background:rgba(255,255,255,.1);font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Skip</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ overlayStop }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;flex-direction:column;justify-content:flex-end;gap:12px;padding:0 20px 40px;color:#fff;z-index:30">
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:44px;line-height:1;text-transform:uppercase">Stop now?</span>
+            <span style="font:400 15px/1.45 'Barlow';color:#c7c7cc;margin-bottom:10px">Feeling unwell — dizzy, chest pain, short of breath? Stop and rest. Your session so far will be saved.</span>
+            <button onClick="{{ confirmStop }}" style="height:58px;border-radius:16px;background:#ff3b30;font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Stop workout</button>
+            <button onClick="{{ cancelStop }}" style="height:58px;border-radius:16px;background:rgba(255,255,255,.1);font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Keep going</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ overlaySafety }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:#c4140c;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:0 24px;color:#fff;z-index:30">
+            <span style="font:700 13px 'Barlow';letter-spacing:.22em;white-space:nowrap">SAFETY STOP</span>
+            <span style="font-family:{{ numFont }};font-weight:800;font-size:150px;line-height:.85;letter-spacing:-.03em;white-space:nowrap">{{ hrText }}</span>
+            <span style="font:700 15px 'Barlow';letter-spacing:.14em;white-space:nowrap">BPM · ABOVE YOUR MAX OF 185</span>
+            <span style="font:500 19px/1.4 'Barlow';text-wrap:pretty">Your heart rate is above your estimated maximum. Stop exercising and check your condition.</span>
+            <button onClick="{{ endWorkout }}" style="margin-top:20px;height:58px;border-radius:16px;background:#fff;color:#c4140c;font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">I've stopped · View summary</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSummary }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;padding:62px 20px 34px;display:flex;flex-direction:column;gap:16px;background:#000;color:#fff;font-family:'Barlow',sans-serif;overflow:auto">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font:600 12px 'Barlow';letter-spacing:.16em;color:#8e8e93;white-space:nowrap">{{ sumDate }} · {{ sumDur }}</span>
+              <span style="font-family:{{ numFont }};font-weight:800;font-size:40px;line-height:1;text-transform:uppercase">{{ sumProg }}</span>
+              <sc-if value="{{ sumStopped }}" hint-placeholder-val="{{ false }}"><span style="font:600 13px 'Barlow';color:#ff453a">Ended early</span></sc-if>
+            </div>
+            <div style="padding:18px;border-radius:18px;background:#141416;display:flex;flex-direction:column;gap:6px">
+              <span style="font:600 12px 'Barlow';letter-spacing:.14em;color:#8e8e93;white-space:nowrap">SESSION SCORE · TIME IN TARGET</span>
+              <span style="display:flex;align-items:baseline;gap:12px"><span style="font-family:{{ numFont }};font-weight:800;font-size:84px;line-height:.9">{{ sumScore }}</span><span style="font-family:{{ numFont }};font-weight:800;font-size:24px;color:#ff453a;text-transform:uppercase">{{ sumTier }}</span></span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="padding:14px 16px;border-radius:16px;background:#141416;display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Barlow';letter-spacing:.14em;color:#8e8e93;white-space:nowrap">AVG HR</span><span style="font-family:{{ numFont }};font-weight:700;font-size:30px;line-height:1">{{ avg }} <span style="font-size:14px;color:#8e8e93">bpm</span></span></div>
+              <div style="padding:14px 16px;border-radius:16px;background:#141416;display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Barlow';letter-spacing:.14em;color:#8e8e93;white-space:nowrap">PEAK HR</span><span style="font-family:{{ numFont }};font-weight:700;font-size:30px;line-height:1">{{ peak }} <span style="font-size:14px;color:#8e8e93">bpm</span></span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;padding:4px 2px">
+              <span style="font:600 12px 'Barlow';letter-spacing:.14em;color:#8e8e93;white-space:nowrap">TIME IN ZONES</span>
+              <sc-for list="{{ zoneRows }}" as="r" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="width:26px;font:800 15px 'Barlow Condensed';color:{{ r.color }}">{{ r.label }}</span>
+                  <div style="flex:1;height:10px;background:#1c1c1e;border-radius:5px;overflow:hidden"><div style="height:100%;width:{{ r.pct }};background:{{ r.color }};border-radius:5px"></div></div>
+                  <span style="width:56px;text-align:right;font:500 13px 'Barlow';color:#a1a1a6;font-variant-numeric:tabular-nums">{{ r.time }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1"></div>
+            <sc-if value="{{ saveIdle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ save }}" style="height:56px;border-radius:16px;background:#ff3b30;font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Save workout</button></sc-if>
+            <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><div style="height:56px;display:flex;align-items:center;justify-content:center;font:600 15px 'Barlow';color:#a1a1a6">Saving…</div></sc-if>
+            <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}"><div style="height:56px;display:flex;align-items:center;justify-content:center;gap:8px;font:700 15px 'Barlow';color:#30d158"><span style="width:8px;height:8px;border-radius:50%;background:#30d158"></span>Saved to history</div></sc-if>
+            <button onClick="{{ done }}" style="height:56px;border-radius:16px;background:rgba(255,255,255,.1);font-family:{{ numFont }};font-weight:800;font-size:20px;letter-spacing:.06em;text-transform:uppercase">Done</button>
+          </div>
+        </sc-if>
+
+        <div style="position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 36px;z-index:40;pointer-events:none;color:#fff;font:600 16px -apple-system,system-ui,sans-serif">
+          <span>9:41</span>
+          <span style="position:absolute;left:50%;top:11px;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:#000"></span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:14px"><span>5G</span><span style="width:24px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5);padding:2px;box-sizing:border-box"><span style="display:block;width:70%;height:100%;background:#fff;border-radius:1px"></span></span></span>
+        </div>
+        <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.85);z-index:40;pointer-events:none"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:28px;width:300px">
+      <sc-if value="{{ showWatch }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+          <span style="font:700 11px 'Barlow';letter-spacing:.18em;color:#8e8e93;white-space:nowrap">APPLE WATCH · MIRRORED</span>
+          <div style="display:flex;align-items:center;gap:0">
+            <div style="padding:11px;background:#1a1a1c;border-radius:58px;box-shadow:{{ watchRing }}, 0 0 0 1px #2c2c2e, 0 20px 50px rgba(0,0,0,.5);transition:box-shadow .25s">
+              <div style="position:relative;width:198px;height:242px;border-radius:46px;overflow:hidden;background:#000;color:#fff">
+                <sc-if value="{{ watchIdle }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 18px;text-align:center">
+                    <span style="width:12px;height:12px;border-radius:50%;background:#ff3b30"></span>
+                    <span style="font-family:{{ numFont }};font-weight:800;font-size:22px;text-transform:uppercase">HeartCoach</span>
+                    <span style="font:500 13px 'Barlow';color:#8e8e93">{{ watchIdleText }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ watchA }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:18px 16px 16px;gap:4px">
+                    <div style="display:flex;justify-content:space-between;align-items:center"><span style="background:#ff3b30;font:800 12px/1 'Barlow Condensed';padding:3px 5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">{{ phaseName }}</span><span style="font:700 15px 'Barlow Condensed';font-variant-numeric:tabular-nums">{{ remain }}</span></div>
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                      <span style="font:800 88px/.86 'Barlow Condensed';color:{{ zc }};font-variant-numeric:tabular-nums;transition:color .4s">{{ hrText }}</span>
+                      <span style="font:700 12px 'Barlow Condensed';letter-spacing:.14em;color:#8e8e93;white-space:nowrap">{{ zoneTag }} · TARGET {{ tzTag }}</span>
+                    </div>
+                    <div style="position:relative;display:flex;gap:2px;height:8px;margin-bottom:6px">
+                      <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="6"><div style="flex:{{ b.flex }};background:{{ b.bg }};outline:{{ b.outlineSm }};outline-offset:1px"></div></sc-for>
+                    </div>
+                    <span style="font:800 15px/1.1 'Barlow Condensed';text-transform:uppercase;text-align:center;height:34px;display:flex;align-items:center;justify-content:center;color:{{ watchMsgColor }}">{{ watchMsg }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ watchB }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:20px 16px 18px;background:{{ heatBg }};transition:background 1.4s;font-family:'Archivo'">
+                    <span style="font-weight:800;font-size:11px;font-stretch:125%;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">{{ phaseName }} · {{ remain }}</span>
+                    <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+                      <span style="font-weight:900;font-size:78px;line-height:.86;font-stretch:115%;letter-spacing:-.04em;font-variant-numeric:tabular-nums;white-space:nowrap">{{ hrText }}</span>
+                      <span style="font-weight:600;font-size:12px;letter-spacing:.08em;color:rgba(255,255,255,.8);white-space:nowrap">Z{{ zoneNum }} · TARGET {{ tzTag }}</span>
+                    </div>
+                    <span style="font-weight:900;font-size:19px;line-height:.95;font-stretch:115%;text-transform:uppercase;height:28px;display:flex;align-items:flex-end;white-space:nowrap">{{ watchShort }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ watchC }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:20px 16px 16px;gap:6px;font-family:'IBM Plex Mono'">
+                    <div style="display:flex;justify-content:space-between;font:500 11px 'IBM Plex Mono';color:#8e8e93"><span>{{ roundShort }}</span><span>{{ remain }}</span></div>
+                    <div style="display:flex;align-items:baseline;gap:4px;margin-top:6px"><span style="font:500 62px/.85 'IBM Plex Mono';letter-spacing:-.06em;white-space:nowrap">{{ hrText }}</span><span style="width:8px;height:8px;border-radius:2px;background:{{ zc }}"></span></div>
+                    <span style="font:600 16px 'IBM Plex Sans Condensed';color:{{ deltaColor }}">{{ deltaText }}</span>
+                    <div style="flex:1;display:flex;align-items:flex-end">{{ spark }}</div>
+                    <span style="font:500 12px/1.2 'IBM Plex Sans Condensed';height:30px;color:#c7c7cc;overflow:hidden">{{ watchMsg }}</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="width:9px;height:44px;background:#2c2c2e;border-radius:0 5px 5px 0;margin-left:-1px"></div>
+          </div>
+          <span style="font:500 12px 'Barlow';color:#8e8e93">Last haptic: <span style="color:#f2f2f0">{{ hapLabel }}</span></span>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:16px;background:#161618;box-shadow:inset 0 0 0 1px #232325">
+        <span style="font:700 11px 'Barlow';letter-spacing:.18em;color:#8e8e93;white-space:nowrap">SIMULATOR</span>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font:500 13px 'Barlow';color:#a1a1a6">Speed</span>
+          <div style="display:flex;gap:4px;padding:3px;background:#0c0c0d;border-radius:10px">
+            <sc-for list="{{ speeds }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.onClick }}" style="flex:1;height:32px;border-radius:7px;background:{{ s.bg }};color:{{ s.ink }};font:700 13px 'Barlow'">{{ s.label }}</button></sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button onClick="{{ skip }}" style="height:38px;border-radius:9px;background:#232325;font:600 13px 'Barlow'">Skip phase</button>
+          <button onClick="{{ toggleDrop }}" style="height:38px;border-radius:9px;background:#232325;font:600 13px 'Barlow'">{{ dropLabel }}</button>
+          <button onClick="{{ driftUp }}" style="height:38px;border-radius:9px;background:#232325;font:600 13px 'Barlow'">Push HR up</button>
+          <button onClick="{{ driftDown }}" style="height:38px;border-radius:9px;background:#232325;font:600 13px 'Barlow'">Ease HR down</button>
+          <button onClick="{{ spike }}" style="grid-column:span 2;height:38px;border-radius:9px;background:#3a0f0d;color:#ff6961;font:600 13px 'Barlow'">Spike above max (safety stop)</button>
+          <button onClick="{{ toggleVoice }}" style="grid-column:span 2;height:38px;border-radius:9px;background:#232325;font:600 13px 'Barlow'">{{ voiceLabel }}</button>
+        </div>
+        <span style="font:400 12px/1.4 'Barlow';color:#636366">Controls apply during a running workout.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;direction&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;],&quot;default&quot;:&quot;d&quot;,&quot;tsType&quot;:&quot;'a'|'b'|'c'|'d'&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;15&quot;,&quot;40&quot;,&quot;90&quot;],&quot;default&quot;:&quot;15&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;voice&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showWatch&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const RHR=60,HRMAX=185;
+const ZN=[['Below Z1',0,122],['Recovery',122,135],['Easy',135,147],['Aerobic',147,160],['Threshold',160,172],['Max effort',172,185]];
+const CUE={1:'Nice and easy',2:'Easy pace — find your rhythm',3:'Moderate effort — change pace',4:'Push it — hard effort',5:'Max effort — give everything'};
+const PAL={
+ a:['#48484a','oklch(0.70 0.14 245)','oklch(0.78 0.17 150)','oklch(0.87 0.17 98)','oklch(0.75 0.18 58)','oklch(0.64 0.23 27)'],
+ b:['oklch(0.50 0.04 25)','oklch(0.56 0.09 25)','oklch(0.62 0.13 26)','oklch(0.67 0.17 28)','oklch(0.72 0.19 33)','oklch(0.80 0.16 48)'],
+ c:['#3a3a3c','oklch(0.74 0.11 205)','oklch(0.80 0.14 165)','oklch(0.86 0.16 115)','oklch(0.78 0.16 65)','oklch(0.67 0.21 30)']};
+const HEAT=['oklch(0.18 0.02 25)','oklch(0.25 0.06 25)','oklch(0.32 0.10 26)','oklch(0.40 0.14 27)','oklch(0.48 0.18 28)','oklch(0.56 0.21 30)'];
+const MSGC={up:'#ff9f0a',down:'oklch(0.72 0.14 245)',good:'oklch(0.78 0.17 150)',phase:'#ff3b30',stretch:'#c7c7cc',alert:'#ff3b30'};
+const KICK={up:'Below target',down:'Above target',good:'In the zone',phase:'New phase',stretch:'Cool down',alert:'Safety stop'};
+const HAP={up:'Short vibration',down:'Long vibration',good:'Double tap',phase:'Tap',stretch:'Tap',alert:'Strong repeated vibration'};
+PAL.d=PAL.a;
+const FN={d:"'Barlow Condensed', sans-serif",a:"'Barlow Condensed', sans-serif",b:"'Archivo', sans-serif",c:"'IBM Plex Sans Condensed', sans-serif"};
+const FT={d:"'Barlow', sans-serif",a:"'Barlow', sans-serif",b:"'Archivo', sans-serif",c:"'IBM Plex Sans Condensed', sans-serif"};
+const PH={warmup:'Warm up',exercise:'Exercise',recovery:'Recovery',cooldown:'Cool down'};
+const PROG={continuous:{name:'Continuous',sub:'Steady progressive effort',meta:'5 cycles · 35 min'},hiit:{name:'HIIT',sub:'High-intensity intervals',meta:'15 rounds · 35 min'},fartlek:{name:'Fartlek',sub:'Structured speed play, recovery built in',meta:'15 segments · 35 min'}};
+const DIRS=[{k:'a',k2:'A',name:'Broadcast',desc:'Scoreboard header, zone gauge with target bracket, lower-third coaching.'},{k:'b',k2:'B',name:'Heat',desc:'Screen glows hotter with effort. Coach takes over in giant type. Now / Plan / Zones tabs.'},{k:'c',k2:'C',name:'Trace',desc:'Whole session as live HR over target bands. Coach feed + Up next sheet.'},{k:'d',k2:'D',name:'Broadcast + Trace',desc:'A, with C\'s live HR trace panel replacing the segment ticker.'}];
+const STRETCH=['Calf stretch','Quad stretch','Hamstring stretch','Hip flexor stretch'];
+function build(p){
+  const s=[{phase:'warmup',dur:120,zone:1},{phase:'warmup',dur:180,zone:2}];
+  if(p==='continuous')[2,3,3,3,4].forEach(z=>s.push({phase:'exercise',dur:300,zone:z},{phase:'recovery',dur:60,zone:null}));
+  if(p==='hiit')for(let i=0;i<15;i++)s.push({phase:'exercise',dur:60,zone:i<3?3:i<12?4:5},{phase:'recovery',dur:60,zone:null});
+  if(p==='fartlek')[2,3,2,3,4,2,3,4,3,4,3,4,2,3,5].forEach(z=>s.push({phase:'exercise',dur:120,zone:z}));
+  STRETCH.forEach(n=>s.push({phase:'cooldown',dur:30,zone:null,name:n}));
+  let t=0,ex=0,wu=0,cd=0;
+  s.forEach((x,i)=>{x.i=i;x.start=t;t+=x.dur;if(x.phase==='exercise')x.n=++ex;if(x.phase==='recovery')x.n=ex;if(x.phase==='warmup')x.n=++wu;if(x.phase==='cooldown')x.n=++cd;});
+  s.exTotal=ex;s.total=t;s.coolStart=s.find(x=>x.phase==='cooldown').start;s.prog=p;return s;
+}
+const PREVIEW={continuous:build('continuous'),hiit:build('hiit'),fartlek:build('fartlek')};
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const fmtM=s=>{const m=Math.floor(s/60),r=s%60;return m?m+'m '+r+'s':r+'s'};
+const zoneOf=hr=>{if(hr<122)return 0;for(let z=1;z<=5;z++)if(hr<ZN[z][2])return z;return 5};
+const mix=(c,p)=>`color-mix(in oklch, ${c} ${p}%, #1c1c1e)`;
+const unit=p=>p==='continuous'?'Cycle':p==='fartlek'?'Segment':'Round';
+function segLabel(s,p){if(s.phase==='warmup')return 'Warm up '+s.n;if(s.phase==='recovery')return 'Recovery walk';if(s.phase==='cooldown')return s.name;return unit(p)+' '+s.n+' · '+ZN[s.zone][0];}
+
+class Component extends DCLogic {
+  state={dir:null,screen:'prestart',prog:'hiit',speed:null,tab:'now',sheet:false,count:3,save:'idle',voice:null,stopped:false};
+  S=null;acc=0;segs=null;
+  componentDidMount(){this.iv=setInterval(()=>this.tick(),100)}
+  componentWillUnmount(){clearInterval(this.iv);clearTimeout(this.to);clearTimeout(this.to2)}
+  componentDidUpdate(pp){if(pp.direction!==this.props.direction&&this.props.direction)this.setState({dir:this.props.direction})}
+  dir(){return this.state.dir??this.props.direction??'d'}
+  speed(){return this.state.speed??Number(this.props.speed??15)}
+  voiceOn(){return this.state.voice??this.props.voice??false}
+  fresh(){return{t:0,hr:74,off:0,correct:0,segI:-1,segStart:0,msgs:[],last:{},zt:[0,0,0,0,0,0],inT:0,exT:0,peak:0,sum:0,n:0,trace:[],paused:false,overlay:null,dropout:false,spike:false,inZoneSince:null,hapAt:0,hapType:null,gateDone:false}}
+  start=()=>{this.segs=build(this.state.prog);this.S=this.fresh();this.acc=0;this.setState({screen:'warming',save:'idle',tab:'now',sheet:false,stopped:false});this.to=setTimeout(()=>this.countdown(3),1600)}
+  countdown(n){if(n===0){this.setState({screen:'run'});return}this.setState({screen:'count',count:n});this.to=setTimeout(()=>this.countdown(n-1),850)}
+  segAt(t){const s=this.segs;for(const x of s)if(t>=x.start&&t<x.start+x.dur)return x;return s[s.length-1]}
+  tick(){const S=this.S;if(!S||this.state.screen!=='run')return;
+    if(!S.paused&&!S.overlay){this.acc+=this.speed()*0.1;let k=0;while(this.acc>=1&&k<300){this.acc-=1;k++;if(this.step()===false){this.acc=0;break}}}
+    this.forceUpdate()}
+  step(){const S=this.S,segs=this.segs;
+    if(S.t>=segs.total){this.finish();return false}
+    if(S.t===segs.coolStart&&!S.gateDone){this.setState({screen:'gate'});return false}
+    const seg=this.segAt(S.t);
+    if(seg.i!==S.segI){S.segI=seg.i;S.segStart=S.t;S.inZoneSince=null;this.announce(seg)}
+    const tgt=seg.zone?(ZN[seg.zone][1]+ZN[seg.zone][2])/2:(seg.phase==='cooldown'?102:124);
+    S.off+=(Math.random()-.5)*2.2-S.off*0.012;
+    if(seg.zone&&Math.random()<0.007)S.off+=(Math.random()<.5?-1:1)*(9+Math.random()*7);
+    if(S.correct>0){S.off*=0.92;S.correct--}
+    const des=S.spike?HRMAX+12:tgt+S.off;
+    S.hr+=(des-S.hr)*(S.spike?0.14:0.06)+(Math.random()-.5)*0.8;
+    S.t++;
+    const hr=Math.round(S.hr),z=zoneOf(hr);
+    if(hr>HRMAX&&!S.dropout){S.overlay='safety';S.spike=false;this.msg('Your heart rate is above your estimated maximum. Stop exercising and check your condition.','alert','STOP',true);this.setState({stopped:true});return false}
+    S.zt[z]++;S.sum+=hr;S.n++;if(hr>S.peak)S.peak=hr;
+    if(seg.phase==='exercise'){S.exT++;if(z===seg.zone)S.inT++}
+    if(S.t%5===0)S.trace.push([S.t,hr]);
+    const since=S.t-S.segStart;
+    if(since>=10&&since%10===0&&!S.dropout)this.coach(seg,hr);
+  }
+  coach(seg,hr){const S=this.S;
+    if(seg.zone){const mn=ZN[seg.zone][1],mx=ZN[seg.zone][2];
+      if(hr<mn){this.msg('Speed up','up','Speed up');S.correct=30;S.inZoneSince=null}
+      else if(hr>=mx){this.msg('Slow down','down','Slow down');S.correct=30;S.inZoneSince=null}
+      else{if(S.inZoneSince==null)S.inZoneSince=S.t-10;if(S.t-S.inZoneSince>=30){this.msg('Good job, keep going','good','Keep going');S.inZoneSince=S.t}}
+    }else if(seg.phase==='recovery'&&hr>=160)this.msg('Slow your walk','down','Slow walk');
+  }
+  announce(seg){
+    if(seg.phase==='cooldown')this.msg('Stretch: '+seg.name,'stretch','Stretch',true);
+    else if(seg.zone)this.msg(`Zone ${seg.zone} — ${ZN[seg.zone][0]}. ${CUE[seg.zone]}`,'phase','Zone '+seg.zone,true);
+    else this.msg('Recovery — walk it out, keep walking','phase','Walk it out',true);
+  }
+  msg(text,type,short,force){const S=this.S;
+    if(!force&&S.last[text]!=null&&S.t-S.last[text]<20)return;
+    S.last[text]=S.t;S.msgs.push({text,type,short,t:S.t,at:Date.now(),id:S.msgs.length});S.hapAt=Date.now();S.hapType=type;
+    if(this.voiceOn()&&window.speechSynthesis){try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}catch(e){}}
+  }
+  finish(){if(this.S)this.S.overlay=null;this.setState({screen:'summary'})}
+  graph(pal,font){const e=React.createElement,S=this.S,segs=this.segs,W=354,H=150;
+    const y=v=>H-(Math.max(95,Math.min(195,v))-95)/100*H,x=t=>t/segs.total*W,k=[];
+    segs.forEach(s=>{const done=s.start+s.dur<=S.t;
+      if(s.zone){const mn=ZN[s.zone][1],mx=ZN[s.zone][2];k.push(e('rect',{key:'s'+s.i,x:x(s.start),y:y(mx),width:Math.max(.6,x(s.dur)-.6),height:y(mn)-y(mx),fill:pal[s.zone],opacity:done?.22:.45}))}
+      else k.push(e('rect',{key:'s'+s.i,x:x(s.start),y:y(135),width:Math.max(.6,x(s.dur)-.6),height:y(110)-y(135),fill:'#fff',opacity:.07}))});
+    k.push(e('line',{key:'mx',x1:0,x2:W,y1:y(185),y2:y(185),stroke:'#ff3b30',strokeDasharray:'3 3',strokeWidth:1}));
+    k.push(e('text',{key:'mt',x:W-6,y:y(185)-4,fill:'#ff453a',fontSize:9,textAnchor:'end',fontFamily:font},'MAX 185'));
+    if(S.trace.length>1)k.push(e('polyline',{key:'tr',points:S.trace.map(([t,h])=>x(t).toFixed(1)+','+y(h).toFixed(1)).join(' '),fill:'none',stroke:'#fff',strokeWidth:1.6,strokeLinejoin:'round'}));
+    k.push(e('line',{key:'nw',x1:x(S.t),x2:x(S.t),y1:0,y2:H,stroke:'#fff',strokeOpacity:.35}));
+    k.push(e('circle',{key:'dt',cx:x(S.t),cy:y(S.hr),r:4.5,fill:pal[zoneOf(Math.round(S.hr))],stroke:'#08090a',strokeWidth:2}));
+    return e('svg',{width:W,height:H,viewBox:`0 0 ${W} ${H}`,style:{display:'block'}},k)}
+  spark(){const e=React.createElement,S=this.S,W=166,H=40,pts=S.trace.slice(-30);if(pts.length<2)return null;
+    const y=v=>H-(Math.max(100,Math.min(190,v))-100)/90*H;
+    return e('svg',{width:W,height:H,style:{display:'block'}},e('polyline',{points:pts.map(([,h],i)=>(i/(pts.length-1)*W).toFixed(1)+','+y(h).toFixed(1)).join(' '),fill:'none',stroke:'#fff',strokeWidth:1.6}))}
+  renderVals(){
+    const dir=this.dir(),pal=PAL[dir],st=this.state,sc=st.screen,S=this.S,segs=this.segs,now=Date.now(),sp=this.speed();
+    const v={numFont:FN[dir],textFont:FT[dir],showWatch:this.props.showWatch??true,count:st.count};
+    v.dirs=DIRS.map(d=>({...d,bg:d.k===dir?'#f2f2f0':'#161618',ink:d.k===dir?'#0a0a0a':'#f2f2f0',sub:d.k===dir?'#48484a':'#8e8e93',onClick:()=>this.setState({dir:d.k})}));
+    v.isPre=sc==='prestart';v.isWarming=sc==='warming';v.isCount=sc==='count';v.isSummary=sc==='summary';v.isGate=sc==='gate';
+    v.programs=Object.keys(PROG).map(k=>({...PROG[k],bg:st.prog===k?'#1f1012':'#121214',ring:st.prog===k?'inset 0 0 0 2px #ff3b30':'inset 0 0 0 1px #232325',onClick:()=>this.setState({prog:k}),
+      bars:PREVIEW[k].filter(s=>s.phase!=='cooldown').map(s=>({grow:s.dur,h:s.zone?(s.zone*4+2)+'px':'4px',color:s.zone?pal[s.zone]:'#3a3a3c'}))}));
+    v.progName=PROG[st.prog].name;v.start=this.start;
+    v.spinner=React.createElement('div',{style:{width:44,height:44,borderRadius:'50%',border:'3px solid rgba(255,255,255,.14)',borderTopColor:'#ff3b30',animation:'hcspin .9s linear infinite'}});
+    v.speeds=[1,15,40,90].map(n=>({label:n+'×',bg:sp===n?'#f2f2f0':'transparent',ink:sp===n?'#000':'#a1a1a6',onClick:()=>this.setState({speed:n})}));
+    v.voiceLabel=this.voiceOn()?'Voice cues: on':'Voice cues: off';v.toggleVoice=()=>this.setState({voice:!this.voiceOn()});
+    const running=S&&segs&&(sc==='run'||sc==='gate');
+    v.runA=running&&(dir==='a'||dir==='d');v.isD=dir==='d';v.notD=dir!=='d';v.runB=running&&dir==='b';v.runC=running&&dir==='c';
+    v.watchIdle=!running;v.watchA=running&&(dir==='a'||dir==='d');v.watchB=running&&dir==='b';v.watchC=running&&dir==='c';
+    v.watchIdleText=sc==='summary'?'Workout complete':(sc==='warming'||sc==='count')?'Starting…':'Start a workout on iPhone';
+    v.watchRing='0 0 0 0 transparent';v.hapLabel='—';v.dropLabel='Drop signal';
+    if(S&&segs){
+      const t=Math.min(S.t,segs.total-1),seg=this.segAt(t),hr=Math.round(S.hr),z=zoneOf(hr),tz=seg.zone,p=segs.prog;
+      v.hrText=S.dropout?'--':String(hr);v.zc=S.dropout?'#636366':pal[z];v.zoneNum=z;v.zoneTag='Z'+z;v.zoneName=S.dropout?'No signal':ZN[z][0];
+      v.tzTag=tz?'Z'+tz:'Walk';v.tRange=tz?ZN[tz][1]+'–'+ZN[tz][2]:(seg.phase==='cooldown'?'easy':'under 160');v.tc=tz?pal[tz]:'#8e8e93';
+      v.phaseName=PH[seg.phase];
+      v.roundLabel=seg.phase==='warmup'?`WARM-UP ${seg.n} / 2`:seg.phase==='cooldown'?`STRETCH ${seg.n} / 4`:seg.phase==='recovery'?`RECOVERY ${seg.n} / ${segs.exTotal}`:`${unit(p).toUpperCase()} ${seg.n} / ${segs.exTotal}`;
+      v.roundShort=seg.phase==='exercise'||seg.phase==='recovery'?`${unit(p).slice(0,1)}${seg.n}/${segs.exTotal}`:seg.phase==='warmup'?`W${seg.n}/2`:`S${seg.n}/4`;
+      v.elapsed=fmt(S.t);v.remain=fmt(seg.start+seg.dur-S.t);v.totalRemain=fmt(segs.total-S.t);v.progress=(S.t/segs.total*100).toFixed(2)+'%';
+      v.isGrace=S.t-S.segStart<10;
+      const inT=tz&&z===tz,below=tz&&hr<ZN[tz][1],above=tz&&hr>=ZN[tz][2];
+      v.deltaText=S.dropout?'No signal':!tz?(seg.phase==='cooldown'?'Stretch':'Walk it out'):below?`${ZN[tz][1]-hr} below`:above?`${hr-ZN[tz][2]+1} above`:'In zone';
+      v.deltaU=v.deltaText.toUpperCase();
+      v.deltaColor=S.dropout||!tz?'#a1a1a6':inT?MSGC.good:below?MSGC.up:MSGC.down;
+      const steady=inT&&S.inZoneSince!=null?fmt(S.t-S.inZoneSince):'0:00';
+      const m=S.msgs[S.msgs.length-1],fresh=!!m&&now-m.at<4500;
+      v.msgText=m?m.text:'';v.msgShort=m?m.short:'';v.msgColor=m?MSGC[m.type]:'#fff';v.msgKicker=m?KICK[m.type]:'';
+      v.bannerX=fresh?'0%':'-104%';v.msgOpacity=fresh?1:0;v.idleOpacity=fresh?0:1;v.msgY=fresh?'0px':'24px';
+      v.idleLine=S.dropout?'NO SIGNAL — CHECK YOUR WATCH':v.isGrace?'GRACE PERIOD — SETTLE IN':seg.phase==='cooldown'?'STRETCH · '+seg.name.toUpperCase():!tz?'RECOVERY — WALK IT OUT':inT?'IN ZONE · STEADY FOR '+steady:v.deltaU+' TARGET';
+      v.statusB=S.dropout?'No signal':v.isGrace?'Settle in':!tz?(seg.phase==='cooldown'?seg.name:'Walk it out'):inT?'Steady '+steady:v.deltaText;
+      v.watchMsg=fresh?m.text:(v.isGrace?'Settle in':'');v.watchShort=fresh?m.short:(inT?'In zone':'');v.watchMsgColor=fresh?v.msgColor:'#8e8e93';
+      const hapFresh=now-S.hapAt<900;v.watchRing=hapFresh&&S.hapType?`0 0 0 4px ${MSGC[S.hapType]}`:'0 0 0 0 transparent';v.hapLabel=S.hapType?HAP[S.hapType]:'—';
+      v.avg=S.n?Math.round(S.sum/S.n):'--';v.peak=S.peak||'--';v.inPct=S.exT?Math.round(S.inT/S.exT*100)+'%':'--';
+      v.heatBg=S.dropout?HEAT[0]:HEAT[z];
+      v.ticker=segs.map(s=>{const c=s.zone?pal[s.zone]:(s.phase==='cooldown'?'#636366':'#8e8e93'),cur=s.i===seg.i;
+        return{grow:s.dur,color:c,dim:mix(c,26),ring:cur?'0 0 0 1px #fff':'none',fill:S.t>=s.start+s.dur?'100%':cur?((S.t-s.start)/s.dur*100).toFixed(1)+'%':'0%'}});
+      const fl=[12,13,12,13,12,13];
+      v.blocks=fl.map((f,i)=>({flex:f,label:i?'Z'+i:'',bg:i===z&&!S.dropout?pal[i]:mix(pal[i],32),ink:i===z?'#000':'#8e8e93',outline:tz===i&&i?'2px solid #fff':'none',outlineSm:tz===i&&i?'1.5px solid #fff':'none'}));
+      v.markerLeft=Math.max(1,Math.min(99,(hr-110)/80*100)).toFixed(1)+'%';
+      const done=segs.filter(s=>s.start+s.dur<=S.t).length;v.doneLabel=done?`${done} DONE · ${segs.length-done} TO GO`:`${segs.length} BLOCKS`;
+      v.plan=segs.slice(seg.i,seg.i+8).map(s=>{const cur=s.i===seg.i;return{tag:s.zone?'Z'+s.zone:s.phase==='cooldown'?'ST':'W',label:segLabel(s,p),dur:cur?fmt(s.start+s.dur-S.t):fmt(s.dur),bg:cur?'#fff':'rgba(255,255,255,.1)',ink:cur?'#000':'#fff',op:1}});
+      v.planC=segs.slice(seg.i+1,seg.i+6).map(s=>({label:segLabel(s,p),dur:fmt(s.dur),color:s.zone?PAL.c[s.zone]:'#48484a'}));
+      const nx=segs[seg.i+1];v.nextLabel=nx?segLabel(nx,p):'Finish';v.nextTag=nx?(nx.zone?'Z'+nx.zone:nx.phase==='cooldown'?'STRETCH':'WALK'):'END';v.nextBg=nx&&nx.zone?PAL.c[nx.zone]:'#8e8e93';
+      v.feed=S.msgs.slice(-3).reverse().map((mm,i)=>({text:mm.text,time:fmt(mm.t),kicker:KICK[mm.type].toLowerCase(),color:MSGC[mm.type],op:i===0?1:i===1?.5:.28,size:i===0?'22px':'16px'}));
+      v.zoneRows=[1,2,3,4,5].map(i=>({label:'Z'+i,name:ZN[i][0],pct:(S.zt[i]/Math.max(1,S.n)*100).toFixed(1)+'%',time:fmtM(S.zt[i]),color:pal[i]}));
+      if(dir==='c'&&running){v.graph=this.graph(PAL.c,'IBM Plex Mono');v.spark=this.spark()}
+      if(dir==='d'&&running)v.graph=this.graph(PAL.a,'Barlow Condensed');
+      v.dropout=S.dropout;v.paused=S.paused&&sc==='run';v.overlayStop=S.overlay==='stop';v.overlaySafety=S.overlay==='safety'&&sc==='run';
+      v.dropLabel=S.dropout?'Restore signal':'Drop signal';
+      v.sumProg=PROG[p].name;v.sumDur=fmt(S.t);v.sumDate='TODAY '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toUpperCase();
+      const score=S.exT?Math.round(S.inT/S.exT*100):0;v.sumScore=score+'%';v.sumTier=score>=80?'Excellent':score>=60?'Strong':score>=40?'Good':'Keep building';v.sumStopped=st.stopped;
+    }
+    const tabs=[['now','NOW'],['plan','PLAN'],['zones','ZONES']];
+    v.tabNow=st.tab==='now';v.tabPlan=st.tab==='plan';v.tabZones=st.tab==='zones';
+    v.tabs=tabs.map(([k,l])=>({label:l,line:st.tab===k?'#fff':'rgba(255,255,255,.2)',color:st.tab===k?'#fff':'rgba(255,255,255,.6)',onClick:()=>this.setState({tab:k})}));
+    v.sheet=st.sheet;v.toggleSheet=()=>this.setState({sheet:!st.sheet});
+    v.saveIdle=st.save==='idle';v.saving=st.save==='saving';v.saved=st.save==='saved';
+    v.save=()=>{this.setState({save:'saving'});this.to2=setTimeout(()=>this.setState({save:'saved'}),900)};
+    v.done=()=>{this.S=null;this.segs=null;this.setState({screen:'prestart'})};
+    const live=()=>this.S&&this.state.screen==='run';
+    v.pause=()=>{if(live()){this.S.paused=true;this.forceUpdate()}};
+    v.resume=()=>{if(this.S){this.S.paused=false;this.forceUpdate()}};
+    v.endWorkout=()=>this.finish();
+    v.askStop=()=>{if(live()){this.S.overlay='stop';this.forceUpdate()}};
+    v.cancelStop=()=>{this.S.overlay=null;this.forceUpdate()};
+    v.confirmStop=()=>{this.setState({stopped:true});this.finish()};
+    v.beginCool=()=>{this.S.gateDone=true;this.setState({screen:'run'})};
+    v.skip=()=>{if(!live())return;const s=this.segAt(this.S.t);this.S.t=Math.max(this.S.t,s.start+s.dur-2);this.forceUpdate()};
+    v.driftUp=()=>{if(live()){this.S.off+=14;this.S.correct=0}};
+    v.driftDown=()=>{if(live()){this.S.off-=14;this.S.correct=0}};
+    v.toggleDrop=()=>{if(live()){this.S.dropout=!this.S.dropout;this.forceUpdate()}};
+    v.spike=()=>{if(live())this.S.spike=true};
+    return v;
+  }
+}
+</script>
+</body>
+</html>

@@ -10,9 +10,7 @@ let package = Package(
     products: [
         .library(name: "HeartRateCoachCore", targets: ["HeartRateCoachCore"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/typelift/SwiftCheck.git", exact: "0.12.0")
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "HeartRateCoachCore",
@@ -21,10 +19,7 @@ let package = Package(
         ),
         .testTarget(
             name: "HeartRateCoachCoreTests",
-            dependencies: [
-                "HeartRateCoachCore",
-                .product(name: "SwiftCheck", package: "SwiftCheck")
-            ],
+            dependencies: ["HeartRateCoachCore"],
             path: "Tests/HeartRateCoachCoreTests"
         )
     ]

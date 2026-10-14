@@ -37,8 +37,10 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
         guard WCSession.default.isReachable else { return }
         var payload: [String: Any] = [
             "zone": state.currentZone,
-            "phase": state.phase.rawValue
+            "phase": state.phase.rawValue,
+            "phaseRemaining": max(0, Int(state.phaseTimeRemaining))
         ]
+        if let tz = state.targetZone { payload["targetZone"] = tz }
         if let message = state.coachingMessage {
             payload["message"] = message
         }

@@ -26,9 +26,11 @@ final class WorkoutSummaryViewModel {
     // MARK: - Dependencies
 
     private let firebaseService: FirebaseServiceProtocol
+    private let exportService: ExportUploading?
 
-    init(firebaseService: FirebaseServiceProtocol) {
+    init(firebaseService: FirebaseServiceProtocol, exportService: ExportUploading? = nil) {
         self.firebaseService = firebaseService
+        self.exportService = exportService
     }
 
     // MARK: - Actions
@@ -44,6 +46,12 @@ final class WorkoutSummaryViewModel {
         Task {
             do {
                 let outcome = try await firebaseService.saveSession(session, userID: userID)
+                await self.advanceProgression(for: session, userID: userID)
+                // Research data lives in the Firestore session doc (hr_stream with epoch-ms
+                // timestamps); export CSVs on demand from Firestore instead. The Storage
+                // upload is kept but disabled for now — re-enable if per-session CSVs in
+                // Storage are wanted again.
+                // await exportService?.uploadSessionCSV(session, userID: userID)
                 await MainActor.run {
                     self.saveState = outcome == .synced ? .saved : .savedPendingSync
                 }
@@ -53,6 +61,20 @@ final class WorkoutSummaryViewModel {
                 await MainActor.run { self.saveState = .failed(.unknown) }
             }
         }
+    }
+
+    /// Advances the progression counter once, at save time, for a qualifying
+    /// session (BR-3-5/6). Non-qualifying sessions (minimum walk, <20 min) are no-ops.
+    private func advanceProgression(for session: Session, userID: String) async {
+        guard var profile = try? await firebaseService.loadProfileV2(userID: userID),
+              let program = profile.program else { return }
+        let flag = session.sessionFlag ?? session.programType.rawValue
+        let training = session.trainingDurationSec ?? session.durationSec
+        let updated = ProgressionEngine.advance(program: program, sessionFlag: flag,
+                                                trainingDurationSec: training, date: session.date)
+        guard updated != program else { return }
+        profile.program = updated
+        try? await firebaseService.saveProfileV2(profile, userID: userID)
     }
 
     // MARK: - Private

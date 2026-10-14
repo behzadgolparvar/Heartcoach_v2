@@ -6,6 +6,8 @@ final class MockFirebaseService: FirebaseServiceProtocol {
     var savedProfiles: [(UserProfile, HRZones, String)] = []
     var profileToReturn: UserProfile? = nil
     var zonesToReturn: HRZones? = nil
+    var savedProfilesV2: [UserProfileV2] = []
+    var profileV2ToReturn: UserProfileV2? = nil
     var sessionsToReturn: [Session] = []
     var shouldThrow: AppError? = nil
     var syncCalled = false
@@ -25,6 +27,16 @@ final class MockFirebaseService: FirebaseServiceProtocol {
     func loadZones(userID: String) async throws -> HRZones? {
         if let error = shouldThrow { throw error }
         return zonesToReturn
+    }
+
+    func saveProfileV2(_ profile: UserProfileV2, userID: String) async throws {
+        if let error = shouldThrow { throw error }
+        savedProfilesV2.append(profile)
+    }
+
+    func loadProfileV2(userID: String) async throws -> UserProfileV2? {
+        if let error = shouldThrow { throw error }
+        return profileV2ToReturn
     }
 
     func saveSession(_ session: Session, userID: String) async throws -> SessionSaveOutcome {

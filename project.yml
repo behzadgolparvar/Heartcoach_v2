@@ -19,6 +19,20 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: HeartCoach
+        # Ship only the Barlow faces the UI actually uses (see WorkoutTheme.swift);
+        # exclude the rest of the family to keep the bundle lean.
+        excludes:
+          - "Fonts/*Italic*.ttf"
+          - "Fonts/Barlow-Thin.ttf"
+          - "Fonts/Barlow-ExtraLight.ttf"
+          - "Fonts/Barlow-Light.ttf"
+          - "Fonts/Barlow-ExtraBold.ttf"
+          - "Fonts/Barlow-Black.ttf"
+          - "Fonts/BarlowCondensed-Thin.ttf"
+          - "Fonts/BarlowCondensed-ExtraLight.ttf"
+          - "Fonts/BarlowCondensed-Light.ttf"
+          - "Fonts/BarlowCondensed-Regular.ttf"
+          - "Fonts/BarlowCondensed-Black.ttf"
     resources:
       - path: HeartCoach/Offline/OfflineQueue.xcdatamodeld
     info:
@@ -36,6 +50,15 @@ targets:
         NSHealthShareUsageDescription: "HeartCoach reads your heart rate to provide personalised coaching during workouts."
         NSHealthUpdateUsageDescription: "HeartCoach needs access to your health data to read your heart rate."
         NSSupportsLiveActivities: false
+        UIAppFonts:
+          - Barlow-Regular.ttf
+          - Barlow-Medium.ttf
+          - Barlow-SemiBold.ttf
+          - Barlow-Bold.ttf
+          - BarlowCondensed-Medium.ttf
+          - BarlowCondensed-SemiBold.ttf
+          - BarlowCondensed-Bold.ttf
+          - BarlowCondensed-ExtraBold.ttf
     entitlements:
       path: HeartCoach/HeartCoach.entitlements
       properties:
@@ -46,6 +69,8 @@ targets:
         product: FirebaseAuth
       - package: firebase-ios-sdk
         product: FirebaseFirestore
+      - package: firebase-ios-sdk
+        product: FirebaseStorage
       - package: HeartRateCoachCore
         product: HeartRateCoachCore
       - sdk: WatchConnectivity.framework
@@ -66,6 +91,10 @@ targets:
     deploymentTarget: "10.0"
     sources:
       - path: HeartCoachWatch
+      # Barlow Condensed faces used by the Watch broadcast view (shared from the
+      # iPhone Fonts folder); only the two weights the Watch renders.
+      - path: HeartCoach/Fonts/BarlowCondensed-ExtraBold.ttf
+      - path: HeartCoach/Fonts/BarlowCondensed-Bold.ttf
     info:
       path: HeartCoachWatch/Info.plist
       properties:
@@ -74,6 +103,9 @@ targets:
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "3"
         WKApplication: true
+        UIAppFonts:
+          - BarlowCondensed-ExtraBold.ttf
+          - BarlowCondensed-Bold.ttf
         WKCompanionAppBundleIdentifier: com.golkoosh.heartcoach
         WKBackgroundModes:
           - workout-processing

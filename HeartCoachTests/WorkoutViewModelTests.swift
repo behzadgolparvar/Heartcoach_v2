@@ -19,7 +19,8 @@ final class WorkoutViewModelTests: XCTestCase {
         mockWatch = MockWatchBridge()
         mockFirebase = MockFirebaseService()
         mockHealthKit = MockHealthKitService()
-        vm = WorkoutViewModel(zones: zones, voiceFeedback: mockVoice, watchBridge: mockWatch,
+        vm = WorkoutViewModel(zones: zones, restingHR: 60, maxHR: 190,
+                              voiceFeedback: mockVoice, watchBridge: mockWatch,
                               healthKitService: mockHealthKit)
     }
 

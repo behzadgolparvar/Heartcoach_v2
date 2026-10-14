@@ -14,16 +14,27 @@ final class HRService: NSObject {
 
     // MARK: - Lifecycle
 
+    /// Request HealthKit authorization up-front (at Watch-app launch) so the
+    /// permission sheet appears before the first workout — not mid-session, which
+    /// delays HR and shows a false "no signal" banner on the phone. Safe to call on
+    /// every launch: if access is already decided, HealthKit returns without a prompt.
+    func requestAuthorization(completion: ((Bool) -> Void)? = nil) {
+        guard HKHealthStore.isHealthDataAvailable() else { completion?(false); return }
+        let typesToShare: Set<HKSampleType> = [HKQuantityType(.heartRate),
+                                                HKQuantityType.workoutType()]
+        let typesToRead: Set<HKObjectType> = [HKQuantityType(.heartRate)]
+        store.requestAuthorization(toShare: typesToShare, read: typesToRead) { ok, _ in
+            DispatchQueue.main.async { completion?(ok) }
+        }
+    }
+
     func start() {
         let config = HKWorkoutConfiguration()
         config.activityType = .other
         config.locationType = .unknown
-
-        let typesToShare: Set<HKSampleType> = [HKQuantityType(.heartRate),
-                                                HKQuantityType.workoutType()]
-        let typesToRead: Set<HKObjectType> = [HKQuantityType(.heartRate)]
-
-        store.requestAuthorization(toShare: typesToShare, read: typesToRead) { [weak self] ok, _ in
+        // Authorization is normally granted at launch; this call is a no-op prompt
+        // if already decided, and still begins the session once access is available.
+        requestAuthorization { [weak self] ok in
             guard ok, let self else { return }
             self.beginSession(config: config)
         }

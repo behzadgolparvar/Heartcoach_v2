@@ -443,3 +443,443 @@
 **Context**: INCEPTION - Requirements Analysis; waiting for user answers before generating requirements.md
 
 ---
+
+## NEW DESIGN CYCLE (v2) — Workflow Start
+**Timestamp**: 2026-09-15T00:00:00Z
+**User Input**: "I would like to implement a new version of the app which may be significantly different. I received some recommendations from my collaborator in two files (hr-coaching-app-full-spec.md, onboarding-form-spec.md). use aidlc to make phased implementation for the new design"
+**AI Response**: Started a new AI-DLC cycle for v2 on branch new_design_Sep_2026. Loaded common rules and extension opt-ins. Ran Workspace Detection: brownfield (existing native Swift/SwiftUI app from v1). Proceeding to open Requirements Analysis decision gate via v2-requirements-questions.md.
+**Context**: INCEPTION - Workspace Detection → Requirements Analysis (v2 cycle)
+
+---
+
+## v2 Requirements Analysis — Answers Received
+**Timestamp**: 2026-09-15T00:30:00Z
+**User Input**: "I answered all question" — Q1=A (native Swift/SwiftUI), Q2=A (skip Reverse Engineering), Q3=A (full auto-assignment engine — headline feature), Q4=A (push notifications), Q5=A (collect all health fields), Q6=A (include CSV/Excel export), Q7=A (incremental TestFlight phases), Q8=A (Security Baseline full/blocking), Q9=B (PBT partial — pure functions + serialization). Q3 was blank in file; confirmed A from user's earlier statement.
+**AI Response**: Validated answers — no contradictions. Extension config: Security Baseline = Yes/Full (blocking); Property-Based Testing = Partial. Loaded both extension rule files. Proceeding to generate v2 requirements.md.
+**Context**: INCEPTION - Requirements Analysis (v2)
+
+---
+
+## v2 Workflow Planning + Units Generation — Phased Plan Created
+**Timestamp**: 2026-09-15T01:00:00Z
+**User Input**: "continue" (approved requirements; skip User Stories)
+**AI Response**: Brownfield architectural transformation, risk High, incremental delivery. Produced v2-phased-implementation-plan.md decomposing v2 into 5 units/phases (Onboarding+Data → Protocols+Coaching → Assignment+Progression → Scoring+Safety → Reminders+Export), with dependencies, per-phase Construction stages, PBT/security notes, and TestFlight milestones. Awaiting approval.
+**Context**: INCEPTION - Workflow Planning + Units Generation (v2)
+
+---
+
+## Phase 1 Functional Design — Answers + Artifacts
+**Timestamp**: 2026-09-15T01:30:00Z
+**User Input**: "I answered all questions" — Q1=B (full re-onboarding), Q2=A (mentality lean majority rule), Q3=A (required set as recommended; height/weight/BMI optional), Q4=A (locale-default units), Q5=A (HealthKit RHR prefill).
+**AI Response**: No contradictions. Generated Phase 1 functional design: domain-entities.md, business-rules.md (BR-1..BR-10 incl. consent gating, units, BMI, mentality-lean, migration), business-logic-model.md (onboarding state machine + derived-value pipeline), frontend-components.md (SwiftUI hierarchy). Security: consent-gated collection + no-PII-logs designed in; no blocking findings.
+**Context**: CONSTRUCTION - Phase 1 Functional Design
+
+## Phase 1 NFR Requirements + NFR Design — Approved
+**Timestamp**: 2026-09-15T02:00:00Z
+**User Input**: "Continue" (x2 — approved NFR Requirements, then NFR Design)
+**AI Response**: NFR Requirements captured (stack reused, security Baseline blocking rules satisfied, N/A for web rules). NFR Design mapped patterns (consent gate, offline-tolerant save, pure testable core, accessibility). Infrastructure Design SKIPPED (no new infra). Next: Code Generation (Part 1 plan).
+**Context**: CONSTRUCTION - Phase 1 NFR stages
+
+## Phase 1 Code Generation — Part 1 Plan Created (awaiting approval)
+**Timestamp**: 2026-09-15T02:15:00Z
+**User Input**: "Continue" (approved NFR Design → start Code Generation)
+**AI Response**: Created phase1-onboarding-code-generation-plan.md — 10 steps, ~25-30 files (brownfield, extend existing). Covers core models/logic + PBT, new Firestore schema, v2 OnboardingViewModel, shared UI + section screens, routing/migration (full re-onboarding), consumer updates to keep v1 running, build/test. Awaiting explicit approval before Part 2 generation.
+**Context**: CONSTRUCTION - Phase 1 Code Generation (Part 1 Planning)
+
+## Phase 1 Code Generation — Part 2 progress (Steps 1-3)
+**Timestamp**: 2026-09-15T03:00:00Z
+**AI Response**: Generated core domain models (OnboardingEnums, Mentality+lean, ProfileSections, UserProfileV2) + pure logic (UnitConverter, BMI). Core package builds clean. Phase 1 logic tests (11) added to app test target and passing; full app suite 44/44 green. NOTE: core package SwiftCheck test target does not compile under Xcode 26 (pre-existing) — flagged for Build&Test to migrate/upgrade. Steps 1-3 [x]; Steps 4-10 (persistence, VM, onboarding UI, routing/migration, consumer refactor, build) remaining.
+**Context**: CONSTRUCTION - Phase 1 Code Generation (Part 2)
+
+## Phase 1 Code Generation — Part 2 COMPLETE
+**Timestamp**: 2026-09-15T04:00:00Z
+**AI Response**: Completed Steps 4-10. New Firestore v2 persistence; v2 OnboardingViewModel; onboarding components + 8 section screens; routing/migration (full re-onboarding); Home/Settings refactored to v2 profile. App builds; full suite 46/46 green (v1 onboarding tests rewritten for v2; auth/home tests updated). Security: consent-gated collection + no-PII logs upheld. Code summary written. Flagged core SwiftCheck target broken under Xcode 26 for Build&Test.
+**Context**: CONSTRUCTION - Phase 1 Code Generation complete
+
+## Phase 2 Functional Design — Started
+**Timestamp**: 2026-09-15T05:00:00Z
+**User Input**: "start phase 2" (after testing Phase 1 onboarding on device)
+**AI Response**: Opened Phase 2 (Protocols + Coaching) Functional Design with 7 design questions (target representation, off-zone deviation, in-zone cadence, briefing count source, phrase randomness/testability, engine approach, workout selection).
+**Context**: CONSTRUCTION - Phase 2 Functional Design (v2)
+
+## v5 Spec Adoption — Requirements Change (mid-workflow)
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "A" (adopt v5 and re-plan now) — re: collaborator's updated spec /Users/behzad/Downloads/files/hr-coaching-app-full-spec-v5.md
+**AI Response**: Per common/workflow-changes.md (requirements change). Adopted v5 as canonical spec (v4 archived as hr-coaching-app-full-spec.v4.backup.md). v5 restructures into a 4 training-stage program (Foundation/Level Up/Shape/Maintain) with per-stage 60-session counters, 3 sub-phase session-gated ratio progression, dual experience classification (Q1+Q2) + Ozempic→Beginner override, exercise phases/banks (Level Up/Shape), relapse handling, mandatory cooldown stretch, biweekly RHR+weight milestones, client PDF, non-negotiable minimum. Pausing AI-DLC Phase 2 (FD questions unanswered); updating v2-requirements.md + v2-phased-implementation-plan.md to v5 before resuming construction. Phase 1 (built) needs onboarding deltas (dual experience + Ozempic override + stage/counter fields).
+**Context**: INCEPTION (re-visited) - Requirements change → updating requirements + phased plan for v5
+
+## v5 Re-Plan (Inception artifacts updated)
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "A"
+**AI Response**: "Executed the v5 re-plan (workflow-changes 'requirements changed' loop): (1) appended a v5 REVISION section to v2-requirements.md — revised FR-1 (dual experience Q1/Q2 + Ozempic→Beginner override), FR-3 (session-gated ratio progression, 60 sessions/3 sub-phases per stage), added FR-3b relapse/re-entry, revised FR-4 (per-stage protocols: Foundation/Level Up/Shape), added FR-6b cooldown stretch, FR-10 milestones, FR-11 client PDF, FR-12 non-negotiable minimum; (2) rewrote v2-phased-implementation-plan.md into a 6-phase structure (P1 done → P1b → P2 → P3 → P4 → P5 → P6) organized around the 4 training stages, archiving the superseded 5-phase plan; (3) updated aidlc-state.md. Presenting the updated plan at an approval gate; NOT resuming Phase 2 coding or answering the open Phase 2 design questions until approved."
+**Context**: Inception re-plan after adopting hr-coaching-app-full-spec v5. Maintain (stage 4) deferred/out of scope.
+
+---
+
+## v5 Re-Plan Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "I approve the re-plan and do P1b next"
+**AI Response**: "Re-plan approved. Marking Inception re-plan accepted in aidlc-state.md and beginning CONSTRUCTION Phase 1b (Onboarding v5 deltas) Functional Design."
+**Context**: Approval gate passed for v5 6-phase re-plan; proceeding to Phase 1b Functional Design.
+
+---
+
+## Phase 1b Functional Design — Answers
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "answered" (Q1=A, Q2=A, Q3=A, Q4=A, Q5=A, Q6=A, Q7=A, Q8=B in phase1b-onboarding-v5-functional-design-plan.md)
+**AI Response**: "All 8 answers unambiguous. Q8=B (force full re-onboard for profiles missing v5 fields) differs from recommended A but is clear. Generating functional-design artifacts under construction/phase1b-onboarding-v5/functional-design/."
+**Context**: Phase 1b (Onboarding v5 deltas) Functional Design — answers collected.
+
+---
+
+## Phase 1b Functional Design — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Marking complete in aidlc-state.md; proceeding to Phase 1b NFR Requirements."
+**Context**: Phase 1b (Onboarding v5 deltas) Functional Design approved.
+
+---
+
+## Phase 1b NFR Requirements — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 1b NFR Design."
+**Context**: Phase 1b (Onboarding v5 deltas) NFR Requirements approved.
+
+---
+
+## Phase 1b NFR Design — Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 1b Code Generation — Part 1 (Planning): creating code generation plan for approval before writing code."
+**Context**: Phase 1b (Onboarding v5 deltas) NFR Design approved; Infrastructure Design skipped.
+
+---
+
+## Phase 1b Code Generation — Plan Approval
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Part 2 (Generation): core types + ExperienceResolver + UserProfileV2 extension + tests + persistence + onboarding/settings/routing, then build+test+SECURITY-03 grep."
+**Context**: Phase 1b (Onboarding v5 deltas) Code Generation Part 1 approved; beginning Part 2.
+
+---
+
+## Phase 1b Code Generation — Part 2 Complete
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: (code generation executed per approved plan)
+**AI Response**: "Generated v5 onboarding deltas: 6 new core types + ExperienceResolver, UserProfileV2 extension with tolerant decode + isV5Complete, onboarding Q1/Q2 + Ozempic popup, isV5Complete routing gate (Q8=B re-onboard), Settings re-resolve. Added ExperienceResolverTests (24-combo exhaustive), StageProgressTests, ProfileV5CodableTests (incl. pre-v5 decode); updated onboarding/auth tests + fixtures. Core + iOS build; full test suite passed on iPhone 17 sim. SECURITY-03 grep clean. Code summary at construction/phase1b-onboarding-v5/code/code-summary.md. Presenting 2-option completion gate."
+**Context**: Phase 1b (Onboarding v5 deltas) Code Generation Part 2 — complete, tests green.
+
+---
+
+## Phase 1b — Completion & Commit
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "commit"
+**AI Response**: "Phase 1b approved and committed as e85fdf4 on branch new_design_Sep_2026 (v5 re-plan Inception artifacts + onboarding v5 deltas + tests). Phase 1b COMPLETE. Next: Phase 2 Foundation protocols/coaching — functional-design questions pending."
+**Context**: Phase 1b Code Generation completion gate approved via commit; work committed.
+
+---
+
+## Phase 2 Functional Design — Plan refreshed for v5
+**Timestamp**: 2026-10-06T00:00:00Z
+**User Input**: "Phase 2 — Protocols + Coaching · Functional Design Plan is aligned with the new v5 design?" → "yes"
+**AI Response**: "Assessed: Foundation protocol tables + coaching model unchanged in v5 (Q1/Q2/Q6/Q7 stand), but the pre-v5 plan was missing cooldown stretch (§F), the +30s Continuous buffer, session scoring (v5 re-plan moves it into P2), safety/edge (§J), and per-stage briefing wording. Rewrote phase2 plan v5-aligned: kept Q1–Q7, fixed Q4 to 'per type per stage', added design steps + Q8–Q11 (cooldown representation, buffer, score tiers, time-in-target signal). Awaiting answers."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design — v5 alignment + questions issued.
+
+---
+
+## Phase 2 Functional Design — Answers
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "I answered all 11 questions" (Q1–Q7=A; Q8=A + user-paced "ready to stretch" transition gate; Q9=A; Q10=A even bands ≥90/75/60/40; Q11=A per-block range, training-only denominator)
+**AI Response**: "All answers unambiguous. Generating Phase 2 functional-design artifacts under construction/phase2-foundation/functional-design/ (business-logic-model, business-rules, domain-entities). Confirmed design incl. transition gate, two-clock timing, segment-tagged hr_stream, cooldown excluded from scoring denominator."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design — answers collected.
+
+---
+
+## Phase 2 Functional Design — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "Functional Design approved. Marking complete; proceeding to Phase 2 NFR Requirements."
+**Context**: Phase 2 (Foundation Protocols + Coaching) Functional Design approved.
+
+---
+
+## Phase 2 NFR Requirements — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 2 NFR Design."
+**Context**: Phase 2 (Foundation Protocols + Coaching) NFR Requirements approved.
+
+---
+
+## Phase 2 NFR Design — Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 2 Code Generation — Part 1 (Planning)."
+**Context**: Phase 2 (Foundation Protocols + Coaching) NFR Design approved; Infrastructure Design skipped.
+
+---
+
+## Phase 2 Code Generation — Plan Approval
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Part 2 Steps 1–4 (pure core: protocol builder, CoachingEngineV2, scorer, briefing + tests), then pausing for the proposed mid-phase check-in before the app-side flow switch."
+**Context**: Phase 2 Code Generation Part 1 approved; beginning Part 2 Steps 1–4.
+
+---
+
+## Phase 2 Code Generation — Steps 1–4 complete (mid-phase check-in)
+**Timestamp**: 2026-10-07T00:00:00Z
+**AI Response**: "Generated pure core: FoundationProtocol/PhaseKind/TargetRange, CooldownStep, FoundationProtocolBuilder, CoachingCue/CoachingPriority/PhraseCategory/SeededGenerator, PhrasePool, CoachingSessionState, CoachingEngineV2, SessionScore/ScoreTier, SessionScorer, BriefingPolicy. 23 new tests pass (FoundationProtocol, CoachingEngineV2, SessionScorer, BriefingPolicy). Core builds. Pausing for the agreed mid-phase check-in before the app-side flow switch (Steps 5–10)."
+**Context**: Phase 2 Code Generation Part 2 — pure core done; awaiting go-ahead for the workout-flow switch.
+
+---
+
+## Phase 2 Code Generation — Steps 5–10 complete
+**Timestamp**: 2026-10-07T00:00:00Z
+**AI Response**: "Completed the app-side flow switch. Extended Session/HRRecord (score fields + phaseKind) + persistence. Built FoundationSessionManager (v2 driver): FoundationProtocol timeline, 5s safety/15s coaching, two clocks, user-paced transition gate, cooldown step playback, end-of-training scoring + spoken tier closing. Switched WorkoutViewModel to it (restingHR/maxHR), removed Fartlek from picker, added cooldown-gate UI + score card. v1 engine left compiled/off-path (Q6=A). Full suite green (84 tests); SECURITY-03 grep clean. DEFERRED (flagged): advanced §J (dropout UI, pause prompt/snoozes, walk_fallback) + device verification → Build & Test. Presenting 2-option completion gate."
+**Context**: Phase 2 Code Generation Part 2 — complete (with documented §J follow-up).
+
+---
+
+## Phase 2 — Completion & Commit
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Phase 2 approved and committed (6aa49c1; core d7f45c1). §J advanced flows + device verification ride to Build & Test as planned. Phase 2 COMPLETE. Next: Phase 3 (classification + session-gated progression)."
+**Context**: Phase 2 Code Generation completion gate approved via 'approve'; committed.
+---
+
+## Phase 3 Functional Design — Started
+**Timestamp**: 2026-10-07T00:00:00Z
+**User Input**: "start Phase 3"
+**AI Response**: "Beginning Phase 3 (classification + session-gated progression + relapse + non-negotiable minimum) Functional Design. Read v5 §B (ratio tables), §C (relapse), §I (minimum). Issuing design-question plan."
+**Context**: Phase 3 Functional Design kickoff.
+---
+
+## Phase 3 Functional Design — Answers
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "I answered all 9 questions" (Q1=A deterministic repeating pattern; Q2=A weight-loss wins; Q3=A outcome→1-in-4 HIIT else pure Continuous; Q4=A count scored training only; Q5=B spec-literal push-back [plain subtraction, >1mo reset to Sub-Phase 1/session 0]; Q6=A store lastCountedSessionDate; Q7=A user-initiated minimum; Q8=A Foundation-complete "coming soon" state; Q9=A assigned default + manual override)
+**AI Response**: "All unambiguous. Q5=B = spec-literal relapse. Generating Phase 3 functional-design artifacts under construction/phase3-progression/functional-design/."
+**Context**: Phase 3 (Progression & Assignment) Functional Design — answers collected.
+---
+
+## Phase 3 Functional Design — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 3 NFR Requirements (concise; pure logic on fixed stack, no new questions)."
+**Context**: Phase 3 (Progression & Assignment) Functional Design approved.
+---
+
+## Phase 3 NFR Requirements — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 3 NFR Design."
+**Context**: Phase 3 NFR Requirements approved.
+---
+
+## Phase 3 NFR Design — Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED (no new infra). Proceeding to Phase 3 Code Generation — Part 1 (Planning)."
+**Context**: Phase 3 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 3 Code Generation — Plan Approval
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–8 straight through (pure core + minimum walk + Home integration + persistence + build/test)."
+**Context**: Phase 3 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 3 Code Generation — Steps 1–8 complete
+**Timestamp**: 2026-10-09T00:00:00Z
+**AI Response**: "Generated ProgressionEngine + §B tables + ratio/assignment/relapse types + ProgramState.lastCountedSessionDate; MinimumWalk flow; Home integration (today's-session card, relapse banner, minimum entry, assigned-type pre-select); progression advance at summary save. 19 new core tests + full suite green (103 tests). SECURITY-03 clean. Code summary written. Presenting completion gate."
+**Context**: Phase 3 Code Generation Part 2 — complete.
+---
+
+## Phase 3 — Completion & Commit
+**Timestamp**: 2026-10-09T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Phase 3 approved and committed (a6670e4). Phase 3 COMPLETE. Next: Phase 4 (Level Up)."
+**Context**: Phase 3 Code Generation completion gate approved; committed.
+---
+
+## Phase 4 Functional Design — Started
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "start phase 4"
+**AI Response**: "Beginning Phase 4 (Level Up) Functional Design. Read §Phase 2 (Level Up Continuous 7-block w/ internal run/exercise/walk timeline; HIIT reworked to warmup+exercise-block+10×3:00 rounds), §G leg bank, §E Level Up unlock. Issuing design-question plan (reworked protocols, exercise bank, bilateral/unilateral timing, injury exclusion, unlock flow, stage advancement)."
+**Context**: Phase 4 Functional Design kickoff.
+---
+
+## Phase 4 Functional Design — Answers
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "I answered all questions" (Q1–Q9 all = A)
+**AI Response**: "All A. Generating Phase 4 functional-design artifacts (leg bank §G + bilateral/unilateral + joint tags [flagged for collaborator], LevelUpProtocolBuilder for reworked Continuous+HIIT, exercise selection+exclusion engine, Level Up unlock reusing P1b jointIssues, exercise-cue/rep-count coaching, Foundation→Level Up advance)."
+**Context**: Phase 4 Functional Design — answers collected.
+---
+
+## Phase 4 Functional Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 4 NFR Requirements (concise; pure logic + exercise-cue layer on fixed stack, no new questions)."
+**Context**: Phase 4 (Level Up) Functional Design approved.
+---
+
+## Phase 4 NFR Requirements — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 4 NFR Design."
+**Context**: Phase 4 NFR Requirements approved.
+---
+
+## Phase 4 NFR Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "Approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED. Proceeding to Phase 4 Code Generation — Part 1 (Planning)."
+**Context**: Phase 4 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 4 Code Generation — Plan Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–7 straight through (leg bank + selector + LevelUpProtocolBuilder + unlock, session-manager exercise-cue layer, stage advance, build/test)."
+**Context**: Phase 4 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 4 Code Generation — Steps 1–7 complete
+**Timestamp**: 2026-10-11T00:00:00Z
+**AI Response**: "Generated leg bank + ExerciseSelector + LevelUpProtocolBuilder (reworked Continuous §2.1 + HIIT §2.2) + LevelUpUnlock; PhaseKind.exercise; session-manager exercise-cue layer + builder override; Level Up unlock screen (injury pre-filled from onboarding + comfort subset + caution); Foundation→Level Up advance. 13 new core tests + full suite green (116). SECURITY-03 clean. Deferred (flagged): literal per-rep voice count, HIIT unilateral per-leg, tick-granularity timing → Build & Test; bank size + tags → collaborator. Presenting completion gate."
+**Context**: Phase 4 Code Generation Part 2 — complete.
+---
+
+## Phase 4 — Completion & Commit
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Phase 4 approved and committed (7e496c2). Phase 4 COMPLETE. Next: Phase 5 (Shape)."
+**Context**: Phase 4 Code Generation completion gate approved; committed.
+---
+
+## Phase 5 Functional Design — Started
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "consolidated approach" (→ proceed to Phase 5, then one Build & Test pass)
+**AI Response**: "Beginning Phase 5 (Shape) Functional Design. Read §Phase 3 (Shape Continuous §3.1 4-2 split; HIIT §3.2 6-5 split, 11 exercise phases, 2-checks-per-50s run), §E Shape unlock, §G weight banks. Issuing design-question plan."
+**Context**: Phase 5 Functional Design kickoff.
+---
+
+## Phase 5 Functional Design — Answers
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "answered all" (Q1–Q10 all = A; Q8 with checks at ~15s & ~40s)
+**AI Response**: "All A. Generating Phase 5 functional-design artifacts (weight banks §G, Option A/B + per-session muscle selection/ranking, Legs rule, 4-2/6-5 alternation, ShapeProtocolBuilder §3.1/§3.2, Shape-HIIT 2-checks cadence, Shape unlock + per-session re-ask, Level Up→Shape advance)."
+**Context**: Phase 5 (Shape) Functional Design — answers collected.
+---
+
+## Phase 5 Functional Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 5 NFR Requirements (concise; pure logic + Shape-HIIT cadence + per-session picker on fixed stack, no new questions)."
+**Context**: Phase 5 (Shape) Functional Design approved.
+---
+
+## Phase 5 NFR Requirements — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 5 NFR Design."
+**Context**: Phase 5 NFR Requirements approved.
+---
+
+## Phase 5 NFR Design — Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Design approved. Infrastructure Design SKIPPED. Proceeding to Phase 5 Code Generation — Part 1 (Planning)."
+**Context**: Phase 5 NFR Design approved; Infrastructure Design skipped.
+---
+
+## Phase 5 Code Generation — Plan Approval
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–6 (weight banks + planner + ShapeProtocolBuilder + ShapeUnlock, session-manager extension, unlock/pickers + advance, build/test)."
+**Context**: Phase 5 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 5 Code Generation — Steps 1–6 complete
+**Timestamp**: 2026-10-11T00:00:00Z
+**AI Response**: "Generated weight banks + ShapeExercisePlanner (4-2/6-5 alternation, Legs rule) + ShapeProtocolBuilder (§3.1/§3.2) + ShapeUnlock; session-manager Shape builder selection + 2-checks-per-50s HIIT cadence + generalized exercise cue (weights + plyo); Shape unlock screen + per-session Option A/B + rank-2-muscles picker; Level Up→Shape advance. 14 new core tests + full suite green (127). SECURITY-03 clean. Deferred (flagged): per-rep voice count, Shape-HIIT offset tuning, exercise-phase internal timing → Build & Test; weight banks → collaborator. All three designed stages (Foundation/Level Up/Shape) now built; Maintain out of scope. Presenting completion gate."
+**Context**: Phase 5 Code Generation Part 2 — complete.
+---
+
+## Phase 5 — Completion & Commit
+**Timestamp**: 2026-10-11T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Phase 5 approved and committed (b263106). Phase 5 COMPLETE — all 3 designed stages built. Next: Phase 6 (milestones/reminders/export/PDF), then Build & Test."
+**Context**: Phase 5 Code Generation completion gate approved; committed.
+---
+
+## Phase 6 Functional Design — Started
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "start p6"
+**AI Response**: "Beginning Phase 6 (Milestones + Reminders + Export + Client PDF) Functional Design. Read §H (milestones), §K (client PDF), FR-7/FR-8, developer-owned technical decisions (§373). New surface: UserNotifications (local push), Firebase Storage (export), PDFKit — Infra Design likely NOT skipped this phase. Issuing design-question plan."
+**Context**: Phase 6 Functional Design kickoff.
+---
+
+## Phase 6 Functional Design — Answers
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "I answered all" (Q1–Q9 all = A)
+**AI Response**: "All A. Generating Phase 6 functional-design artifacts (milestones biweekly RHR-auto/weight-manual + Day2 workout-start gating; 4 local notification types + permission at reminders-consent; CSV export to Storage on save; PDFKit per-stage session-plan PDF via share sheet). Q3 'block workout start' flagged for collaborator. Infra Design will run (notifications/Storage/PDFKit)."
+**Context**: Phase 6 (Milestones/Reminders/Export/PDF) Functional Design — answers collected.
+---
+
+## Phase 6 Functional Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Functional Design approved. Proceeding to Phase 6 NFR Requirements (new surface: notifications permission, Firebase Storage rules, PDFKit; key choices settled in FD, no new questions)."
+**Context**: Phase 6 Functional Design approved.
+---
+
+## Phase 6 NFR Requirements — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "NFR Requirements approved. Proceeding to Phase 6 NFR Design, then Infrastructure Design (runs this phase)."
+**Context**: Phase 6 NFR Requirements approved.
+---
+
+## Phase 6 NFR Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "APPROVE"
+**AI Response**: "NFR Design approved. Proceeding to Phase 6 Infrastructure Design (runs this phase — notifications, Firebase Storage rules, PDF)."
+**Context**: Phase 6 NFR Design approved.
+---
+
+## Phase 6 Infrastructure Design — Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Infrastructure Design approved. Proceeding to Phase 6 Code Generation — Part 1 (Planning)."
+**Context**: Phase 6 Infrastructure Design approved.
+---
+
+## Phase 6 Code Generation — Plan Approval
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Code generation plan approved. Executing Steps 1–5 (milestone/reminder/CSV/plan core, tests, notification/export/PDF services behind protocols, wiring, build/test)."
+**Context**: Phase 6 Code Generation Part 1 approved; beginning Part 2.
+---
+
+## Phase 6 — Completion & Commit
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "approve"
+**AI Response**: "Phase 6 approved and committed (7141536). Phase 6 COMPLETE — all 6 build phases (P1/P1b/P2/P3/P4/P5/P6) done. Remaining: Build & Test stage (device verification + deferred §J + owner Storage-rules deploy)."
+**Context**: Phase 6 Code Generation completion gate approved; committed. Construction feature phases complete.
+---
+
+## Build & Test — Started
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "let's build and test but keep a note of our backlog"
+**AI Response**: "Saved the Build & Test backlog to persistent memory (v5_build_test_backlog.md). Starting Build & Test stage: generating build/test instruction files + an in-repo backlog doc under construction/build-and-test/."
+**Context**: Construction → Build & Test stage kickoff (all 6 feature phases complete).
+---
+
+## Build & Test — §J wired + Storage deployed; B/C/E parked
+**Timestamp**: 2026-10-12T00:00:00Z
+**User Input**: "let's keep the backlog items for a later time"
+**AI Response**: "§J safety wired (dropout, pause prompt, walk_fallback; 139 tests green; commit 0895341). Firebase Storage set up on Blaze + own-data rules published (D done). Remaining backlog B (coaching device-tuning), C (on-device verification), E (collaborator confirms) parked for the device pass. Updated backlog.md, aidlc-state.md, and memory."
+**Context**: Build & Test — code-side complete; device/collaborator items deferred by user.
+---

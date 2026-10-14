@@ -7,11 +7,17 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
     private let hrService = HRService()
     private let hapticService = HapticService()
     private weak var viewModel: WorkoutWatchViewModel?
+    /// Clears a coaching message after it has been shown ~4.5s (matches the iPhone banner).
+    private var messageClearItem: DispatchWorkItem?
 
     // MARK: - Activation
 
     func activate(viewModel: WorkoutWatchViewModel) {
         self.viewModel = viewModel
+
+        // Prompt for HealthKit access at launch (foreground) so the first workout
+        // has HR immediately instead of surfacing a late permission sheet mid-session.
+        hrService.requestAuthorization()
 
         hrService.onHRReading = { [weak self] reading in
             self?.sendHR(reading)
@@ -82,13 +88,32 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
 
         if let zone = message["zone"] as? Int,
            let phaseRaw = message["phase"] as? String {
-            let msg = message["message"] as? String
+            let targetZone = message["targetZone"] as? Int ?? 0
+            let remaining = message["phaseRemaining"] as? Int ?? 0
+            let msg = (message["message"] as? String).flatMap { $0.isEmpty ? nil : $0 }
             DispatchQueue.main.async { [weak self] in
-                self?.viewModel?.currentZone = zone
-                self?.viewModel?.phaseName = phaseRaw.capitalized
-                self?.viewModel?.lastMessage = msg
+                guard let self, let vm = self.viewModel else { return }
+                vm.currentZone = zone
+                vm.phaseName = phaseRaw
+                vm.targetZone = targetZone
+                vm.phaseRemainingSec = remaining
+                if let msg {
+                    vm.lastMessage = msg
+                    self.scheduleMessageClear()
+                }
             }
         }
+    }
+
+    /// Hold a coaching message ~4.5s, then clear it (so the message line goes blank
+    /// between cues rather than freezing on the last one).
+    private func scheduleMessageClear() {
+        messageClearItem?.cancel()
+        let item = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated { self?.viewModel?.lastMessage = nil }
+        }
+        messageClearItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5, execute: item)
     }
 
     // MARK: - Commands
@@ -102,11 +127,15 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
             }
         case "workoutStopped":
             hrService.stop()
+            messageClearItem?.cancel()
             DispatchQueue.main.async { [weak self] in
-                self?.viewModel?.isWorkoutActive = false
-                self?.viewModel?.currentHR = 0
-                self?.viewModel?.currentZone = 0
-                self?.viewModel?.lastMessage = nil
+                guard let vm = self?.viewModel else { return }
+                vm.isWorkoutActive = false
+                vm.currentHR = 0
+                vm.currentZone = 0
+                vm.targetZone = 0
+                vm.phaseRemainingSec = 0
+                vm.lastMessage = nil
             }
         default:
             break
