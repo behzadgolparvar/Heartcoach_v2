@@ -14,8 +14,6 @@ struct HomeView: View {
     @State private var showShapeUnlock = false
     @State private var showShapeChoice = false
     @State private var weightText = ""
-    @State private var pdfURL: URL?
-    @State private var showShare = false
     @State private var didRequestNotifications = false
 
     var body: some View {
@@ -115,15 +113,9 @@ struct HomeView: View {
                         Button("Not feeling it? Do your 15-min minimum") {
                             showMinimumWalk = true
                         }
-                        .font(.footnote.bold())
-                        .foregroundStyle(.secondary)
+                        .buttonStyle(SecondaryButtonStyle())
                         .disabled(vm.zones == nil)
-
-                        Button("View my plan (PDF)") { generatePlan() }
-                            .font(.footnote.bold())
-                            .foregroundStyle(.secondary)
-                            .disabled(vm.profile?.program == nil)
-                            .accessibilityIdentifier("home-view-plan")
+                        .accessibilityIdentifier("home-minimum-walk")
 
                         if !vm.isHealthKitAuthorized {
                             VStack(spacing: 6) {
@@ -191,9 +183,6 @@ struct HomeView: View {
                 }
             }
         }
-        .sheet(isPresented: $showShare) {
-            if let url = pdfURL { ShareSheet(items: [url]) }
-        }
         .onAppear {
             if let userID = authViewModel.currentUserID {
                 vm.loadData(userID: userID)
@@ -205,17 +194,6 @@ struct HomeView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { vm.recheckHealthKitStatus() }
-        }
-    }
-
-    private func generatePlan() {
-        guard let profile = vm.profile, let stage = profile.program?.currentStage else { return }
-        let rows = SessionPlanBuilder.plan(stage: stage, profile: profile)
-        let note = SessionPlanBuilder.projectedCompletionNote(
-            frequencyPerWeek: profile.schedule.frequencyPerWeek, stage: stage)
-        if let url = container.pdfRenderer.render(stage: stage, rows: rows, completionNote: note) {
-            pdfURL = url
-            showShare = true
         }
     }
 
@@ -241,16 +219,6 @@ struct HomeView: View {
         default: return "evening"
         }
     }
-}
-
-// MARK: - Share sheet (PDF export)
-
-private struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Today's session card

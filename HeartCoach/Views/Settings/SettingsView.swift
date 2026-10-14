@@ -5,6 +5,9 @@ struct SettingsView: View {
     @Environment(SettingsViewModel.self) private var vm
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(HomeViewModel.self) private var homeViewModel
+    @Environment(AppContainer.self) private var container
+    @State private var pdfURL: URL?
+    @State private var showShare = false
 
     var body: some View {
         @Bindable var vm = vm
@@ -82,6 +85,16 @@ struct SettingsView: View {
                             .foregroundStyle(.green).font(.subheadline)
                     }
 
+                    SectionHeader("Your Program")
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button("View my plan (PDF)") { generatePlan() }
+                            .buttonStyle(SecondaryButtonStyle())
+                            .disabled(homeViewModel.profile?.program == nil)
+                            .accessibilityIdentifier("settings-view-plan")
+                        Text("A printable overview of your current stage's sessions.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                    }
+
                     Button(vm.isSaving ? "Saving…" : "Save") {
                         if let userID = authViewModel.currentUserID { vm.save(userID: userID) }
                     }
@@ -115,6 +128,20 @@ struct SettingsView: View {
             Text("Research shows that combining exercise with GLP-1 medications like Ozempic is linked to greater fat loss and better weight-loss maintenance after stopping the medication.\n\nYour training will start at a Beginner level to build a strong, sustainable foundation alongside your medication.")
         }
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $showShare) {
+            if let url = pdfURL { ShareSheet(items: [url]) }
+        }
+    }
+
+    private func generatePlan() {
+        guard let profile = homeViewModel.profile, let stage = profile.program?.currentStage else { return }
+        let rows = SessionPlanBuilder.plan(stage: stage, profile: profile)
+        let note = SessionPlanBuilder.projectedCompletionNote(
+            frequencyPerWeek: profile.schedule.frequencyPerWeek, stage: stage)
+        if let url = container.pdfRenderer.render(stage: stage, rows: rows, completionNote: note) {
+            pdfURL = url
+            showShare = true
+        }
     }
 }
 
