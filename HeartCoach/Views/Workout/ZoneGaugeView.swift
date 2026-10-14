@@ -47,12 +47,12 @@ struct ZoneGaugeView: View {
                             .animation(.easeInOut(duration: 0.4), value: tz)
                     }
                     // Marker (downward triangle), centered on the current zone block
-                    // (discrete, like the Watch) — tip 13pt above the track top.
+                    // (discrete, like the Watch) — tip sits just above the track top.
                     let mi = min(5, max(0, currentZone))
                     DownTriangle()
                         .fill(Color.white)
                         .frame(width: 14, height: 10)
-                        .offset(x: xs[mi] + widths[mi] / 2 - 7, y: -23)
+                        .offset(x: xs[mi] + widths[mi] / 2 - 7, y: -12)
                         .animation(.easeInOut(duration: 0.4), value: currentZone)
                 }
             }
