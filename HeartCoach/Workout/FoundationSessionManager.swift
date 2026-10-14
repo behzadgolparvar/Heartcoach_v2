@@ -58,6 +58,9 @@ final class FoundationSessionManager {
     var onCooldownStep: ((String) -> Void)?
     /// Fires with true when HR has been absent ≥20s, false when it returns.
     var onSensorDropout: ((Bool) -> Void)?
+    /// Fires (with the offending HR) when HR exceeds HRmax — drives the full-screen
+    /// safety-stop overlay (§J). Fires each tick it stays above; the VM latches it.
+    var onSafetyStop: ((Int) -> Void)?
 
     /// Tracks exercise-phase cues already spoken (intro / switch-legs).
     private var exerciseIntroDone = Set<Int>()
@@ -203,6 +206,7 @@ final class FoundationSessionManager {
         if hr != Int.max, hr > maxHR {
             voiceFeedback.speak(.criticalSlowDown)
             watchBridge.sendHaptic(.long)
+            onSafetyStop?(hr)
         }
 
         var cueText: String?

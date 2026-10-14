@@ -38,6 +38,19 @@ final class WorkoutViewModel {
     private var pauseSnoozesUsed = 0
     var canSnoozePause: Bool { SafetyPolicy.canSnooze(usedSnoozes: pauseSnoozesUsed) }
 
+    /// HR exceeded HRmax — show the full-screen safety-stop overlay (§J). Latches true.
+    var safetyStop: Bool = false
+    /// HR that triggered the safety stop (for the overlay numeral before live updates).
+    var safetyStopHR: Int = 0
+
+    // Coach lower-third banner (Direction D): the most-recent message, held 4.5s,
+    // classified for its bar color / kicker.
+    enum MessageKind: Equatable { case speedUp, slowDown, good, phase, stretch }
+    struct ActiveBanner: Equatable { let text: String; let kind: MessageKind }
+    var activeBanner: ActiveBanner?
+    private var bannerTask: Task<Void, Never>?
+    private var lastBannerText: String?
+
     /// Seconds to wait for the first HR reading before starting anyway.
     private let firstReadingTimeout: TimeInterval = 8
     private var startupTask: Task<Void, Never>?
@@ -138,6 +151,11 @@ final class WorkoutViewModel {
         manager.onSensorDropout = { [weak self] active in
             self?.sensorDropout = active
         }
+        manager.onSafetyStop = { [weak self] hr in
+            guard let self else { return }
+            self.safetyStopHR = hr
+            self.safetyStop = true
+        }
         self.sessionManager = manager
         self.selectedProgram = program
         self.isPaused = false
@@ -156,6 +174,9 @@ final class WorkoutViewModel {
         self.peakHR = 0; self.liveAvgHR = 0
         self.exerciseSeconds = 0; self.inTargetSeconds = 0
         self.hrSum = 0; self.hrCount = 0
+        self.safetyStop = false; self.safetyStopHR = 0
+        self.activeBanner = nil; self.lastBannerText = nil
+        self.bannerTask?.cancel(); self.bannerTask = nil
 
         // Wake the Watch app into a workout so HR starts spinning up immediately,
         // then run the smart countdown before coaching begins.
@@ -271,6 +292,19 @@ final class WorkoutViewModel {
     // MARK: - Broadcast-redesign derived state
 
     private func ingest(_ state: CoachingState) {
+        // Coach banner: a fresh message slides in and holds 4.5s (independent of HR).
+        if let msg = state.coachingMessage, !msg.isEmpty, msg != lastBannerText {
+            lastBannerText = msg
+            activeBanner = ActiveBanner(text: msg, kind: Self.classify(msg))
+            bannerTask?.cancel()
+            bannerTask = Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 4_500_000_000)
+                guard !Task.isCancelled else { return }
+                self?.activeBanner = nil
+                self?.lastBannerText = nil
+            }
+        }
+
         let sec = Int(state.elapsedTime)
         guard state.currentHR > 0 else { return }
         hrSum += state.currentHR; hrCount += 1
@@ -284,6 +318,20 @@ final class WorkoutViewModel {
                 inTargetSeconds += 1
             }
         }
+    }
+
+    /// Classify a coaching message into its Direction-D banner type (bar color / kicker).
+    /// Text-based: the coaching pipeline carries only the message string to the UI.
+    nonisolated static func classify(_ text: String) -> MessageKind {
+        let t = text.lowercased()
+        if t.contains("stretch") { return .stretch }
+        if t.contains("slow") { return .slowDown }
+        if t.contains("speed up") || t.contains("faster") || t.contains("pick it up")
+            || t.contains("push") || t.contains("quicker") || t.contains("bit harder") { return .speedUp }
+        if t.contains("good") || t.contains("great") || t.contains("nice") || t.contains("perfect")
+            || t.contains("keep going") || t.contains("keep it up") || t.contains("excellent")
+            || t.contains("steady") || t.contains("on track") { return .good }
+        return .phase
     }
 
     /// % of exercise seconds spent in the target zone (for the stats row).

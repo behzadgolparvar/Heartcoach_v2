@@ -25,6 +25,7 @@ struct WorkoutView: View {
             if workoutVM.awaitingCooldownStart { cooldownGate }
             if workoutVM.showPausePrompt { pausePrompt }
             if showStopConfirm { stopConfirm }
+            if workoutVM.safetyStop { safetyStopOverlay }
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -123,31 +124,55 @@ struct WorkoutView: View {
 
     private var coachLowerThird: some View {
         ZStack {
-            if let msg = workoutVM.coachingState?.coachingMessage, !msg.isEmpty {
+            // Idle line always underneath; fades out while a banner is showing.
+            HStack {
+                Text(idleLine).font(WT.cond(15, .bold)).tracking(1.2).foregroundStyle(WT.textLight)
+                    .lineLimit(1)
+                Spacer()
+            }
+            .padding(.horizontal, 14)
+            .frame(maxHeight: .infinity)
+            .overlay(Rectangle().strokeBorder(WT.divider, lineWidth: 1))
+            .opacity(workoutVM.activeBanner == nil ? 1 : 0)
+
+            if let banner = workoutVM.activeBanner {
                 HStack(spacing: 0) {
-                    Rectangle().fill(WT.red).frame(width: 10)
+                    Rectangle().fill(bannerBarColor(banner.kind)).frame(width: 10)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("COACH").font(WT.body(10.5, .bold)).tracking(1.8).foregroundStyle(WT.textTertiary)
-                        Text(msg.uppercased())
+                        Text("COACH · \(bannerKicker(banner.kind))")
+                            .font(WT.body(10.5, .bold)).tracking(1.8).foregroundStyle(WT.textTertiary)
+                        Text(banner.text.uppercased())
                             .font(WT.cond(26, .heavy)).foregroundStyle(.black).lineLimit(1).truncationMode(.tail)
                     }
                     .padding(.horizontal, 14)
                     Spacer()
                 }
+                .frame(maxHeight: .infinity)
                 .background(WT.bannerPaper)
                 .transition(.move(edge: .leading).combined(with: .opacity))
-            } else {
-                HStack {
-                    Text(idleLine).font(WT.cond(15, .bold)).tracking(1.2).foregroundStyle(WT.textLight)
-                        .lineLimit(1)
-                    Spacer()
-                }
-                .padding(.horizontal, 14)
-                .overlay(RoundedRectangle(cornerRadius: 0).strokeBorder(WT.divider, lineWidth: 1))
             }
         }
         .frame(height: 76).clipped()
-        .animation(.easeOut(duration: 0.4), value: workoutVM.coachingState?.coachingMessage)
+        .animation(.easeOut(duration: 0.45), value: workoutVM.activeBanner)
+    }
+
+    private func bannerBarColor(_ k: WorkoutViewModel.MessageKind) -> Color {
+        switch k {
+        case .speedUp: return WT.msgSpeedUp
+        case .slowDown: return WT.msgSlowDown
+        case .good: return WT.msgGood
+        case .phase: return WT.msgPhase
+        case .stretch: return WT.msgStretch
+        }
+    }
+    private func bannerKicker(_ k: WorkoutViewModel.MessageKind) -> String {
+        switch k {
+        case .speedUp: return "BELOW TARGET"
+        case .slowDown: return "ABOVE TARGET"
+        case .good: return "IN THE ZONE"
+        case .phase: return "NEW PHASE"
+        case .stretch: return "COOL DOWN"
+        }
     }
 
     private var idleLine: String {
@@ -278,6 +303,37 @@ struct WorkoutView: View {
                 secondaryButton("Skip") { workoutVM.end() }.accessibilityIdentifier("cooldown-skip-button")
             }
         }
+    }
+
+    private var safetyStopOverlay: some View {
+        ZStack {
+            WT.safetyBg.ignoresSafeArea()
+            VStack(spacing: 8) {
+                Text("SAFETY STOP")
+                    .font(WT.body(13, .bold)).tracking(2.5).foregroundStyle(.white.opacity(0.85))
+                Text("\(max(workoutVM.coachingState?.currentHR ?? 0, workoutVM.safetyStopHR))")
+                    .font(WT.cond(150, .heavy)).monospacedDigit().foregroundStyle(.white)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity)
+                Text("BPM · ABOVE YOUR MAX OF \(workoutVM.displayMaxHR)")
+                    .font(WT.cond(15, .bold)).tracking(1.6).foregroundStyle(.white.opacity(0.85))
+                Text("Your heart rate is above your estimated maximum. Stop exercising and check your condition.")
+                    .font(WT.body(19, .medium)).foregroundStyle(.white)
+                    .multilineTextAlignment(.center).padding(.horizontal, 28).padding(.top, 10)
+                Button {
+                    showStopConfirm = false
+                    workoutVM.end()
+                } label: {
+                    Text("I've stopped · View summary")
+                        .font(WT.cond(20, .heavy)).tracking(0.6).foregroundStyle(WT.redText)
+                        .frame(maxWidth: .infinity).frame(height: 56)
+                        .background(RoundedRectangle(cornerRadius: 16).fill(.white))
+                }
+                .padding(.horizontal, 24).padding(.top, 24)
+                .accessibilityIdentifier("safety-stop-button")
+            }
+        }
+        .transition(.opacity)
     }
 
     private func startupView(big: String?, caption: String, showSpinner: Bool) -> some View {
