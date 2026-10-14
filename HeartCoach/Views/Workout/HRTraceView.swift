@@ -57,10 +57,17 @@ struct HRTraceView: View {
             let completed = (start + dur) <= currentSecond
             if let target = phase.target, phase.kind.isScored {
                 let band = target.bpmRange(restingHR: restingHR, maxHR: maxHR)
-                let z = ZoneCalculator.zone(for: (band.lowerBound + band.upperBound) / 2, in: zones)
-                let yTop = yFor(Double(band.upperBound)), yBot = yFor(Double(band.lowerBound))
-                let r = CGRect(x: x0, y: yTop, width: rectW, height: yBot - yTop)
-                ctx.fill(Path(r), with: .color(WT.zoneColor(z).opacity(completed ? 0.22 : 0.45)))
+                let lo = Double(band.lowerBound), hi = Double(band.upperBound)
+                let op = completed ? 0.22 : 0.45
+                // Split the target box across the zone bands it spans, so a block that
+                // reaches into Z4 shows orange up top (not a single midpoint color).
+                for n in 1...5 {
+                    guard let z = zones.zone(number: n) else { continue }
+                    let oLo = max(lo, Double(z.min)), oHi = min(hi, Double(z.max))
+                    guard oHi > oLo else { continue }
+                    let r = CGRect(x: x0, y: yFor(oHi), width: rectW, height: yFor(oLo) - yFor(oHi))
+                    ctx.fill(Path(r), with: .color(WT.zoneColor(n).opacity(op)))
+                }
             } else {
                 let yTop = yFor(135), yBot = yFor(110)
                 let r = CGRect(x: x0, y: yTop, width: rectW, height: yBot - yTop)
