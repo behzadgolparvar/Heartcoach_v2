@@ -43,41 +43,54 @@ struct WorkoutView: View {
     // MARK: - Running (broadcast layout)
 
     private var runningContent: some View {
-        VStack(spacing: 14) {
-            scoreboardHeader
+        // Controls stay pinned at the bottom; everything above lives in a scroll
+        // view bounded to the safe area, so an optional element (the dropout banner)
+        // can never push the header under the status bar / Dynamic Island — it
+        // scrolls instead. A minHeight keeps the hero centered when it all fits.
+        GeometryReader { geo in
+            VStack(spacing: 12) {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 14) {
+                        scoreboardHeader
 
-            if let proto = workoutVM.sessionProtocol {
-                HRTraceView(
-                    proto: proto,
-                    zones: workoutVM.displayZones,
-                    restingHR: workoutVM.displayRestingHR,
-                    maxHR: workoutVM.displayMaxHR,
-                    hrTrace: workoutVM.hrTrace,
-                    currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
-                    currentZone: zone,
-                    roundLabel: workoutVM.roundLabel,
-                    remainingSec: workoutVM.remainingSessionSec)
+                        if let proto = workoutVM.sessionProtocol {
+                            HRTraceView(
+                                proto: proto,
+                                zones: workoutVM.displayZones,
+                                restingHR: workoutVM.displayRestingHR,
+                                maxHR: workoutVM.displayMaxHR,
+                                hrTrace: workoutVM.hrTrace,
+                                currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
+                                currentZone: zone,
+                                roundLabel: workoutVM.roundLabel,
+                                remainingSec: workoutVM.remainingSessionSec)
+                        }
+
+                        if workoutVM.sensorDropout { dropoutBanner }
+
+                        Spacer(minLength: 6)
+                        hero
+                        ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
+                                      zones: workoutVM.displayZones, recoveryMode: recoveryMode)
+                        Spacer(minLength: 6)
+
+                        coachLowerThird
+                        statsRow
+                    }
+                    .frame(minHeight: geo.size.height - 56 - 12, alignment: .center)
+                }
+                controls
             }
-
-            if workoutVM.sensorDropout {
-                Text("No heart-rate signal — safety checks paused. Check your Watch.")
-                    .font(WT.body(13, .bold)).foregroundStyle(.black)
-                    .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 12)
-                    .background(WT.warning)
-            }
-
-            Spacer(minLength: 0)
-            hero
-            ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
-                          zones: workoutVM.displayZones, recoveryMode: recoveryMode)
-            Spacer(minLength: 0)
-
-            coachLowerThird
-            statsRow
-            controls
         }
         .padding(.top, 12).padding(.horizontal, 18).padding(.bottom, 16)
         .foregroundStyle(.white)
+    }
+
+    private var dropoutBanner: some View {
+        Text("No heart-rate signal — safety checks paused. Check your Watch.")
+            .font(WT.body(13, .bold)).foregroundStyle(.black)
+            .frame(maxWidth: .infinity).padding(.vertical, 8).padding(.horizontal, 12)
+            .background(WT.warning)
     }
 
     // MARK: Scoreboard header
