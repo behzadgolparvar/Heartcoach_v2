@@ -128,11 +128,17 @@ struct WorkoutView: View {
                 .animation(.easeInOut(duration: 0.4), value: zone)
             }
 
-            Text(hr > 0 ? "\(hr)" : "--")
-                .font(WT.cond(140, .heavy)).monospacedDigit()
-                .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
-                .lineLimit(1).minimumScaleFactor(0.6)
-                .padding(.top, 6)
+            HStack(spacing: 12) {
+                PulsingHeart(bpm: hr, color: zone >= 1 ? WT.zoneColor(zone) : WT.redText)
+                    .frame(width: 50, height: 50)
+                Text(hr > 0 ? "\(hr)" : "--")
+                    .font(WT.cond(140, .heavy)).monospacedDigit()
+                    .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                // Balance the heart so the numeral stays horizontally centered.
+                Color.clear.frame(width: 50, height: 50)
+            }
+            .padding(.top, 6)
             Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
         }
     }
@@ -391,5 +397,28 @@ struct WorkoutView: View {
                 .frame(maxWidth: .infinity).frame(height: 56)
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.10)))
         }
+    }
+}
+
+/// A heart icon that "beats" once per heartbeat (period = 60/bpm), tinted by zone.
+/// Dim and still when there's no signal.
+private struct PulsingHeart: View {
+    let bpm: Int
+    let color: Color
+    @State private var beat = 0
+
+    var body: some View {
+        Image(systemName: "heart.fill")
+            .resizable().scaledToFit()
+            .foregroundStyle(bpm > 0 ? color : WT.textTertiary)
+            .symbolEffect(.bounce, value: beat)
+            .task(id: bpm) {
+                guard bpm > 0 else { return }
+                let period = min(1.5, max(0.34, 60.0 / Double(bpm)))
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: UInt64(period * 1_000_000_000))
+                    beat &+= 1
+                }
+            }
     }
 }
