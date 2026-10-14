@@ -15,6 +15,10 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
     func activate(viewModel: WorkoutWatchViewModel) {
         self.viewModel = viewModel
 
+        // Prompt for HealthKit access at launch (foreground) so the first workout
+        // has HR immediately instead of surfacing a late permission sheet mid-session.
+        hrService.requestAuthorization()
+
         hrService.onHRReading = { [weak self] reading in
             self?.sendHR(reading)
             DispatchQueue.main.async {
