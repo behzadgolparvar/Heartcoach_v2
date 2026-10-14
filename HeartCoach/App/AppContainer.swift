@@ -83,7 +83,7 @@ final class AppContainer {
     }
 
     /// Creates a fresh WorkoutViewModel for a new workout session.
-    /// Called by WorkoutPreStartView — one instance per session.
+    /// Called from Home (and ShapeChoiceView) — one instance per session.
     func makeWorkoutViewModel(zones: HRZones, restingHR: Int, maxHR: Int,
                               stage: TrainingStage = .foundation,
                               levelUpUnlock: LevelUpUnlock? = nil) -> WorkoutViewModel {

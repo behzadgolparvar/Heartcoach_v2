@@ -8,7 +8,7 @@ struct HomeView: View {
     @Environment(AppContainer.self) private var container
     @Environment(\.scenePhase) private var scenePhase
     @State private var workoutVM: WorkoutViewModel?
-    @State private var showPreStart = false
+    @State private var showWorkout = false
     @State private var showMinimumWalk = false
     @State private var showLevelUpUnlock = false
     @State private var showShapeUnlock = false
@@ -91,16 +91,20 @@ struct HomeView: View {
                     VStack(spacing: 8) {
                         Button(startButtonTitle) {
                             if let zones = vm.zones, let profile = vm.profile {
-                                workoutVM = container.makeWorkoutViewModel(
+                                let wvm = container.makeWorkoutViewModel(
                                     zones: zones,
                                     restingHR: profile.restingHR,
                                     maxHR: profile.effectiveMaxHR,
                                     stage: profile.program?.currentStage ?? .foundation,
                                     levelUpUnlock: profile.levelUpUnlock)
+                                workoutVM = wvm
                                 if profile.program?.currentStage == .shape {
+                                    // Shape still needs its per-session choice (Option A/B + muscles).
                                     showShapeChoice = true
                                 } else {
-                                    showPreStart = true
+                                    // Launch today's assigned session directly — no program picker.
+                                    wvm.start(program: Self.program(for: vm.assignment?.type))
+                                    showWorkout = true
                                 }
                             }
                         }
@@ -141,11 +145,11 @@ struct HomeView: View {
             .background(Color.black)
             .navigationTitle("HeartCoach")
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(isPresented: $showPreStart) {
+            .navigationDestination(isPresented: $showWorkout) {
                 if let wvm = workoutVM {
-                    WorkoutPreStartView(assignedType: vm.assignment?.type, onFinish: {
-                        // Collapse the entire workout stack back to Home.
-                        showPreStart = false
+                    WorkoutView(onFinish: {
+                        // Collapse the workout stack back to Home.
+                        showWorkout = false
                         workoutVM = nil
                     })
                     .environment(wvm)
@@ -218,6 +222,15 @@ struct HomeView: View {
     private var startButtonTitle: String {
         guard let a = vm.assignment, !a.isStageComplete else { return "Start Workout" }
         return "Start \(a.type.displayName)"
+    }
+
+    /// Map today's assigned workout type to its program (defaults to Continuous).
+    private static func program(for type: WorkoutType?) -> WorkoutProgram {
+        switch type {
+        case .hiit: return .hiit
+        case .fartlek: return .fartlek
+        default: return .continuous
+        }
     }
 
     private func timeOfDayGreeting() -> String {
