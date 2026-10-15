@@ -69,7 +69,6 @@ struct WorkoutView: View {
             Spacer(minLength: 0)
 
             coachLowerThird
-            statsRow
             controls
         }
         .padding(.top, 12).padding(.horizontal, 18).padding(.bottom, 16)
@@ -208,29 +207,6 @@ struct WorkoutView: View {
         case .stretch: return "COOL DOWN — STRETCH"
         case .none: return "KEEP IT STEADY"
         }
-    }
-
-    // MARK: Stats row
-
-    private var statsRow: some View {
-        HStack(spacing: 0) {
-            stat("AVG", "\(workoutVM.liveAvgHR)")
-            Divider().frame(height: 30).overlay(WT.divider)
-            stat("PEAK", "\(workoutVM.peakHR)")
-            Divider().frame(height: 30).overlay(WT.divider)
-            stat("IN TARGET", "\(workoutVM.inTargetPercent)%")
-        }
-        .padding(.vertical, 8)
-        .overlay(alignment: .top) { Rectangle().fill(WT.divider).frame(height: 1) }
-        .overlay(alignment: .bottom) { Rectangle().fill(WT.divider).frame(height: 1) }
-    }
-
-    private func stat(_ label: String, _ value: String) -> some View {
-        VStack(spacing: 2) {
-            Text(label).font(WT.body(10, .semibold)).tracking(1.6).foregroundStyle(WT.textSecondary)
-            Text(value).font(WT.cond(24, .bold)).monospacedDigit().foregroundStyle(.white)
-        }
-        .frame(maxWidth: .infinity)
     }
 
     // MARK: Controls
