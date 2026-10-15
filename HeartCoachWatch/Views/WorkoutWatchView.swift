@@ -29,13 +29,20 @@ struct WorkoutWatchView: View {
 
             Spacer(minLength: 0)
 
-            // Big HR numeral, colored by current zone.
-            Text("\(viewModel.currentHR)")
-                .font(WWT.cond(88, .heavy))
-                .monospacedDigit()
-                .foregroundStyle(WWT.zoneColor(viewModel.currentZone))
-                .lineLimit(1).minimumScaleFactor(0.5)
-                .accessibilityLabel("\(viewModel.currentHR) beats per minute")
+            // Beating heart + big HR numeral (heart mirrors the iPhone; balance spacer
+            // keeps the number centered).
+            HStack(spacing: 6) {
+                PulsingHeart(bpm: viewModel.currentHR,
+                             color: viewModel.currentZone >= 1 ? WWT.zoneColor(viewModel.currentZone) : WWT.red)
+                    .frame(width: 28, height: 28)
+                Text("\(viewModel.currentHR)")
+                    .font(WWT.cond(88, .heavy))
+                    .monospacedDigit()
+                    .foregroundStyle(WWT.zoneColor(viewModel.currentZone))
+                    .lineLimit(1).minimumScaleFactor(0.5)
+                    .accessibilityLabel("\(viewModel.currentHR) beats per minute")
+                Color.clear.frame(width: 28, height: 28)
+            }
 
             Text(zoneCaption)
                 .font(WWT.cond(12, .bold))
@@ -183,6 +190,29 @@ private extension Color {
 
 private extension Int {
     var clock: String { String(format: "%d:%02d", self / 60, self % 60) }
+}
+
+/// A heart that "beats" once per heartbeat (period = 60/bpm), tinted by zone.
+/// Dim and still when there's no signal. Mirrors the iPhone hero heart.
+private struct PulsingHeart: View {
+    let bpm: Int
+    let color: Color
+    @State private var beat = 0
+
+    var body: some View {
+        Image(systemName: "heart.fill")
+            .resizable().scaledToFit()
+            .foregroundStyle(bpm > 0 ? color : WWT.secondary)
+            .symbolEffect(.bounce, value: beat)
+            .task(id: bpm) {
+                guard bpm > 0 else { return }
+                let period = min(1.5, max(0.34, 60.0 / Double(bpm)))
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: UInt64(period * 1_000_000_000))
+                    beat &+= 1
+                }
+            }
+    }
 }
 
 /// Small downward triangle marking the current zone above the gauge.
