@@ -135,8 +135,9 @@ struct WorkoutView: View {
                     .font(WT.cond(140, .heavy)).monospacedDigit()
                     .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                // Balance the heart so the numeral stays horizontally centered.
-                Color.clear.frame(width: 50, height: 50)
+                // Persistent status pill (below/in/above the target) beside the numeral;
+                // it roughly balances the heart so the number stays near-centered.
+                StatusPill(stat: heroStat)
             }
             .padding(.top, 6)
             Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
@@ -243,6 +244,25 @@ struct WorkoutView: View {
     private var recoveryMode: ZoneGaugeView.RecoveryMode {
         switch workoutVM.coachingState?.phase {
         case .recovery: return .walk; case .cooldown: return .stretch; default: return .none
+        }
+    }
+
+    /// At-a-glance status beside the HR number: below / in / above the target zone,
+    /// plus muted states for recovery, cool-down and no signal. `big` carries the
+    /// bpm gap to close (nil when there's nothing to close).
+    private var heroStat: HeroStat {
+        let mutedFill = WT.surface, mutedFg = WT.textSecondary
+        if hr <= 0 { return HeroStat(big: nil, label: "NO\nHR", fill: mutedFill, fg: mutedFg) }
+        switch recoveryMode {
+        case .walk:    return HeroStat(big: nil, label: "REST", fill: mutedFill, fg: mutedFg)
+        case .stretch: return HeroStat(big: nil, label: "COOL\nDOWN", fill: mutedFill, fg: mutedFg)
+        case .none:
+            guard let tz = targetZone, let band = workoutVM.displayZones.zone(number: tz) else {
+                return HeroStat(big: nil, label: "—", fill: mutedFill, fg: mutedFg)
+            }
+            if hr < band.min { return HeroStat(big: "\(band.min - hr)", label: "BELOW", fill: WT.msgSpeedUp, fg: .black) }
+            if hr > band.max { return HeroStat(big: "\(hr - band.max)", label: "ABOVE", fill: WT.msgSlowDown, fg: .black) }
+            return HeroStat(big: nil, label: "IN\nZONE", fill: WT.success, fg: .black)
         }
     }
 
@@ -374,6 +394,36 @@ struct WorkoutView: View {
                 .frame(maxWidth: .infinity).frame(height: 56)
                 .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.10)))
         }
+    }
+}
+
+/// Status shown beside the HR number: an optional bpm gap (`big`) + a short label,
+/// on a colored fill. See `WorkoutView.heroStat`.
+private struct HeroStat: Equatable {
+    let big: String?
+    let label: String
+    let fill: Color
+    let fg: Color
+}
+
+/// Compact vertical status pill (delta over word) beside the hero HR numeral.
+private struct StatusPill: View {
+    let stat: HeroStat
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if let big = stat.big {
+                Text(big).font(WT.cond(30, .heavy)).monospacedDigit().lineLimit(1)
+            }
+            Text(stat.label)
+                .font(WT.cond(stat.big == nil ? 16 : 12.5, .heavy))
+                .tracking(0.3).multilineTextAlignment(.center).lineLimit(2)
+        }
+        .foregroundStyle(stat.fg)
+        .minimumScaleFactor(0.7)
+        .frame(width: 52, height: 60)
+        .background(RoundedRectangle(cornerRadius: 10).fill(stat.fill))
+        .animation(.easeInOut(duration: 0.3), value: stat)
     }
 }
 
