@@ -64,19 +64,25 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
         recoverIfNeeded()
         // Check if iPhone already sent a command before we activated.
         if let command = session.receivedApplicationContext["command"] as? String {
-            handleCommand(command)
+            handleCommand(command,
+                          zoneBounds: session.receivedApplicationContext["zoneBounds"] as? [Int],
+                          restingHR: session.receivedApplicationContext["restingHR"] as? Int)
         }
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         if let command = applicationContext["command"] as? String {
-            handleCommand(command)
+            handleCommand(command,
+                          zoneBounds: applicationContext["zoneBounds"] as? [Int],
+                          restingHR: applicationContext["restingHR"] as? Int)
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         if let command = message["command"] as? String {
-            handleCommand(command)
+            handleCommand(command,
+                          zoneBounds: message["zoneBounds"] as? [Int],
+                          restingHR: message["restingHR"] as? Int)
             return
         }
 
@@ -118,12 +124,15 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
 
     // MARK: - Commands
 
-    private func handleCommand(_ command: String) {
+    private func handleCommand(_ command: String, zoneBounds: [Int]? = nil, restingHR: Int? = nil) {
         switch command {
         case "workoutStarted":
             hrService.start()
             DispatchQueue.main.async { [weak self] in
-                self?.viewModel?.isWorkoutActive = true
+                guard let vm = self?.viewModel else { return }
+                vm.isWorkoutActive = true
+                if let zoneBounds, zoneBounds.count == 10 { vm.zoneBounds = zoneBounds }
+                if let restingHR, restingHR > 0 { vm.restingHR = restingHR }
             }
         case "workoutStopped":
             hrService.stop()
@@ -136,6 +145,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
                 vm.targetZone = 0
                 vm.phaseRemainingSec = 0
                 vm.lastMessage = nil
+                vm.zoneBounds = []
             }
         default:
             break

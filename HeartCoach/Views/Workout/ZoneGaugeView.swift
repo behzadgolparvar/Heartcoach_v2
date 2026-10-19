@@ -9,6 +9,7 @@ struct ZoneGaugeView: View {
     let currentZone: Int        // 0 (below) … 5
     let targetZone: Int?        // nil during recovery/cooldown
     let zones: HRZones
+    let restingHR: Int          // floor of the below-Z1 block (so warmup HR spreads across it)
     /// Suppresses the arrow and swaps the caption during walk/stretch phases.
     var recoveryMode: RecoveryMode = .none
 
@@ -128,9 +129,9 @@ struct ZoneGaugeView: View {
         return xs[z] + widths[z] * CGFloat(frac)
     }
 
-    /// bpm span of a block (below-Z1 uses 110…Z1.min).
+    /// bpm span of a block (below-Z1 uses restingHR…Z1.min so warmup HR spreads across it).
     private func zoneDomain(_ z: Int) -> (lo: Double, hi: Double) {
-        if z == 0 { return (110, Double(zones.zone(number: 1)?.min ?? 120)) }
+        if z == 0 { return (Double(restingHR), Double(zones.zone(number: 1)?.min ?? 120)) }
         if let band = zones.zone(number: z) { return (Double(band.min), Double(band.max)) }
         return (110, 190)
     }

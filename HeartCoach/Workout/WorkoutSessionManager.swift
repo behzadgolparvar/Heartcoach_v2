@@ -12,6 +12,7 @@ final class WorkoutSessionManager {
     private let voiceFeedback: VoiceFeedbackServiceProtocol
     private let watchBridge: WatchBridgeProtocol
     private let zones: HRZones
+    private let restingHR: Int
 
     // MARK: - Session State
 
@@ -34,10 +35,12 @@ final class WorkoutSessionManager {
 
     init(program: WorkoutProgram,
          zones: HRZones,
+         restingHR: Int = 60,
          voiceFeedback: VoiceFeedbackServiceProtocol,
          watchBridge: WatchBridgeProtocol) {
         self.program = program
         self.zones = zones
+        self.restingHR = restingHR
         self.voiceFeedback = voiceFeedback
         self.watchBridge = watchBridge
         self.sequencer = WorkoutPhaseSequencer(program: program)
@@ -58,8 +61,9 @@ final class WorkoutSessionManager {
                 self?.lastHRReceived = reading
             }
         }
-        // Notify Watch that workout started (WCSession already activated at app launch)
-        watchBridge.sendCommand("workoutStarted")
+        // Notify Watch that workout started + ship the zone table (WCSession already
+        // activated at app launch) so the Watch gauge marker can slide within its block.
+        watchBridge.sendWorkoutStart(zones: zones, restingHR: restingHR)
     }
 
     /// Step 2 of starting: begin the coaching tick loop and the workout timer.

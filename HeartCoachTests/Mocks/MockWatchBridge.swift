@@ -22,6 +22,14 @@ final class MockWatchBridge: WatchBridgeProtocol {
         sentCommands.append(command)
     }
 
+    var sentZoneTables: [HRZones] = []
+    var sentRestingHRs: [Int] = []
+    func sendWorkoutStart(zones: HRZones, restingHR: Int) {
+        sentCommands.append("workoutStarted")
+        sentZoneTables.append(zones)
+        sentRestingHRs.append(restingHR)
+    }
+
     func activate() {
         activateCallCount += 1
     }

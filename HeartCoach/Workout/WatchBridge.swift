@@ -6,6 +6,9 @@ protocol WatchBridgeProtocol: AnyObject {
     func sendHaptic(_ pattern: HapticPattern)
     func sendCoachingState(_ state: CoachingState)
     func sendCommand(_ command: String)
+    /// Starts the Watch workout and ships the (static) HR zone table + resting HR so the
+    /// Watch can position its gauge marker within the current block from its live HR.
+    func sendWorkoutStart(zones: HRZones, restingHR: Int)
     func activate()
     func deactivate()
 }
@@ -59,6 +62,27 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
                 errorHandler: { _ in }
             )
         }
+    }
+
+    func sendWorkoutStart(zones: HRZones, restingHR: Int) {
+        let bounds = Self.flatBounds(zones)   // [z1.min,z1.max, … z5.min,z5.max]
+        let payload: [String: Any] = ["command": "workoutStarted",
+                                      "zoneBounds": bounds,
+                                      "restingHR": restingHR,
+                                      "ts": Date().timeIntervalSince1970]
+        // Guaranteed delivery: the Watch gets the bounds on next open / reconnect.
+        try? WCSession.default.updateApplicationContext(payload)
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(["command": "workoutStarted",
+                                           "zoneBounds": bounds, "restingHR": restingHR],
+                                          replyHandler: nil, errorHandler: { _ in })
+        }
+    }
+
+    /// Flattens the zone table to the 10 ints the Watch marker needs.
+    private static func flatBounds(_ z: HRZones) -> [Int] {
+        [z.zone1.min, z.zone1.max, z.zone2.min, z.zone2.max, z.zone3.min,
+         z.zone3.max, z.zone4.min, z.zone4.max, z.zone5.min, z.zone5.max]
     }
 
     // MARK: - WCSessionDelegate

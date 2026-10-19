@@ -78,16 +78,22 @@ struct WorkoutWatchView: View {
 
     private var miniGauge: some View {
         VStack(spacing: 2) {
-            // Current-zone caret row (aligned to the blocks by equal-width cells).
-            HStack(spacing: 2) {
-                ForEach(0..<6, id: \.self) { i in
+            // Caret slides WITHIN the current block by HR position (mirrors the iPhone),
+            // using the zone bounds the phone sent at workout start. Hidden on no signal.
+            GeometryReader { geo in
+                if viewModel.currentHR > 0 {
+                    let blockW = (geo.size.width - 2 * 5) / 6     // 6 equal blocks, spacing 2
+                    let cz = min(5, max(0, viewModel.currentZone))
+                    let x = CGFloat(cz) * (blockW + 2) + blockW * caretFrac()
                     DownCaret()
                         .fill(Color.white)
-                        .frame(height: 5)
-                        .frame(maxWidth: .infinity)
-                        .opacity(i == viewModel.currentZone ? 1 : 0)
+                        .frame(width: 9, height: 5)
+                        .offset(x: x - 4.5)
+                        .animation(.easeInOut(duration: 0.5), value: viewModel.currentHR)
+                        .animation(.easeInOut(duration: 0.4), value: viewModel.currentZone)
                 }
             }
+            .frame(height: 5)
             // Blocks
             HStack(spacing: 2) {
                 ForEach(0..<6, id: \.self) { i in
@@ -102,6 +108,14 @@ struct WorkoutWatchView: View {
                 }
             }
         }
+    }
+
+    /// Caret position within the current block (0.06…0.94), from live HR vs the
+    /// current block's bpm span. Falls back to center until the zone table arrives.
+    private func caretFrac() -> CGFloat {
+        guard let (lo, hi) = viewModel.blockDomain(viewModel.currentZone), hi > lo else { return 0.5 }
+        let f = Double(viewModel.currentHR - lo) / Double(hi - lo)
+        return CGFloat(min(0.94, max(0.06, f)))
     }
 
     // MARK: - Derived

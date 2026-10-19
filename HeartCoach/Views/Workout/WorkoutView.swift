@@ -65,7 +65,8 @@ struct WorkoutView: View {
             Spacer(minLength: 0)
             hero
             ZoneGaugeView(currentHR: hr, currentZone: zone, targetZone: targetZone,
-                          zones: workoutVM.displayZones, recoveryMode: recoveryMode)
+                          zones: workoutVM.displayZones, restingHR: workoutVM.displayRestingHR,
+                          recoveryMode: recoveryMode)
             Spacer(minLength: 0)
 
             coachLowerThird

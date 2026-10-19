@@ -110,7 +110,7 @@ final class FoundationSessionManager {
         watchBridge.onHRReceived = { [weak self] reading in
             Task { @MainActor in self?.lastHRReceived = reading }
         }
-        watchBridge.sendCommand("workoutStarted")
+        watchBridge.sendWorkoutStart(zones: zones, restingHR: restingHR)
     }
 
     func beginCoaching() {
