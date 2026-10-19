@@ -2,8 +2,8 @@ import SwiftUI
 import HeartRateCoachCore
 
 /// Broadcast-style zone gauge (Direction D) — 6 proportional blocks (below-Z1 … Z5),
-/// a bracket + marker on the CURRENT zone (where you are), and a correction arrow
-/// pointing to the target zone when you're off it. Target is named in the caption.
+/// a white bracket on the TARGET zone (the goal) + a marker that slides within the
+/// CURRENT block by HR, and a correction arrow from current → target when you're off.
 struct ZoneGaugeView: View {
     let currentHR: Int          // 0 = no signal
     let currentZone: Int        // 0 (below) … 5
@@ -39,14 +39,14 @@ struct ZoneGaugeView: View {
                             .frame(width: widths[i], height: 30)
                         }
                     }
-                    // Bracket on the CURRENT zone block (where you are). Hidden on no signal.
-                    if currentHR > 0 {
-                        let z = min(5, max(0, currentZone))
+                    // Bracket on the TARGET zone block (the goal), matching the Watch.
+                    // The current zone already stands out via its bright fill.
+                    if let tz = targetZone, (1...5).contains(tz) {
                         Rectangle()
                             .strokeBorder(Color.white, lineWidth: 2)
-                            .frame(width: widths[z] + 6, height: 36)
-                            .offset(x: xs[z] - 3, y: -3)
-                            .animation(.easeInOut(duration: 0.4), value: currentZone)
+                            .frame(width: widths[tz] + 6, height: 36)
+                            .offset(x: xs[tz] - 3, y: -3)
+                            .animation(.easeInOut(duration: 0.4), value: tz)
                     }
                     // Marker — slides within the current block by HR position, tip above the track.
                     DownTriangle()

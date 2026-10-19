@@ -57,9 +57,7 @@ struct WorkoutView: View {
                     maxHR: workoutVM.displayMaxHR,
                     hrTrace: workoutVM.hrTrace,
                     currentSecond: Int(workoutVM.coachingState?.elapsedTime ?? 0),
-                    currentZone: zone,
-                    roundLabel: workoutVM.roundLabel,
-                    remainingSec: workoutVM.remainingSessionSec)
+                    currentZone: zone)
             }
 
             Spacer(minLength: 0)
@@ -98,13 +96,15 @@ struct WorkoutView: View {
             Text(phaseChip)
                 .font(WT.cond(20, .heavy)).tracking(1).foregroundStyle(.white)
                 .padding(.horizontal, 12).frame(height: 44).background(WT.red)
-            Text(Int(workoutVM.coachingState?.elapsedTime ?? 0).msClock)
+            // Countdown to the end of the current phase.
+            Text(Int(workoutVM.coachingState?.phaseTimeRemaining ?? 0).msClock)
                 .font(WT.cond(28, .bold)).monospacedDigit().foregroundStyle(.white)
                 .padding(.horizontal, 12).frame(height: 44).background(WT.surface)
             Spacer()
+            // Countdown to the end of the whole session.
             VStack(alignment: .trailing, spacing: 2) {
-                Text("PHASE ENDS").font(WT.body(10, .semibold)).tracking(1.6).foregroundStyle(WT.textSecondary)
-                Text(Int(workoutVM.coachingState?.phaseTimeRemaining ?? 0).msClock)
+                Text("SESSION ENDS").font(WT.body(10, .semibold)).tracking(1.6).foregroundStyle(WT.textSecondary)
+                Text(workoutVM.remainingSessionSec.msClock)
                     .font(WT.cond(26, .bold)).monospacedDigit().foregroundStyle(.white)
             }
         }
@@ -114,33 +114,36 @@ struct WorkoutView: View {
     // MARK: Hero
 
     private var hero: some View {
-        VStack(spacing: 0) {
-            // Zone tag only while actually in a zone (hidden below Z1 / no signal).
-            if zone >= 1 {
-                HStack(spacing: 8) {
-                    Text("Z\(zone)")
-                        .font(WT.cond(18, .heavy)).foregroundStyle(.black)
-                        .padding(.horizontal, 8).padding(.vertical, 5).background(WT.zoneColor(zone))
-                    Text(WT.zoneName(zone))
-                        .font(WT.cond(18, .bold)).tracking(0.8).foregroundStyle(WT.zoneColor(zone))
+        HStack(spacing: 12) {
+            // Heart + HR number (+ zone tag / BPM label) grouped on the left.
+            VStack(alignment: .leading, spacing: 0) {
+                // Zone tag only while actually in a zone (hidden below Z1 / no signal).
+                if zone >= 1 {
+                    HStack(spacing: 8) {
+                        Text("Z\(zone)")
+                            .font(WT.cond(18, .heavy)).foregroundStyle(.black)
+                            .padding(.horizontal, 8).padding(.vertical, 5).background(WT.zoneColor(zone))
+                        Text(WT.zoneName(zone))
+                            .font(WT.cond(18, .bold)).tracking(0.8).foregroundStyle(WT.zoneColor(zone))
+                    }
+                    .padding(.bottom, 2)
+                    .animation(.easeInOut(duration: 0.4), value: zone)
                 }
-                .padding(.bottom, 2)
-                .animation(.easeInOut(duration: 0.4), value: zone)
-            }
 
-            HStack(spacing: 12) {
-                PulsingHeart(bpm: hr, color: zone >= 1 ? WT.zoneColor(zone) : WT.redText)
-                    .frame(width: 50, height: 50)
-                Text(hr > 0 ? "\(hr)" : "--")
-                    .font(WT.cond(140, .heavy)).monospacedDigit()
-                    .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                // Persistent status pill (below/in/above the target) beside the numeral;
-                // it roughly balances the heart so the number stays near-centered.
-                StatusPill(stat: heroStat)
+                HStack(spacing: 12) {
+                    PulsingHeart(bpm: hr, color: zone >= 1 ? WT.zoneColor(zone) : WT.redText)
+                        .frame(width: 50, height: 50)
+                    Text(hr > 0 ? "\(hr)" : "--")
+                        .font(WT.cond(140, .heavy)).monospacedDigit()
+                        .foregroundStyle(hr > 0 ? .white : WT.textTertiary)
+                        .lineLimit(1).minimumScaleFactor(0.6)
+                }
+                .padding(.top, 6)
+                Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
             }
-            .padding(.top, 6)
-            Text("BPM").font(WT.cond(15, .bold)).tracking(5).foregroundStyle(WT.textSecondary)
+            Spacer(minLength: 8)
+            // Persistent status pill (below/in/above the target) on the right.
+            StatusPill(stat: heroStat)
         }
     }
 
@@ -260,9 +263,10 @@ struct WorkoutView: View {
             guard let tz = targetZone, let band = workoutVM.displayZones.zone(number: tz) else {
                 return HeroStat(big: nil, label: "—", fill: mutedFill, fg: mutedFg)
             }
-            if hr < band.min { return HeroStat(big: "\(band.min - hr)", label: "BELOW", fill: WT.msgSpeedUp, fg: .black) }
-            if hr > band.max { return HeroStat(big: "\(hr - band.max)", label: "ABOVE", fill: WT.msgSlowDown, fg: .black) }
-            return HeroStat(big: nil, label: "IN\nZONE", fill: WT.success, fg: .black)
+            let tint = WT.zoneColor(tz)   // match the target zone's gauge-box color
+            if hr < band.min { return HeroStat(big: "\(band.min - hr)", label: "BELOW", fill: tint, fg: .black) }
+            if hr > band.max { return HeroStat(big: "\(hr - band.max)", label: "ABOVE", fill: tint, fg: .black) }
+            return HeroStat(big: nil, label: "IN\nZONE", fill: tint, fg: .black)
         }
     }
 

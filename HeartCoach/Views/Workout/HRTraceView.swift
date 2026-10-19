@@ -11,32 +11,17 @@ struct HRTraceView: View {
     let hrTrace: [(second: Int, hr: Int)]
     let currentSecond: Int
     let currentZone: Int
-    /// Round label (e.g. "ROUND 4 / 15") and total time remaining.
-    let roundLabel: String
-    let remainingSec: Int
 
     private let yLo = 95.0, yHi = 195.0
 
     var body: some View {
-        VStack(spacing: 0) {
-            Canvas { ctx, size in draw(ctx, size) }
-                .frame(height: 150)
-                .padding(.top, 10)
-
-            // Caption row
-            HStack {
-                Text(roundLabel).lineLimit(1).truncationMode(.tail)
-                Spacer()
-                Text("\(remainingSec.msClock) TO GO")
-            }
-            .font(WT.body(11, .semibold)).tracking(1.4)
-            .foregroundStyle(WT.textSecondary)
-            .padding(.horizontal, 12)
-            .padding(.top, 6).padding(.bottom, 2)
-        }
-        .background(WT.panel)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(WT.panelStroke, lineWidth: 1))
+        // Just the trace — the phase name and session timer live in the top bar.
+        Canvas { ctx, size in draw(ctx, size) }
+            .frame(height: 150)
+            .padding(.vertical, 10)
+            .background(WT.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(WT.panelStroke, lineWidth: 1))
     }
 
     // MARK: - Drawing

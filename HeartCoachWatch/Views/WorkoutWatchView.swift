@@ -38,10 +38,15 @@ struct WorkoutWatchView: View {
                 Text("\(viewModel.currentHR)")
                     .font(WWT.cond(88, .heavy))
                     .monospacedDigit()
-                    .foregroundStyle(WWT.zoneColor(viewModel.currentZone))
+                    // Zone color in Z1–Z5; white when below/above a zone (but HR present);
+                    // gray only for no signal — matches the iPhone's always-visible numeral.
+                    .foregroundStyle(viewModel.currentHR > 0 && !(1...5).contains(viewModel.currentZone)
+                                     ? .white : WWT.zoneColor(viewModel.currentZone))
                     .lineLimit(1).minimumScaleFactor(0.5)
                     .accessibilityLabel("\(viewModel.currentHR) beats per minute")
-                Color.clear.frame(width: 28, height: 28)
+                Spacer(minLength: 2)
+                // Persistent status pill on the right (mirrors the iPhone).
+                WatchStatusPill(stat: heroStat)
             }
 
             Text(zoneCaption)
@@ -144,6 +149,23 @@ struct WorkoutWatchView: View {
         if t.contains("good") || t.contains("great") || t.contains("keep") || t.contains("steady") { return WWT.msgGood }
         return WWT.red
     }
+
+    /// At-a-glance status beside the HR number: below / in / above the target zone,
+    /// plus muted REST / NO HR. `big` carries the bpm gap to close (uses the zone table).
+    private var heroStat: WHStat {
+        let mutedFill = WWT.surface, mutedFg = WWT.secondary
+        if viewModel.currentHR <= 0 { return WHStat(big: nil, label: "NO\nHR", fill: mutedFill, fg: mutedFg) }
+        let tz = viewModel.targetZone
+        guard tz >= 1 else { return WHStat(big: nil, label: "REST", fill: mutedFill, fg: mutedFg) }
+        guard let band = viewModel.blockDomain(tz) else {
+            return WHStat(big: nil, label: "—", fill: mutedFill, fg: mutedFg)   // bounds not in yet
+        }
+        let tint = WWT.zoneColor(tz)   // match the target zone's gauge-box color
+        let hr = viewModel.currentHR
+        if hr < band.lo { return WHStat(big: "\(band.lo - hr)", label: "BELOW", fill: tint, fg: .black) }
+        if hr > band.hi { return WHStat(big: "\(hr - band.hi)", label: "ABOVE", fill: tint, fg: .black) }
+        return WHStat(big: nil, label: "IN\nZONE", fill: tint, fg: .black)
+    }
 }
 
 // MARK: - Watch theme (Direction D tokens, local to the Watch target)
@@ -204,6 +226,36 @@ private extension Color {
 
 private extension Int {
     var clock: String { String(format: "%d:%02d", self / 60, self % 60) }
+}
+
+/// Status shown beside the HR number: an optional bpm gap (`big`) + a short label,
+/// on a colored fill. Mirrors the iPhone `HeroStat`.
+private struct WHStat: Equatable {
+    let big: String?
+    let label: String
+    let fill: Color
+    let fg: Color
+}
+
+/// Compact vertical status pill (delta over word) beside the Watch HR numeral.
+private struct WatchStatusPill: View {
+    let stat: WHStat
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if let big = stat.big {
+                Text(big).font(WWT.cond(19, .heavy)).monospacedDigit().lineLimit(1)
+            }
+            Text(stat.label)
+                .font(WWT.cond(stat.big == nil ? 11 : 8.5, .heavy))
+                .tracking(0.2).multilineTextAlignment(.center).lineLimit(2)
+        }
+        .foregroundStyle(stat.fg)
+        .minimumScaleFactor(0.6)
+        .frame(width: 32, height: 40)
+        .background(RoundedRectangle(cornerRadius: 7).fill(stat.fill))
+        .animation(.easeInOut(duration: 0.3), value: stat)
+    }
 }
 
 /// A heart that "beats" once per heartbeat (period = 60/bpm), tinted by zone.
