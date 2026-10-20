@@ -57,11 +57,6 @@ struct WorkoutWatchView: View {
                 WatchStatusPill(stat: heroStat)
             }
 
-            Text(zoneCaption)
-                .font(WWT.cond(12, .bold))
-                .tracking(1).foregroundStyle(WWT.secondary)
-                .lineLimit(1)
-
             Spacer(minLength: 0)
 
             miniGauge
@@ -107,15 +102,23 @@ struct WorkoutWatchView: View {
                 }
             }
             .frame(height: 5)
-            // Blocks
+            // Blocks (taller, with Z1–Z5 labels inside; below-Z1 stays unlabeled).
             HStack(spacing: 2) {
                 ForEach(0..<6, id: \.self) { i in
-                    RoundedRectangle(cornerRadius: 1)
+                    RoundedRectangle(cornerRadius: 2)
+                        // Dim non-current blocks so the white target box stays legible.
                         .fill(i == viewModel.currentZone ? WWT.zoneColor(i) : WWT.zoneDim(i))
-                        .frame(height: 8)
+                        .frame(height: 18)
+                        .overlay {
+                            if i >= 1 {
+                                Text("Z\(i)")
+                                    .font(WWT.cond(11, .heavy)).tracking(0.3)
+                                    .foregroundStyle(i == viewModel.currentZone ? .black : WWT.secondary)
+                            }
+                        }
                         .overlay {
                             if i == viewModel.targetZone, i >= 1 {
-                                RoundedRectangle(cornerRadius: 1).strokeBorder(.white, lineWidth: 1.5)
+                                RoundedRectangle(cornerRadius: 2).strokeBorder(.white, lineWidth: 1.5)
                             }
                         }
                 }
@@ -133,21 +136,6 @@ struct WorkoutWatchView: View {
 
     // MARK: - Derived
 
-    private var zoneCaption: String {
-        let target = viewModel.targetZone >= 1 ? " · TARGET Z\(viewModel.targetZone)" : ""
-        let here: String
-        if viewModel.currentHR <= 0 {
-            here = "—"                              // no signal
-        } else {
-            switch viewModel.currentZone {
-            case 1...5: here = "Z\(viewModel.currentZone)"
-            case 6:     here = "ABOVE"              // over HRmax
-            default:    here = "BELOW"              // under Zone 1
-            }
-        }
-        return here + target
-    }
-
     private var messageColor: Color {
         guard let msg = viewModel.lastMessage else { return .clear }
         let t = msg.lowercased()
@@ -162,17 +150,17 @@ struct WorkoutWatchView: View {
     /// plus muted REST / NO HR. `big` carries the bpm gap to close (uses the zone table).
     private var heroStat: WHStat {
         let mutedFill = WWT.surface, mutedFg = WWT.secondary
-        if viewModel.currentHR <= 0 { return WHStat(big: nil, label: "NO\nHR", fill: mutedFill, fg: mutedFg) }
+        if viewModel.currentHR <= 0 { return WHStat(big: nil, label: "NO\nHR", zone: nil, fill: mutedFill, fg: mutedFg) }
         let tz = viewModel.targetZone
-        guard tz >= 1 else { return WHStat(big: nil, label: "REST", fill: mutedFill, fg: mutedFg) }
+        guard tz >= 1 else { return WHStat(big: nil, label: "REST", zone: nil, fill: mutedFill, fg: mutedFg) }
         guard let band = viewModel.blockDomain(tz) else {
-            return WHStat(big: nil, label: "—", fill: mutedFill, fg: mutedFg)   // bounds not in yet
+            return WHStat(big: nil, label: "—", zone: nil, fill: mutedFill, fg: mutedFg)   // bounds not in yet
         }
-        let tint = WWT.zoneColor(tz)   // match the target zone's gauge-box color
+        let tint = WWT.zoneColor(tz), tag = "Z\(tz)"   // match the target zone's gauge-box color
         let hr = viewModel.currentHR
-        if hr < band.lo { return WHStat(big: "\(band.lo - hr)", label: "BELOW", fill: tint, fg: .black) }
-        if hr > band.hi { return WHStat(big: "\(hr - band.hi)", label: "ABOVE", fill: tint, fg: .black) }
-        return WHStat(big: nil, label: "IN\nZONE", fill: tint, fg: .black)
+        if hr < band.lo { return WHStat(big: "\(band.lo - hr)", label: "BELOW", zone: tag, fill: tint, fg: .black) }
+        if hr > band.hi { return WHStat(big: "\(hr - band.hi)", label: "ABOVE", zone: tag, fill: tint, fg: .black) }
+        return WHStat(big: nil, label: "IN ZONE", zone: tag, fill: tint, fg: .black)
     }
 }
 
@@ -208,7 +196,7 @@ private enum WWT {
     }
 
     static func zoneColor(_ zone: Int) -> Color { Color(hex: zoneHex(zone)) }
-    /// Dimmed block = zone color mixed 32% into surface (blend raw hex, no UIColor).
+    /// Dimmed block = zone color blended toward the dark surface (no UIColor).
     static func zoneDim(_ zone: Int) -> Color {
         Color(hex: mixHex(zoneHex(zone), surfaceHex, by: 0.68))
     }
@@ -241,26 +229,30 @@ private extension Int {
 private struct WHStat: Equatable {
     let big: String?
     let label: String
+    let zone: String?       // target zone tag ("Z1"), nil for muted states
     let fill: Color
     let fg: Color
 }
 
-/// Compact vertical status pill (delta over word) beside the Watch HR numeral.
+/// Compact vertical status pill (delta / word / target zone) beside the Watch HR numeral.
 private struct WatchStatusPill: View {
     let stat: WHStat
 
     var body: some View {
         VStack(spacing: 0) {
             if let big = stat.big {
-                Text(big).font(WWT.cond(19, .heavy)).monospacedDigit().lineLimit(1)
+                Text(big).font(WWT.cond(20, .heavy)).monospacedDigit().lineLimit(1)
             }
             Text(stat.label)
-                .font(WWT.cond(stat.big == nil ? 11 : 8.5, .heavy))
+                .font(WWT.cond(stat.big == nil ? 12 : 9.5, .heavy))
                 .tracking(0.2).multilineTextAlignment(.center).lineLimit(2)
+            if let zone = stat.zone {
+                Text(zone).font(WWT.cond(10.5, .heavy))
+            }
         }
         .foregroundStyle(stat.fg)
         .minimumScaleFactor(0.6)
-        .frame(width: 32, height: 40)
+        .frame(width: 38, height: 48)
         .background(RoundedRectangle(cornerRadius: 7).fill(stat.fill))
         .animation(.easeInOut(duration: 0.3), value: stat)
     }

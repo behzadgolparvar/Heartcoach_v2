@@ -255,18 +255,18 @@ struct WorkoutView: View {
     /// bpm gap to close (nil when there's nothing to close).
     private var heroStat: HeroStat {
         let mutedFill = WT.surface, mutedFg = WT.textSecondary
-        if hr <= 0 { return HeroStat(big: nil, label: "NO\nHR", fill: mutedFill, fg: mutedFg) }
+        if hr <= 0 { return HeroStat(big: nil, label: "NO\nHR", zone: nil, fill: mutedFill, fg: mutedFg) }
         switch recoveryMode {
-        case .walk:    return HeroStat(big: nil, label: "REST", fill: mutedFill, fg: mutedFg)
-        case .stretch: return HeroStat(big: nil, label: "COOL\nDOWN", fill: mutedFill, fg: mutedFg)
+        case .walk:    return HeroStat(big: nil, label: "REST", zone: nil, fill: mutedFill, fg: mutedFg)
+        case .stretch: return HeroStat(big: nil, label: "COOL\nDOWN", zone: nil, fill: mutedFill, fg: mutedFg)
         case .none:
             guard let tz = targetZone, let band = workoutVM.displayZones.zone(number: tz) else {
-                return HeroStat(big: nil, label: "—", fill: mutedFill, fg: mutedFg)
+                return HeroStat(big: nil, label: "—", zone: nil, fill: mutedFill, fg: mutedFg)
             }
-            let tint = WT.zoneColor(tz)   // match the target zone's gauge-box color
-            if hr < band.min { return HeroStat(big: "\(band.min - hr)", label: "BELOW", fill: tint, fg: .black) }
-            if hr > band.max { return HeroStat(big: "\(hr - band.max)", label: "ABOVE", fill: tint, fg: .black) }
-            return HeroStat(big: nil, label: "IN\nZONE", fill: tint, fg: .black)
+            let tint = WT.zoneColor(tz), tag = "Z\(tz)"   // match the target zone's gauge-box color
+            if hr < band.min { return HeroStat(big: "\(band.min - hr)", label: "BELOW", zone: tag, fill: tint, fg: .black) }
+            if hr > band.max { return HeroStat(big: "\(hr - band.max)", label: "ABOVE", zone: tag, fill: tint, fg: .black) }
+            return HeroStat(big: nil, label: "IN ZONE", zone: tag, fill: tint, fg: .black)
         }
     }
 
@@ -406,26 +406,30 @@ struct WorkoutView: View {
 private struct HeroStat: Equatable {
     let big: String?
     let label: String
+    let zone: String?       // target zone tag ("Z1"), nil for muted states
     let fill: Color
     let fg: Color
 }
 
-/// Compact vertical status pill (delta over word) beside the hero HR numeral.
+/// Compact vertical status pill (delta / word / target zone) beside the hero HR numeral.
 private struct StatusPill: View {
     let stat: HeroStat
 
     var body: some View {
         VStack(spacing: 0) {
             if let big = stat.big {
-                Text(big).font(WT.cond(30, .heavy)).monospacedDigit().lineLimit(1)
+                Text(big).font(WT.cond(31, .heavy)).monospacedDigit().lineLimit(1)
             }
             Text(stat.label)
-                .font(WT.cond(stat.big == nil ? 16 : 12.5, .heavy))
+                .font(WT.cond(stat.big == nil ? 18 : 14, .heavy))
                 .tracking(0.3).multilineTextAlignment(.center).lineLimit(2)
+            if let zone = stat.zone {
+                Text(zone).font(WT.cond(14, .heavy)).tracking(0.3)
+            }
         }
         .foregroundStyle(stat.fg)
         .minimumScaleFactor(0.7)
-        .frame(width: 52, height: 60)
+        .frame(width: 58, height: 66)
         .background(RoundedRectangle(cornerRadius: 10).fill(stat.fill))
         .animation(.easeInOut(duration: 0.3), value: stat)
     }
