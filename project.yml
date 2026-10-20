@@ -50,6 +50,9 @@ targets:
         NSHealthShareUsageDescription: "HeartCoach reads your heart rate to provide personalised coaching during workouts."
         NSHealthUpdateUsageDescription: "HeartCoach needs access to your health data to read your heart rate."
         NSSupportsLiveActivities: false
+        # Keep speaking coaching cues while the phone is pocketed/backgrounded.
+        UIBackgroundModes:
+          - audio
         UIAppFonts:
           - Barlow-Regular.ttf
           - Barlow-Medium.ttf
