@@ -5,6 +5,11 @@ import Observation
 @MainActor
 final class WorkoutWatchViewModel {
     var isWorkoutActive: Bool = false
+    /// True while the phone-driven workout is paused (drives the Pause/Resume button).
+    var isPaused: Bool = false
+    /// Sends a controls-page action to the phone ("pause" / "resume" / "end").
+    /// Set by WatchSessionManager at activation.
+    @ObservationIgnored var onControl: ((String) -> Void)?
     var currentHR: Int = 0
     var currentZone: Int = 0
     /// Target zone for the current phase (0 = none / recovery).

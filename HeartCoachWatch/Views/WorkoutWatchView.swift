@@ -75,7 +75,7 @@ struct WorkoutWatchView: View {
         // Tick the phase countdown locally every second (the phone only pushes
         // state ~every 5s to spare WCSession); a fresh packet re-syncs the value.
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            guard viewModel.isWorkoutActive else { return }
+            guard viewModel.isWorkoutActive, !viewModel.isPaused else { return }
             if viewModel.phaseRemainingSec > 0 { viewModel.phaseRemainingSec -= 1 }
             if viewModel.sessionRemainingSec > 0 { viewModel.sessionRemainingSec -= 1 }
         }

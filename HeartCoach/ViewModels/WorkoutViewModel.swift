@@ -156,6 +156,18 @@ final class WorkoutViewModel {
             self.safetyStopHR = hr
             self.safetyStop = true
         }
+        // Controls tapped on the Watch's swipe-left page.
+        watchBridge.onWatchControl = { [weak self] control in
+            Task { @MainActor in
+                guard let self else { return }
+                switch control {
+                case "pause":  if !self.isPaused { self.pause() }
+                case "resume": if self.isPaused { self.resume() }
+                case "end":    self.end()
+                default: break
+                }
+            }
+        }
         self.sessionManager = manager
         self.selectedProgram = program
         self.isPaused = false
@@ -224,12 +236,14 @@ final class WorkoutViewModel {
     func pause() {
         sessionManager?.pause()
         isPaused = true
+        watchBridge.sendPaused(true)
         schedulePausePrompt(afterMinutes: SafetyPolicy.pausePromptMinutes)
     }
 
     func resume() {
         sessionManager?.resume()
         isPaused = false
+        watchBridge.sendPaused(false)
         cancelPausePrompt()
     }
 

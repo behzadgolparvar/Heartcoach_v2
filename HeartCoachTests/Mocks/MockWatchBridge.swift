@@ -4,6 +4,9 @@ import HeartRateCoachCore
 
 final class MockWatchBridge: WatchBridgeProtocol {
     var onHRReceived: ((HRReading) -> Void)?
+    var onWatchControl: ((String) -> Void)?
+    var sentPaused: [Bool] = []
+    func sendPaused(_ paused: Bool) { sentPaused.append(paused) }
     var sentHaptics: [HapticPattern] = []
     var sentCoachingStates: [CoachingState] = []
     var sentCommands: [String] = []

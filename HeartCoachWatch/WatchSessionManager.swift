@@ -14,6 +14,9 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
 
     func activate(viewModel: WorkoutWatchViewModel) {
         self.viewModel = viewModel
+        DispatchQueue.main.async { [weak self] in
+            viewModel.onControl = { control in self?.sendControl(control) }
+        }
 
         // Prompt for HealthKit access at launch (foreground) so the first workout
         // has HR immediately instead of surfacing a late permission sheet mid-session.
@@ -41,6 +44,12 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
             replyHandler: nil,
             errorHandler: { _ in }
         )
+    }
+
+    /// Send a controls-page action to the phone ("pause" / "resume" / "end").
+    private func sendControl(_ control: String) {
+        guard WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(["control": control], replyHandler: nil, errorHandler: { _ in })
     }
 
     // MARK: - Session Recovery
@@ -89,6 +98,11 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
         if let rawHaptic = message["haptic"] as? String,
            let pattern = HapticPattern(rawValue: rawHaptic) {
             hapticService.play(pattern)
+            return
+        }
+
+        if let paused = message["paused"] as? Bool {
+            DispatchQueue.main.async { [weak self] in self?.viewModel?.isPaused = paused }
             return
         }
 
@@ -142,6 +156,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
             DispatchQueue.main.async { [weak self] in
                 guard let vm = self?.viewModel else { return }
                 vm.isWorkoutActive = false
+                vm.isPaused = false
                 vm.currentHR = 0
                 vm.currentZone = 0
                 vm.targetZone = 0

@@ -3,7 +3,11 @@ import HeartRateCoachCore
 
 protocol WatchBridgeProtocol: AnyObject {
     var onHRReceived: ((HRReading) -> Void)? { get set }
+    /// A control the user tapped on the Watch controls page: "pause" / "resume" / "end".
+    var onWatchControl: ((String) -> Void)? { get set }
     func sendHaptic(_ pattern: HapticPattern)
+    /// Tell the Watch whether the workout is paused (keeps its Pause/Resume button in sync).
+    func sendPaused(_ paused: Bool)
     func sendCoachingState(_ state: CoachingState, sessionRemaining: Int)
     func sendCommand(_ command: String)
     /// Starts the Watch workout and ships the (static) HR zone table + resting HR so the
@@ -16,6 +20,7 @@ protocol WatchBridgeProtocol: AnyObject {
 final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
 
     var onHRReceived: ((HRReading) -> Void)?
+    var onWatchControl: ((String) -> Void)?
 
     func activate() {
         guard WCSession.isSupported() else { return }
@@ -34,6 +39,12 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
             replyHandler: nil,
             errorHandler: { _ in }
         )
+    }
+
+    func sendPaused(_ paused: Bool) {
+        // Ephemeral (sendMessage only) so it doesn't clobber the workoutStarted context.
+        guard WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(["paused": paused], replyHandler: nil, errorHandler: { _ in })
     }
 
     func sendCoachingState(_ state: CoachingState, sessionRemaining: Int) {
@@ -98,6 +109,10 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
     func sessionDidDeactivate(_ session: WCSession) {}
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        if let control = message["control"] as? String {
+            DispatchQueue.main.async { [weak self] in self?.onWatchControl?(control) }
+            return
+        }
         guard let bpm = message["hr"] as? Int else { return }
         let reading = HRReading(value: bpm)
         DispatchQueue.main.async { [weak self] in
