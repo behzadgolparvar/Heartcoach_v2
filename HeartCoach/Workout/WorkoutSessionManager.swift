@@ -182,7 +182,7 @@ final class WorkoutSessionManager {
             isGracePeriodActive: sequencer.isGracePeriodActive
         )
         onStateUpdate?(coachingState)
-        watchBridge.sendCoachingState(coachingState)
+        watchBridge.sendCoachingState(coachingState, sessionRemaining: 0)   // unused path
     }
 
     // MARK: - Session Building

@@ -14,8 +14,10 @@ final class MockWatchBridge: WatchBridgeProtocol {
         sentHaptics.append(pattern)
     }
 
-    func sendCoachingState(_ state: CoachingState) {
+    var sentSessionRemainings: [Int] = []
+    func sendCoachingState(_ state: CoachingState, sessionRemaining: Int) {
         sentCoachingStates.append(state)
+        sentSessionRemainings.append(sessionRemaining)
     }
 
     func sendCommand(_ command: String) {

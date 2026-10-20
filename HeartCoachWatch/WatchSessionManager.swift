@@ -96,6 +96,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
            let phaseRaw = message["phase"] as? String {
             let targetZone = message["targetZone"] as? Int ?? 0
             let remaining = message["phaseRemaining"] as? Int ?? 0
+            let sessionRemaining = message["sessionRemaining"] as? Int ?? 0
             let msg = (message["message"] as? String).flatMap { $0.isEmpty ? nil : $0 }
             DispatchQueue.main.async { [weak self] in
                 guard let self, let vm = self.viewModel else { return }
@@ -103,6 +104,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
                 vm.phaseName = phaseRaw
                 vm.targetZone = targetZone
                 vm.phaseRemainingSec = remaining
+                vm.sessionRemainingSec = sessionRemaining
                 if let msg {
                     vm.lastMessage = msg
                     self.scheduleMessageClear()
@@ -144,6 +146,7 @@ final class WatchSessionManager: NSObject, WCSessionDelegate {
                 vm.currentZone = 0
                 vm.targetZone = 0
                 vm.phaseRemainingSec = 0
+                vm.sessionRemainingSec = 0
                 vm.lastMessage = nil
                 vm.zoneBounds = []
             }

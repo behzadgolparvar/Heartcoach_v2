@@ -11,19 +11,27 @@ struct WorkoutWatchView: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            // Phase chip + phase-remaining countdown.
+            // Top bar (mirrors the iPhone): phase chip + phase countdown on the left,
+            // session countdown (ENDS) on the right.
             HStack(spacing: 4) {
                 Text(viewModel.phaseName.uppercased())
                     .font(WWT.cond(12, .heavy))
                     .tracking(0.5).foregroundStyle(.white)
+                    .lineLimit(1).fixedSize()
                     .padding(.horizontal, 5).padding(.vertical, 3)
                     .background(WWT.red)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
                 if viewModel.phaseRemainingSec > 0 {
                     Text(viewModel.phaseRemainingSec.clock)
-                        .font(WWT.cond(15, .bold))
-                        .monospacedDigit().foregroundStyle(.white)
+                        .font(WWT.cond(13, .bold))
+                        .monospacedDigit().foregroundStyle(WWT.secondary)
+                }
+                Spacer(minLength: 0)
+                if viewModel.sessionRemainingSec > 0 {
+                    VStack(alignment: .trailing, spacing: -1) {
+                        Text("ENDS").font(WWT.cond(8, .bold)).tracking(0.8).foregroundStyle(WWT.secondary)
+                        Text(viewModel.sessionRemainingSec.clock)
+                            .font(WWT.cond(15, .bold)).monospacedDigit().foregroundStyle(.white)
+                    }
                 }
             }
 
@@ -72,9 +80,9 @@ struct WorkoutWatchView: View {
         // Tick the phase countdown locally every second (the phone only pushes
         // state ~every 5s to spare WCSession); a fresh packet re-syncs the value.
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if viewModel.isWorkoutActive, viewModel.phaseRemainingSec > 0 {
-                viewModel.phaseRemainingSec -= 1
-            }
+            guard viewModel.isWorkoutActive else { return }
+            if viewModel.phaseRemainingSec > 0 { viewModel.phaseRemainingSec -= 1 }
+            if viewModel.sessionRemainingSec > 0 { viewModel.sessionRemainingSec -= 1 }
         }
     }
 

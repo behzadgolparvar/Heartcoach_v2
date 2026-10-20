@@ -4,7 +4,7 @@ import HeartRateCoachCore
 protocol WatchBridgeProtocol: AnyObject {
     var onHRReceived: ((HRReading) -> Void)? { get set }
     func sendHaptic(_ pattern: HapticPattern)
-    func sendCoachingState(_ state: CoachingState)
+    func sendCoachingState(_ state: CoachingState, sessionRemaining: Int)
     func sendCommand(_ command: String)
     /// Starts the Watch workout and ships the (static) HR zone table + resting HR so the
     /// Watch can position its gauge marker within the current block from its live HR.
@@ -36,12 +36,13 @@ final class WatchBridge: NSObject, WatchBridgeProtocol, WCSessionDelegate {
         )
     }
 
-    func sendCoachingState(_ state: CoachingState) {
+    func sendCoachingState(_ state: CoachingState, sessionRemaining: Int) {
         guard WCSession.default.isReachable else { return }
         var payload: [String: Any] = [
             "zone": state.currentZone,
             "phase": state.phase.rawValue,
-            "phaseRemaining": max(0, Int(state.phaseTimeRemaining))
+            "phaseRemaining": max(0, Int(state.phaseTimeRemaining)),
+            "sessionRemaining": max(0, sessionRemaining)
         ]
         if let tz = state.targetZone { payload["targetZone"] = tz }
         if let message = state.coachingMessage {

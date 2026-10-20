@@ -351,6 +351,11 @@ final class FoundationSessionManager {
         }
     }
 
+    /// Seconds left until the whole session ends (sum of timed phases − elapsed).
+    private var sessionRemainingSec: Int {
+        max(0, proto.phases.compactMap { $0.durationSec }.reduce(0, +) - totalElapsedSec)
+    }
+
     private func publishSnapshot(hr: Int, phase: FoundationPhase, cue: String?) {
         let state = CoachingState(
             currentHR: hr == Int.max ? 0 : hr,
@@ -369,7 +374,7 @@ final class FoundationSessionManager {
         let phaseChanged = state.phase != lastWatchPhase
         if cue != nil || zoneChanged || phaseChanged
             || totalElapsedSec - lastWatchSendSec >= watchSendIntervalSec {
-            watchBridge.sendCoachingState(state)
+            watchBridge.sendCoachingState(state, sessionRemaining: sessionRemainingSec)
             lastWatchSendSec = totalElapsedSec
             lastWatchZone = state.currentZone
             lastWatchPhase = state.phase
