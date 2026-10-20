@@ -35,6 +35,10 @@ final class WorkoutViewModel {
     /// Shown after 15 min paused — Continue / Finish / Need More Time (BR-2-25).
     var showPausePrompt: Bool = false
     private var pausePromptTask: Task<Void, Never>?
+    /// While paused, the coaching tick stops, so the phone re-sends the paused state
+    /// ~every 10s as a heartbeat — keeps the Watch's phone-gone watchdog fed so a
+    /// force-quit during a pause is still detected.
+    private var pauseKeepAlive: Task<Void, Never>?
     private var pauseSnoozesUsed = 0
     var canSnoozePause: Bool { SafetyPolicy.canSnooze(usedSnoozes: pauseSnoozesUsed) }
 
@@ -237,6 +241,7 @@ final class WorkoutViewModel {
         sessionManager?.pause()
         isPaused = true
         watchBridge.sendPaused(true)
+        startPauseKeepAlive()
         schedulePausePrompt(afterMinutes: SafetyPolicy.pausePromptMinutes)
     }
 
@@ -244,7 +249,19 @@ final class WorkoutViewModel {
         sessionManager?.resume()
         isPaused = false
         watchBridge.sendPaused(false)
+        pauseKeepAlive?.cancel(); pauseKeepAlive = nil
         cancelPausePrompt()
+    }
+
+    private func startPauseKeepAlive() {
+        pauseKeepAlive?.cancel()
+        pauseKeepAlive = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 10 * 1_000_000_000)
+                guard let self, self.isPaused, self.isWorkoutActive else { return }
+                self.watchBridge.sendPaused(true)
+            }
+        }
     }
 
     /// "Need More Time" — snooze the resume prompt (max 3 × 10 min, BR-2-25).
@@ -279,6 +296,7 @@ final class WorkoutViewModel {
         startupTask?.cancel()
         startupTask = nil
         cancelPausePrompt()
+        pauseKeepAlive?.cancel(); pauseKeepAlive = nil
         guard let manager = sessionManager else { return }
         let session = await manager.end()
         completedSession = session
@@ -292,6 +310,7 @@ final class WorkoutViewModel {
         startupTask?.cancel()
         startupTask = nil
         cancelPausePrompt()
+        pauseKeepAlive?.cancel(); pauseKeepAlive = nil
         sessionManager?.emergencyStop()
         isWorkoutActive = false
         startupState = .running
