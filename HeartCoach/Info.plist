@@ -37,6 +37,10 @@
 		<string>BarlowCondensed-Bold.ttf</string>
 		<string>BarlowCondensed-ExtraBold.ttf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiresFullScreen</key>
