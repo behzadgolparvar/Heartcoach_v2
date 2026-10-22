@@ -2,20 +2,25 @@ import SwiftUI
 
 struct WatchRootView: View {
     @Environment(WorkoutWatchViewModel.self) private var viewModel
-    /// Default to the metrics page; the controls page sits to its left (swipe right).
+    /// Which workout page is shown: 0 = controls (swipe left), 1 = metrics. Default metrics.
     @State private var page = 1
 
     var body: some View {
-        if viewModel.isWorkoutActive {
-            TabView(selection: $page) {
-                WatchControlsView().tag(0)
-                WorkoutWatchView().tag(1)
+        Group {
+            if viewModel.isWorkoutActive {
+                TabView(selection: $page) {
+                    WatchControlsView().tag(0)
+                    WorkoutWatchView().tag(1)
+                }
+                .tabViewStyle(.page)
+            } else {
+                IdleWatchView()
             }
-            .tabViewStyle(.page)
-            // Always return to the metrics page when a new workout starts.
-            .onChange(of: viewModel.isWorkoutActive) { _, active in if active { page = 1 } }
-        } else {
-            IdleWatchView()
         }
+        // Snap to the metrics page around every workout so a new session always opens
+        // on HR/metrics (never the controls page). This must sit on an always-present
+        // view — inside the `if` it would be created only once active and miss the
+        // start transition. Resetting on end leaves it ready for the next start (no flash).
+        .onChange(of: viewModel.isWorkoutActive) { _, _ in page = 1 }
     }
 }
