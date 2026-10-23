@@ -9,8 +9,14 @@ final class WorkoutSummaryViewModel {
         case saving
         case saved
         case savedPendingSync
+        case tooShort          // under the minimum worth saving — shown, not persisted
         case failed(AppError)
     }
+
+    /// Sessions shorter than this aren't saved (history/research) — mis-starts and
+    /// accidental runs. Well below the 20-min progression bar, so a real 5–20 min
+    /// session is still saved (just doesn't count toward progression).
+    static let minSaveDurationSec = 300   // 5 minutes
 
     // MARK: - State
 
@@ -38,6 +44,15 @@ final class WorkoutSummaryViewModel {
     func load(session: Session) {
         self.session = session
         computeStats(from: session)
+    }
+
+    /// Auto-save on reaching the summary, gated on a minimum duration. Too-short
+    /// sessions are marked (shown, not saved); otherwise we save if there's a user.
+    func autoSaveIfEligible(userID: String?) {
+        guard let session, case .idle = saveState else { return }
+        guard session.durationSec >= Self.minSaveDurationSec else { saveState = .tooShort; return }
+        guard let userID else { return }   // no user → stay idle; view offers manual save
+        saveSession(userID: userID)
     }
 
     func saveSession(userID: String) {

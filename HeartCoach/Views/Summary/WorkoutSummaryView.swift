@@ -77,13 +77,19 @@ struct WorkoutSummaryView: View {
                 VStack(spacing: 8) {
                     switch summaryVM.saveState {
                     case .idle:
-                        Button("Save Workout") {
-                            if let uid = authVM.currentUserID {
-                                summaryVM.saveSession(userID: uid)
+                        // Auto-save runs on appear; this is only reached if there's no
+                        // signed-in user — offer a manual save as a fallback.
+                        if authVM.currentUserID == nil {
+                            Button("Save Workout") {
+                                if let uid = authVM.currentUserID {
+                                    summaryVM.saveSession(userID: uid)
+                                }
                             }
+                            .buttonStyle(PrimaryButtonStyle())
+                            .accessibilityIdentifier("summary-save-button")
+                        } else {
+                            ProgressView("Saving…").tint(.white)
                         }
-                        .buttonStyle(PrimaryButtonStyle())
-                        .accessibilityIdentifier("summary-save-button")
 
                     case .saving:
                         ProgressView("Saving…").tint(.white)
@@ -97,6 +103,12 @@ struct WorkoutSummaryView: View {
                         Label("Saved — will sync when online", systemImage: "arrow.triangle.2.circlepath")
                             .font(.subheadline.bold())
                             .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+
+                    case .tooShort:
+                        Text("Sessions under 5 min aren't saved")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
 
                     case .failed(let error):
@@ -120,7 +132,13 @@ struct WorkoutSummaryView: View {
         .navigationTitle("Summary")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
-        .onAppear { summaryVM.load(session: session) }
+        .onAppear {
+            summaryVM.load(session: session)
+            // Auto-save the finished session (and advance progression) so "Done" can
+            // just dismiss — no risk of losing a workout by tapping the wrong button.
+            // Gated on a minimum duration; runs once.
+            summaryVM.autoSaveIfEligible(userID: authVM.currentUserID)
+        }
     }
 }
 
