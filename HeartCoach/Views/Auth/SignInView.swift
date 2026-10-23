@@ -61,6 +61,7 @@ struct SignInView: View {
                         .font(.footnote)
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 if let info = authViewModel.infoMessage {
@@ -68,6 +69,7 @@ struct SignInView: View {
                         .font(.footnote)
                         .foregroundStyle(.green)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 // Password reset — only relevant when signing in.

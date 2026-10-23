@@ -43,7 +43,7 @@ final class AuthViewModel {
         infoMessage = nil
         do {
             try await authService.sendPasswordReset(email: email)
-            infoMessage = "Password reset email sent. Check your inbox."
+            infoMessage = "Password reset email sent. Check your inbox and spam folder."
         } catch {
             errorMessage = "Couldn't send a reset email. Check the address and try again."
         }
