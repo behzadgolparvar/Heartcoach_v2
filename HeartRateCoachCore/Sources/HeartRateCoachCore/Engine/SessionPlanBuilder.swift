@@ -7,6 +7,39 @@ public struct SessionPlanRow: Sendable, Equatable {
     public let focus: String
     public let intensity: String
     public let durationMin: Int
+
+    public init(sessionNumber: Int, type: WorkoutType, focus: String, intensity: String, durationMin: Int) {
+        self.sessionNumber = sessionNumber
+        self.type = type
+        self.focus = focus
+        self.intensity = intensity
+        self.durationMin = durationMin
+    }
+}
+
+/// A run of consecutive sessions that share the same type/focus/intensity/duration —
+/// a scannable "block" for the plan PDF instead of listing 60 near-identical rows.
+public struct SessionPlanBlock: Sendable, Equatable {
+    public let startSession: Int         // 1-based, inclusive
+    public let endSession: Int
+    public let type: WorkoutType
+    public let focus: String
+    public let intensity: String
+    public let durationMin: Int
+
+    public init(startSession: Int, endSession: Int, type: WorkoutType,
+                focus: String, intensity: String, durationMin: Int) {
+        self.startSession = startSession
+        self.endSession = endSession
+        self.type = type
+        self.focus = focus
+        self.intensity = intensity
+        self.durationMin = durationMin
+    }
+
+    public var sessionsLabel: String {
+        startSession == endSession ? "Session \(startSession)" : "Sessions \(startSession)–\(endSession)"
+    }
 }
 
 /// Builds the per-stage client session plan (§K / FR-11, Q9). Pure — projects the
@@ -27,6 +60,32 @@ public enum SessionPlanBuilder {
                 intensity: intensity(type: type, subPhase: sub),
                 durationMin: durationMin(stage: stage, type: type))
         }
+    }
+
+    /// Groups the per-session rows into consecutive runs that share the same
+    /// type/focus/intensity/duration — e.g. Foundation collapses to 3 blocks.
+    public static func blocks(stage: TrainingStage, profile: UserProfileV2) -> [SessionPlanBlock] {
+        group(plan(stage: stage, profile: profile))
+    }
+
+    public static func group(_ rows: [SessionPlanRow]) -> [SessionPlanBlock] {
+        var blocks: [SessionPlanBlock] = []
+        for row in rows {
+            if let last = blocks.last,
+               last.type == row.type, last.focus == row.focus,
+               last.intensity == row.intensity, last.durationMin == row.durationMin {
+                blocks[blocks.count - 1] = SessionPlanBlock(
+                    startSession: last.startSession, endSession: row.sessionNumber,
+                    type: last.type, focus: last.focus,
+                    intensity: last.intensity, durationMin: last.durationMin)
+            } else {
+                blocks.append(SessionPlanBlock(
+                    startSession: row.sessionNumber, endSession: row.sessionNumber,
+                    type: row.type, focus: row.focus,
+                    intensity: row.intensity, durationMin: row.durationMin))
+            }
+        }
+        return blocks
     }
 
     /// Frequency-based projected completion (§B), framed toward the next stage.

@@ -76,6 +76,23 @@ final class EngagementTests: XCTestCase {
         XCTAssertEqual(rows[1].type, .continuous)
     }
 
+    func test_planBlocks_collapseConsecutiveIdenticalRows() {
+        func row(_ n: Int, _ t: WorkoutType, _ focus: String) -> SessionPlanRow {
+            SessionPlanRow(sessionNumber: n, type: t, focus: focus, intensity: "x", durationMin: 37)
+        }
+        let rows = [row(1, .continuous, "a"), row(2, .continuous, "a"),
+                    row(3, .continuous, "b"),
+                    row(4, .hiit, "b"), row(5, .hiit, "b")]
+        let blocks = SessionPlanBuilder.group(rows)
+        XCTAssertEqual(blocks.count, 3)
+        XCTAssertEqual(blocks[0].startSession, 1); XCTAssertEqual(blocks[0].endSession, 2)
+        XCTAssertEqual(blocks[1].startSession, 3); XCTAssertEqual(blocks[1].endSession, 3)
+        XCTAssertEqual(blocks[2].startSession, 4); XCTAssertEqual(blocks[2].endSession, 5)
+        XCTAssertEqual(blocks[2].type, .hiit)
+        XCTAssertEqual(blocks.last?.sessionsLabel, "Sessions 4–5")
+        XCTAssertEqual(blocks[1].sessionsLabel, "Session 3")
+    }
+
     func test_projectedCompletionNote_frequency() {
         XCTAssertTrue(SessionPlanBuilder.projectedCompletionNote(frequencyPerWeek: 5, stage: .foundation).contains("3 months"))
         XCTAssertTrue(SessionPlanBuilder.projectedCompletionNote(frequencyPerWeek: 3, stage: .foundation).contains("4.5"))

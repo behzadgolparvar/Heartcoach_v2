@@ -8,6 +8,7 @@ struct SettingsView: View {
     @Environment(AppContainer.self) private var container
     @State private var pdfURL: URL?
     @State private var showShare = false
+    @State private var isGeneratingPlan = false
 
     var body: some View {
         @Bindable var vm = vm
@@ -87,9 +88,14 @@ struct SettingsView: View {
 
                     SectionHeader("Your Program")
                     VStack(alignment: .leading, spacing: 8) {
-                        Button("View my plan (PDF)") { generatePlan() }
+                        Button { generatePlan() } label: {
+                            HStack(spacing: 8) {
+                                if isGeneratingPlan { ProgressView().tint(.white) }
+                                Text(isGeneratingPlan ? "Preparing plan…" : "View my plan (PDF)")
+                            }
+                        }
                             .buttonStyle(SecondaryButtonStyle())
-                            .disabled(homeViewModel.profile?.program == nil)
+                            .disabled(homeViewModel.profile?.program == nil || isGeneratingPlan)
                             .accessibilityIdentifier("settings-view-plan")
                         Text("A printable overview of your current stage's sessions.")
                             .font(.footnote).foregroundStyle(.secondary)
@@ -129,18 +135,28 @@ struct SettingsView: View {
         }
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showShare) {
-            if let url = pdfURL { ShareSheet(items: [url]) }
+            if let url = pdfURL { QuickLookPreview(url: url) }
         }
     }
 
     private func generatePlan() {
-        guard let profile = homeViewModel.profile, let stage = profile.program?.currentStage else { return }
-        let rows = SessionPlanBuilder.plan(stage: stage, profile: profile)
+        guard !isGeneratingPlan,
+              let profile = homeViewModel.profile, let stage = profile.program?.currentStage else { return }
+        let blocks = SessionPlanBuilder.blocks(stage: stage, profile: profile)
         let note = SessionPlanBuilder.projectedCompletionNote(
             frequencyPerWeek: profile.schedule.frequencyPerWeek, stage: stage)
-        if let url = container.pdfRenderer.render(stage: stage, rows: rows, completionNote: note) {
-            pdfURL = url
-            showShare = true
+        let renderer = container.pdfRenderer
+        isGeneratingPlan = true
+        // Render off the main thread so the UI doesn't freeze; present when ready.
+        DispatchQueue.global(qos: .userInitiated).async {
+            let url = renderer.render(stage: stage, blocks: blocks, completionNote: note)
+            DispatchQueue.main.async {
+                isGeneratingPlan = false
+                if let url {
+                    pdfURL = url
+                    showShare = true
+                }
+            }
         }
     }
 }
