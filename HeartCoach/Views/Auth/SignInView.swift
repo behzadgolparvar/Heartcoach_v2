@@ -63,9 +63,30 @@ struct SignInView: View {
                         .multilineTextAlignment(.center)
                 }
 
+                if let info = authViewModel.infoMessage {
+                    Text(info)
+                        .font(.footnote)
+                        .foregroundStyle(.green)
+                        .multilineTextAlignment(.center)
+                }
+
+                // Password reset — only relevant when signing in.
+                if !authViewModel.isSignUpMode {
+                    Button {
+                        Task { await authViewModel.resetPassword() }
+                    } label: {
+                        Text("Forgot password?")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    .disabled(authViewModel.isLoading)
+                    .padding(.top, 2)
+                }
+
                 Button {
                     authViewModel.isSignUpMode.toggle()
                     authViewModel.errorMessage = nil
+                    authViewModel.infoMessage = nil
                 } label: {
                     Text(authViewModel.isSignUpMode
                          ? "Already have an account? Sign In"

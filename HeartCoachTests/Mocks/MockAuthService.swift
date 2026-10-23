@@ -21,6 +21,13 @@ final class MockAuthService: AuthServiceProtocol {
         }
     }
 
+    var passwordResetEmails: [String] = []
+    var passwordResetError: Error? = nil
+    func sendPasswordReset(email: String) async throws {
+        if let error = passwordResetError { throw error }
+        passwordResetEmails.append(email)
+    }
+
     func signOut() throws {
         if let error = signOutError { throw error }
         currentUserID = nil

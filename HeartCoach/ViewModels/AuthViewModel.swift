@@ -7,6 +7,7 @@ final class AuthViewModel {
 
     var appState: AppState = .loading
     var errorMessage: String?
+    var infoMessage: String?        // non-error confirmation (e.g. reset email sent)
     var isLoading = false
     var isSignUpMode = false
     var email = ""
@@ -30,9 +31,29 @@ final class AuthViewModel {
         }
     }
 
+    /// Sends a Firebase password-reset email to the address in the email field.
+    func resetPassword() async {
+        guard !email.trimmingCharacters(in: .whitespaces).isEmpty else {
+            infoMessage = nil
+            errorMessage = "Enter your email to reset your password."
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        infoMessage = nil
+        do {
+            try await authService.sendPasswordReset(email: email)
+            infoMessage = "Password reset email sent. Check your inbox."
+        } catch {
+            errorMessage = "Couldn't send a reset email. Check the address and try again."
+        }
+        isLoading = false
+    }
+
     func submitAuth() async {
         isLoading = true
         errorMessage = nil
+        infoMessage = nil
         do {
             let userID = isSignUpMode
                 ? try await authService.signUp(email: email, password: password)

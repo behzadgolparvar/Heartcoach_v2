@@ -25,6 +25,14 @@ final class FirebaseAuthService: AuthServiceProtocol {
         }
     }
 
+    func sendPasswordReset(email: String) async throws {
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+        } catch {
+            throw AppError.authenticationFailed
+        }
+    }
+
     func signOut() throws {
         do {
             try Auth.auth().signOut()

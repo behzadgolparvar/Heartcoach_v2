@@ -27,6 +27,7 @@ Branch `new_design_Sep_2026`. All 6 feature phases complete; 134 unit tests gree
 - [x] Confirm a Storage bucket is enabled on the project — DONE (regional US-EAST1, no-cost)
 - [x] **`GoogleService-Info.plist` bucket check** — verified: existing plist's `STORAGE_BUCKET` already = `heartcoach-dcec5.firebasestorage.app` (matches the created bucket). No re-download needed.
 - [ ] (Firestore rules already published in an earlier cycle)
+- [ ] **Auth email branding (cosmetic, deferred 2026-10-22):** password-reset email shows the project ID "heartcoach-dcec5" instead of "HeartCoach" because the template's `%APP_NAME%` resolves to the public-facing name (= project ID). Feature itself works (email + link verified). Blocked path: Firebase Console → Authentication → Templates edit is currently disabled for this project ("Email template updates are currently unavailable"). Fix options when revisited: (a) wait/contact Firebase support to unblock template edits, then set Sender name + replace `%APP_NAME%`; or (b) set the public-facing name via Google Cloud (heartcoach-dcec5 project → OAuth consent "App name") so `%APP_NAME%` → HeartCoach across all auth emails. Sender domain `@heartcoach-dcec5.firebaseapp.com` + link domain need a custom domain (bigger task, likely skip).
 
 ## E. Collaborator confirmations (safety-relevant, flagged in FDs)
 - [ ] Leg-exercise bank: built on §G's 8; spec line 59 says "20+" — expand? + confirm per-exercise **mode (bilateral/unilateral)** and **impacted-joint** tags (P4)
