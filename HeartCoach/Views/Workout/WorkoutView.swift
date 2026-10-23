@@ -7,6 +7,8 @@ struct WorkoutView: View {
     @Environment(WorkoutViewModel.self) private var workoutVM
     @State private var showStopConfirm = false
     @State private var navigateToSummary = false
+    /// Persisted voice-coaching preference from Settings (shared key).
+    @AppStorage("voiceCoachingMuted") private var voiceMuted = false
 
     var body: some View {
         ZStack {
@@ -30,6 +32,7 @@ struct WorkoutView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.hidden, for: .tabBar)   // full-screen: don't let the tab bar cover the controls
+        .onAppear { workoutVM.isMuted = voiceMuted }   // apply the Settings voice preference
         .onChange(of: workoutVM.isWorkoutActive) { _, active in
             if !active, workoutVM.completedSession != nil { navigateToSummary = true }
         }

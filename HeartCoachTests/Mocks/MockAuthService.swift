@@ -3,6 +3,7 @@ import Foundation
 
 final class MockAuthService: AuthServiceProtocol {
     var currentUserID: String? = "test-user-id"
+    var currentUserEmail: String? = "test@example.com"
     var signInResult: Result<String, Error> = .success("test-user-id")
     var signOutError: Error? = nil
     var authStateSequence: [String?] = ["test-user-id"]

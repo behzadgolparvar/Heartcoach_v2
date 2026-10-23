@@ -9,8 +9,8 @@ struct MainTabView: View {
             HistoryView()
                 .tabItem { Label("History", systemImage: "list.bullet") }
 
-            SettingsView()
-                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+            ProfileView()
+                .tabItem { Label("Profile", systemImage: "person.fill") }
         }
         .preferredColorScheme(.dark)
     }

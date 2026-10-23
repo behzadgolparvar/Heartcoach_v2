@@ -7,6 +7,10 @@ final class FirebaseAuthService: AuthServiceProtocol {
         Auth.auth().currentUser?.uid
     }
 
+    var currentUserEmail: String? {
+        Auth.auth().currentUser?.email
+    }
+
     func signIn(email: String, password: String) async throws -> String {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)

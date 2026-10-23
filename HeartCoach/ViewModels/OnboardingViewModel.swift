@@ -74,6 +74,28 @@ final class OnboardingViewModel {
 
     var onComplete: (() -> Void)?
 
+    /// Clears every answer back to a fresh state — used by "Redo onboarding" so the
+    /// flow starts from scratch (the resulting profile also resets program progress).
+    func reset() {
+        section = .consent
+        healthDataConsent = false; remindersConsent = false
+        ageText = ""; gender = nil
+        weightText = ""; heightText = ""; rhrText = ""; maxHRText = ""; occupation = nil
+        q1TrainingHistory = nil; q2SelfSelect = nil
+        chronicConditions = []; hrMedications = []
+        onAntiObesityTherapy = false; showOzempicInfo = false
+        smokingStatus = nil; jointIssues = []
+        sessionLengthText = ""; frequencyText = ""; preferredDays = []
+        timeOfDay = nil; reminderMethod = nil
+        motivationDriver = nil; missedResponse = nil; routinePreference = nil
+        equipment = []; locationPreference = nil
+        goals = []
+        wearable = .appleWatch; trackingApps = []
+        rhrWarning = nil; isSaving = false; fieldError = nil; isHealthKitAuthorized = false
+        let imperial = Locale.current.measurementSystem == .us
+        weightImperial = imperial; heightImperial = imperial
+    }
+
     private let firebaseService: FirebaseServiceProtocol
     private let healthKitService: HealthKitServiceProtocol
 

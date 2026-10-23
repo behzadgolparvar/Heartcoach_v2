@@ -14,6 +14,26 @@ final class AuthViewModel {
     var password = ""
 
     var currentUserID: String? { authService.currentUserID }
+    var currentUserEmail: String? { authService.currentUserEmail }
+
+    /// Sends a reset email to the signed-in user's address (Settings → Change password).
+    func sendPasswordResetToCurrentUser() async {
+        guard let email = authService.currentUserEmail, !email.isEmpty else {
+            infoMessage = nil
+            errorMessage = "No email on file for this account."
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        infoMessage = nil
+        do {
+            try await authService.sendPasswordReset(email: email)
+            infoMessage = "Reset link sent to \(email). Check your inbox and spam folder."
+        } catch {
+            errorMessage = "Couldn't send a reset email. Try again."
+        }
+        isLoading = false
+    }
 
     private let authService: AuthServiceProtocol
     private let firebaseService: FirebaseServiceProtocol
