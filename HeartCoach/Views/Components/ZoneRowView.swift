@@ -5,14 +5,10 @@ import HeartRateCoachCore
 struct ZoneRowView: View {
     let zone: Zone
 
-    private let zoneColors: [Int: Color] = [
-        1: .blue, 2: .green, 3: .yellow, 4: .orange, 5: .red
-    ]
-
     var body: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(zoneColors[zone.number] ?? .gray)
+                .fill(WT.zoneColor(zone.number))
                 .frame(width: 10, height: 10)
 
             VStack(alignment: .leading, spacing: 2) {

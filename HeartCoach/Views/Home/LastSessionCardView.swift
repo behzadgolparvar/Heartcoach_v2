@@ -1,64 +1,71 @@
 import SwiftUI
 import HeartRateCoachCore
 
+/// Direction D "broadcast" restyle of the last-session recap (Home A6).
 struct LastSessionCardView: View {
     let session: Session
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Last Session")
-                .font(.headline)
-                .foregroundStyle(.white)
-
-            HStack {
-                Label(session.date.formatted(date: .abbreviated, time: .omitted),
-                      systemImage: "calendar")
-                Spacer()
-                Label("\(session.durationSec / 60) min", systemImage: "clock")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-
-            HStack(spacing: 4) {
-                Image(systemName: "heart.fill").foregroundStyle(.red)
-                Text("Avg HR: \(session.avgHR) bpm")
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.white)
-            }
-
-            // Time-in-zones mini bar
-            if !session.timeInZones.isEmpty {
-                ZoneBarView(timeInZones: session.timeInZones, totalSec: session.durationSec)
-            }
+    private var zonesWithTime: [(zone: Int, sec: Int)] {
+        (1...5).compactMap { z in
+            let s = session.timeInZones[z] ?? 0
+            return s > 0 ? (z, s) : nil
         }
-        .padding(16)
-        .background(Color.white.opacity(0.04))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
-}
-
-private struct ZoneBarView: View {
-    let timeInZones: [Int: Int]
-    let totalSec: Int
-
-    private let zoneColors: [Int: Color] = [
-        1: .blue, 2: .green, 3: .yellow, 4: .orange, 5: .red
-    ]
+    private var zonedTotal: Int { zonesWithTime.reduce(0) { $0 + $1.sec } }
 
     var body: some View {
-        GeometryReader { geo in
-            HStack(spacing: 2) {
-                ForEach(1...5, id: \.self) { zone in
-                    let seconds = timeInZones[zone] ?? 0
-                    let fraction = totalSec > 0 ? CGFloat(seconds) / CGFloat(totalSec) : 0
-                    Rectangle()
-                        .fill(zoneColors[zone] ?? .gray)
-                        .frame(width: geo.size.width * fraction)
-                        .opacity(seconds > 0 ? 1 : 0.15)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Last session")
+                    .font(WT.body(16, .bold)).foregroundStyle(.white)
+                Spacer()
+                Text("\(dateText) · \(session.programType.displayName)")
+                    .font(WT.body(13, .medium)).foregroundStyle(WT.textSecondary)
+            }
+
+            HStack(spacing: 22) {
+                stat(value: "\(session.avgHR)", unit: " avg bpm")
+                if let pct = session.scorePercent {
+                    stat(value: "\(Int(pct.rounded()))%", unit: " in target")
+                }
+            }
+
+            if zonedTotal > 0 {
+                GeometryReader { geo in
+                    HStack(spacing: 2) {
+                        ForEach(zonesWithTime, id: \.zone) { item in
+                            Rectangle()
+                                .fill(WT.zoneColor(item.zone))
+                                .frame(width: geo.size.width * CGFloat(item.sec) / CGFloat(zonedTotal))
+                        }
+                    }
+                }
+                .frame(height: 8)
+                .clipShape(Capsule())
+
+                HStack(spacing: 14) {
+                    ForEach(zonesWithTime, id: \.zone) { item in
+                        HStack(spacing: 5) {
+                            Circle().fill(WT.zoneColor(item.zone)).frame(width: 6, height: 6)
+                            Text("Z\(item.zone) \(item.sec / 60)m")
+                                .font(WT.body(12, .medium)).foregroundStyle(WT.textSecondary)
+                        }
+                    }
                 }
             }
         }
-        .frame(height: 8)
-        .clipShape(Capsule())
+        .padding(.vertical, 14).padding(.horizontal, 16)
+        .background(Color(hex: 0x141416))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(WT.panelStroke, lineWidth: 1))
+    }
+
+    private var dateText: String {
+        session.date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+    }
+
+    private func stat(value: String, unit: String) -> some View {
+        (Text(value).font(WT.body(26, .bold)).foregroundStyle(.white)
+         + Text(unit).font(WT.body(13, .medium)).foregroundStyle(WT.textSecondary))
     }
 }

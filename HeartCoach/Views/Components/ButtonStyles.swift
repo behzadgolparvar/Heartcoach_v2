@@ -24,3 +24,28 @@ struct SecondaryButtonStyle: ButtonStyle {
             .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
+
+// MARK: - Broadcast (Direction D) — square slabs for the Home action bar.
+
+/// Full-width red slab, height 60, square corners. The label supplies its own content.
+struct BroadcastPrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+            .background(WT.red)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+    }
+}
+
+/// Full-width outlined surface slab, height 44, square corners (15-min minimum).
+struct BroadcastSecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(WT.surface)
+            .overlay(Rectangle().strokeBorder(Color(hex: 0x3A3A3C), lineWidth: 1))
+            .opacity(configuration.isPressed ? 0.85 : 1)
+    }
+}
