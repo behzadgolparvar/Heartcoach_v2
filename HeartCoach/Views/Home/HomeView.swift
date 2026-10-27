@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var weightText = ""
     @State private var didRequestNotifications = false
     @State private var zonesOpen = false
+    @AppStorage("preferredVoiceId") private var preferredVoiceId = ""
 
     private let durationMin = 37
 
@@ -71,6 +72,7 @@ struct HomeView: View {
             }
         }
         .onAppear {
+            container.voiceFeedbackService.voiceIdentifier = preferredVoiceId.isEmpty ? nil : preferredVoiceId
             if let userID = authViewModel.currentUserID { vm.loadData(userID: userID) }
             if !didRequestNotifications {
                 didRequestNotifications = true

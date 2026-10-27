@@ -4,6 +4,7 @@ import HeartRateCoachCore
 
 final class MockVoiceFeedbackService: VoiceFeedbackServiceProtocol {
     var isMuted: Bool = false
+    var voiceIdentifier: String?
     var spokenMessages: [CoachingMessage] = []
     var stopSpeakingCallCount: Int = 0
     var configureAudioSessionCallCount: Int = 0
