@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("voiceCoachingMuted") private var voiceMuted = false
     /// "" = automatic (best available); otherwise an AVSpeechSynthesisVoice identifier.
     @AppStorage("preferredVoiceId") private var voiceId = ""
+    @AppStorage("easyCues") private var easyCues = false
 
     private var englishVoices: [AVSpeechSynthesisVoice] {
         AVSpeechSynthesisVoice.speechVoices()
@@ -53,28 +54,43 @@ struct SettingsView: View {
                     }
 
                     // Preferences
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 20) {
                         title("Preferences")
-                        Toggle("Voice coaching", isOn: Binding(
-                            get: { !voiceMuted }, set: { voiceMuted = !$0 }))
-                            .tint(.red)
-                        Text("Spoken cues during workouts. Safety alerts always play.")
-                            .font(.footnote).foregroundStyle(.secondary)
 
-                        HStack {
-                            Text("Coach voice").foregroundStyle(.white)
-                            Spacer()
-                            Picker("Coach voice", selection: $voiceId) {
-                                Text("Automatic").tag("")
-                                ForEach(englishVoices, id: \.identifier) { v in
-                                    Text(voiceLabel(v)).tag(v.identifier)
+                        pref(caption: "Spoken cues during workouts. Safety alerts always play.") {
+                            Toggle("Voice coaching", isOn: Binding(
+                                get: { !voiceMuted }, set: { voiceMuted = !$0 }))
+                                .tint(.red)
+                        }
+
+                        pref(caption: nil) {
+                            HStack(spacing: 8) {
+                                Text("Coach voice").foregroundStyle(.white).layoutPriority(1)
+                                Spacer(minLength: 8)
+                                Menu {
+                                    Picker("Coach voice", selection: $voiceId) {
+                                        Text("Automatic").tag("")
+                                        ForEach(englishVoices, id: \.identifier) { v in
+                                            Text(voiceLabel(v)).tag(v.identifier)
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text(currentVoiceLabel)
+                                            .lineLimit(1).truncationMode(.tail)
+                                        Image(systemName: "chevron.up.chevron.down").font(.caption2)
+                                    }
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: 190, alignment: .trailing)
                                 }
                             }
-                            .pickerStyle(.menu).tint(.secondary)
+                            .onChange(of: voiceId) { _, newValue in
+                                container.voiceFeedbackService.voiceIdentifier = newValue.isEmpty ? nil : newValue
+                            }
                         }
-                        .font(.subheadline)
-                        .onChange(of: voiceId) { _, newValue in
-                            container.voiceFeedbackService.voiceIdentifier = newValue.isEmpty ? nil : newValue
+
+                        pref(caption: "Simple numeric cues — \"12 below target\", \"8 above target\", \"in target\" — instead of coaching phrases.") {
+                            Toggle("Easy cues", isOn: $easyCues).tint(.red)
                         }
                     }
 
@@ -114,6 +130,24 @@ struct SettingsView: View {
     }
 
     private func title(_ t: String) -> some View { Text(t).font(.headline).foregroundStyle(.white) }
+
+    /// One preference row: a control plus an optional caption beneath it.
+    @ViewBuilder
+    private func pref<Control: View>(caption: String?, @ViewBuilder _ control: () -> Control) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            control()
+            if let caption {
+                Text(caption).font(.footnote).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var currentVoiceLabel: String {
+        if voiceId.isEmpty { return "Automatic" }
+        if let v = englishVoices.first(where: { $0.identifier == voiceId }) { return voiceLabel(v) }
+        return "Automatic"
+    }
 
     private func voiceLabel(_ v: AVSpeechSynthesisVoice) -> String {
         switch v.quality {

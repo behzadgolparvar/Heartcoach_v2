@@ -17,6 +17,8 @@ final class WorkoutViewModel {
     var coachingState: CoachingState?
     var isPaused: Bool = false
     var isWorkoutActive: Bool = false
+    /// Plain numeric coaching cues (set before start from the Settings preference).
+    var easyCues = false
     var startupState: StartupState = .running
     var lastMessage: CoachingMessage?
     var completedSession: Session?
@@ -139,6 +141,7 @@ final class WorkoutViewModel {
             protocolOverride: override,
             shapeHIITCadence: shapeHIIT
         )
+        manager.easyCues = easyCues
         manager.onStateUpdate = { [weak self] state in
             self?.coachingState = state
             self?.ingest(state)

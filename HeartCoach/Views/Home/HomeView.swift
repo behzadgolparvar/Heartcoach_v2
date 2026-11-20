@@ -20,6 +20,7 @@ struct HomeView: View {
     @State private var didRequestNotifications = false
     @State private var zonesOpen = false
     @AppStorage("preferredVoiceId") private var preferredVoiceId = ""
+    @AppStorage("easyCues") private var easyCues = false
 
     private let durationMin = 37
 
@@ -281,6 +282,7 @@ struct HomeView: View {
         let wvm = container.makeWorkoutViewModel(
             zones: zones, restingHR: profile.restingHR, maxHR: profile.effectiveMaxHR,
             stage: profile.program?.currentStage ?? .foundation, levelUpUnlock: profile.levelUpUnlock)
+        wvm.easyCues = easyCues
         workoutVM = wvm
         if profile.program?.currentStage == .shape {
             showShapeChoice = true

@@ -23,6 +23,9 @@ final class FoundationSessionManager {
     private let type: WorkoutType
     private let escalationThresholdSec: Int
     private var coaching: CoachingSessionState
+    /// When true, HR-guidance cues become plain numeric ("N below/above target", "In
+    /// target") instead of the varied phrases. Structural/closing cues are unchanged.
+    var easyCues = false
 
     // MARK: - Session state
     private var phaseIndex = 0
@@ -245,9 +248,17 @@ final class FoundationSessionManager {
                 escalationThresholdSec: escalationThresholdSec, sessionSec: totalElapsedSec,
                 secondsPerTick: isShapeHIITRun ? 25 : 15)
             if let cue = CoachingEngineV2.tick(tick, state: &coaching) {
-                cueText = cue.text
-                voiceFeedback.speak(CoachingMessage(layer: 2, text: cue.text, hapticPattern: cue.haptic))
+                let text = easyCues ? easyCueText(category: cue.category, hr: hr, target: bpm, fallback: cue.text) : cue.text
+                cueText = text
+                voiceFeedback.speak(CoachingMessage(layer: 2, text: text, hapticPattern: cue.haptic))
                 if let h = cue.haptic { watchBridge.sendHaptic(h) }
+            } else if easyCues, elapsedInPhaseSec > 0 {
+                // Easy mode is a status readout: speak the current gap even when the
+                // phrase engine would stay quiet (e.g. steadily in zone). Skip the phase
+                // start (handled by the engine) so the ~10s grace isn't stepped on.
+                let text = statusText(hr: hr, target: bpm)
+                cueText = text
+                voiceFeedback.speak(CoachingMessage(layer: 2, text: text))
             }
         }
 
@@ -339,6 +350,25 @@ final class FoundationSessionManager {
         let bpm = target.bpmRange(restingHR: restingHR, maxHR: maxHR)
         let mid = (bpm.lowerBound + bpm.upperBound) / 2
         return ZoneCalculator.zone(for: mid, in: zones)
+    }
+
+    /// Plain numeric cue text for easy mode. HR-guidance categories become the bpm gap;
+    /// structural/closing cues fall back to their phrase.
+    private func easyCueText(category: PhraseCategory, hr: Int, target: ClosedRange<Int>, fallback: String) -> String {
+        switch category {
+        case .offMinorLow, .offMajorLow, .escalationLow,
+             .offMinorHigh, .offMajorHigh, .escalationHigh, .inZone:
+            return statusText(hr: hr, target: target)
+        default:
+            return fallback   // keep structural / closing phrases
+        }
+    }
+
+    /// Plain numeric HR status vs the target band.
+    private func statusText(hr: Int, target: ClosedRange<Int>) -> String {
+        if hr < target.lowerBound { return "\(target.lowerBound - hr) below target" }
+        if hr > target.upperBound { return "\(hr - target.upperBound) above target" }
+        return "in target"
     }
 
     private func mapPhaseType(_ kind: PhaseKind) -> PhaseType {
